@@ -20,19 +20,19 @@ public class Solution extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "strategy_id", nullable = false)
-    private Strategy strategy;
+    private Strategy strategy; //전략 FK
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
     @Column(nullable = false, length = 255)
-    private String title;
+    private String title; //솔루션 명
 
     @Column(nullable = false)
-    private int price;
+    private int price; //가격
 
     @Lob
     @Column(name = "description", columnDefinition = "TEXT")
-    private String desc;
+    private String desc; //결과
 }
