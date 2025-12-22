@@ -2,6 +2,7 @@ package com.InsightMarket.domain.community;
 
 import com.InsightMarket.domain.brand.Brand;
 import com.InsightMarket.domain.common.BaseEntity;
+import com.InsightMarket.domain.common.SoftDeleteEntity;
 import com.InsightMarket.domain.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,7 +13,7 @@ import lombok.*;
 @Builder
 @Entity
 @Table(name = "board")
-public class Board extends BaseEntity {
+public class Board extends SoftDeleteEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "board_id")

@@ -1,6 +1,7 @@
 package com.InsightMarket.domain.files;
 
 import com.InsightMarket.domain.common.BaseEntity;
+import com.InsightMarket.domain.common.SoftDeleteEntity;
 import com.InsightMarket.domain.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,7 +12,7 @@ import lombok.*;
 @Builder
 @Entity
 @Table(name = "files")
-public class Files extends BaseEntity {
+public class Files extends SoftDeleteEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "file_id")
