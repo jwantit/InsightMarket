@@ -6,8 +6,6 @@ import com.InsightMarket.domain.strategy.Strategy;
 import com.InsightMarket.repository.project.ProjectRepository;
 import com.InsightMarket.repository.solution.SolutionRepository;
 import com.InsightMarket.repository.strategy.StrategyRepository;
-import lombok.extern.log4j.Log4j2;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,10 +13,8 @@ import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @SpringBootTest
-@Log4j2
 public class SolutionRepositoryTests {
 
 
@@ -141,4 +137,4 @@ public class SolutionRepositoryTests {
         System.out.println("=== 테스트 완료 ===");
     }
 
-    }
+}

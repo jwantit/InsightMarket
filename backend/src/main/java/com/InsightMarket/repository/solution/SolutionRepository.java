@@ -9,5 +9,6 @@ import java.util.List;
 
 public interface SolutionRepository extends JpaRepository<Solution, Long> {
 
-
+//    @Query("SELECT s FROM Solution s WHERE s.project.projectId = :projectId")
+//    List<Solution> findByProjectId(@Param("projectId") Integer projectId);
 }
