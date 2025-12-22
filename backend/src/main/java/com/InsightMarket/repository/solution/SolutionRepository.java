@@ -7,8 +7,8 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface SolutionRepository extends JpaRepository<Solution, Integer> {
+public interface SolutionRepository extends JpaRepository<Solution, Long> {
 
-    @Query("SELECT s FROM Solution s WHERE s.project.projectId = :projectId")
-    List<Solution> findByProjectId(@Param("projectId") Integer projectId);
+//    @Query("SELECT s FROM Solution s WHERE s.project.projectId = :projectId")
+//    List<Solution> findByProjectId(@Param("projectId") Integer projectId);
 }

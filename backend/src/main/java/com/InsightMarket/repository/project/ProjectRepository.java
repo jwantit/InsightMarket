@@ -1,8 +1,8 @@
 package com.InsightMarket.repository.project;
 
-import com.InsightMarket.domain.solution.Solution;
+import com.InsightMarket.domain.project.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ProjectRepository extends JpaRepository<Solution, Long> {
+public interface ProjectRepository extends JpaRepository<Project, Long> {
     
 }
