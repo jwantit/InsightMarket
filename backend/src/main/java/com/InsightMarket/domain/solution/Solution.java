@@ -34,5 +34,5 @@ public class Solution extends BaseEntity {
 
     @Lob
     @Column(name = "description", columnDefinition = "TEXT")
-    private String desc;
+    private String description;
 }

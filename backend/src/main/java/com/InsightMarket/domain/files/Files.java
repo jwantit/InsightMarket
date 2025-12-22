@@ -1,4 +1,4 @@
-package com.InsightMarket.domain.file;
+package com.InsightMarket.domain.files;
 
 import com.InsightMarket.domain.common.BaseEntity;
 import com.InsightMarket.domain.user.User;
@@ -10,8 +10,8 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "file")
-public class File extends BaseEntity {
+@Table(name = "files")
+public class Files extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "file_id")
@@ -32,5 +32,6 @@ public class File extends BaseEntity {
     private String fileName;
 
     // 추가 추천(운영 필수급): fileUrl/path, contentType, size
-     @Column(name="file_url", nullable=false, length=1000) private String fileUrl;
+     @Column(name="file_url", nullable=false, length=1000)
+     private String fileUrl;
 }

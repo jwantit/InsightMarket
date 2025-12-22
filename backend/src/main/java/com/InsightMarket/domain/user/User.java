@@ -24,6 +24,9 @@ public class User extends BaseEntity {
     @JoinColumn(name = "company_id")
     private Company company;
 
+    @Column(nullable = false, length = 100)
+    private String name;
+
     @Column(nullable = false, length = 255)
     private String email;
 
@@ -33,4 +36,10 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "system_role", nullable = false, length = 30)
     private SystemRole systemRole;
+
+    @Column(name = "is_approved", nullable = false)
+    private boolean isApproved;
+
+    @Column(name = "is_expired", nullable = false)
+    private boolean isExpired;
 }
