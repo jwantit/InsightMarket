@@ -13,7 +13,7 @@ import lombok.*;
 @Table(
         name = "cart",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_cart_user", columnNames = "user_id")
+                @UniqueConstraint(name = "uk_cart_member", columnNames = "member_id")
         }
 )
 public class Cart extends BaseEntity {
@@ -24,5 +24,5 @@ public class Cart extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member user;
+    private Member member;
 }

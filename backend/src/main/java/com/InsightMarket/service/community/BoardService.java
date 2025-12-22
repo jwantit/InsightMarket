@@ -5,6 +5,7 @@ import com.InsightMarket.domain.files.FileTargetType;
 import com.InsightMarket.domain.files.Files;
 import com.InsightMarket.dto.community.BoardResponseDTO;
 import com.InsightMarket.dto.community.BoardUpsertRequestDTO;
+import com.InsightMarket.dto.community.FileResponseDTO;
 import com.InsightMarket.repository.FileRepository;
 import com.InsightMarket.repository.community.BoardRepository;
 import lombok.RequiredArgsConstructor;
@@ -114,15 +115,39 @@ public class BoardService {
         throw new UnsupportedOperationException("TODO");
     }
 
+    // [기능] 게시글 상세 조회 1단계: 게시글 + (첨부파일 목록) 조회 후 DTO 반환
+// [디버깅] brandId/boardId/첨부 개수 로그
     @Transactional(readOnly = true)
     public BoardResponseDTO detail(Long brandId, Long boardId) {
+
         log.info("[BOARD][SVC][DETAIL] brandId={}, boardId={}", brandId, boardId);
 
-        // TODO 1) board 조회
-        // TODO 2) attachments 조회(targetType=BOARD, targetId=boardId)
-        // TODO 3) DTO 조립
+        Board board = boardRepository.findByIdAndBrandIdAndDeletedAtIsNull(boardId, brandId)
+                .orElseThrow(() -> new IllegalArgumentException("Board not found"));
 
-        throw new UnsupportedOperationException("TODO");
+        List<Files> files = fileRepository
+                .findByTargetTypeAndTargetIdAndDeletedAtIsNull(FileTargetType.BOARD, boardId);
+
+        log.info("[BOARD][SVC][DETAIL] attachments={}", files.size());
+
+        return BoardResponseDTO.builder()
+                .id(board.getId())
+                .brandId(board.getBrand().getId())
+                .writerId(board.getWriter().getId())
+                .writerName(board.getWriter().getName())
+                .title(board.getTitle())
+                .content(board.getContent())
+                .deleted(board.getDeletedAt() != null)
+                .createdAt(board.getCreatedAt())
+                .updatedAt(board.getUpdatedAt())
+                .files(files.stream().map(f -> FileResponseDTO.builder()
+                        .id(f.getId())
+                        .originalName(f.getFileName())
+                        .size(f.getSize())
+                        .contentType(f.getContentType())
+                        .build()
+                ).toList())
+                .build();
     }
 
     public void delete(Long brandId, Long boardId) {

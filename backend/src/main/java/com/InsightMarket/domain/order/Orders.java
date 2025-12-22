@@ -12,7 +12,7 @@ import lombok.*;
 @Builder
 @Entity
 @Table(name = "orders") // order는 예약어 충돌 가능성이 있어서 orders 추천
-public class Order extends BaseEntity {
+public class Orders extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
