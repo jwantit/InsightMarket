@@ -1,7 +1,7 @@
 package com.InsightMarket.domain.cart;
 
 import com.InsightMarket.domain.common.BaseEntity;
-import com.InsightMarket.domain.user.User;
+import com.InsightMarket.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,6 +23,6 @@ public class Cart extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member user;
 }

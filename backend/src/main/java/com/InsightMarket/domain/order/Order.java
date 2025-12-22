@@ -1,8 +1,8 @@
 package com.InsightMarket.domain.order;
 
 import com.InsightMarket.domain.common.BaseEntity;
+import com.InsightMarket.domain.member.Member;
 import com.InsightMarket.domain.project.Project;
-import com.InsightMarket.domain.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,8 +19,8 @@ public class Order extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "buyer_user_id", nullable = false)
-    private User buyer;
+    @JoinColumn(name = "buyer_member_id", nullable = false)
+    private Member buyer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)

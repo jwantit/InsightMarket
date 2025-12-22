@@ -1,9 +1,8 @@
 package com.InsightMarket.domain.community;
 
 import com.InsightMarket.domain.brand.Brand;
-import com.InsightMarket.domain.common.BaseEntity;
 import com.InsightMarket.domain.common.SoftDeleteEntity;
-import com.InsightMarket.domain.user.User;
+import com.InsightMarket.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,8 +19,8 @@ public class Board extends SoftDeleteEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User writer;
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member writer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id", nullable = false)

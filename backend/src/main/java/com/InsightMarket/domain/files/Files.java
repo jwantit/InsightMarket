@@ -1,8 +1,7 @@
 package com.InsightMarket.domain.files;
 
-import com.InsightMarket.domain.common.BaseEntity;
 import com.InsightMarket.domain.common.SoftDeleteEntity;
-import com.InsightMarket.domain.user.User;
+import com.InsightMarket.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,7 +26,7 @@ public class Files extends SoftDeleteEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "uploaded_by", nullable = false)
-    private User uploadedBy;
+    private Member uploadedBy;
 
     @Column(name = "file_name", nullable = false, length = 255)
     private String fileName;

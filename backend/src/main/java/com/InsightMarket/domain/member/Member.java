@@ -1,4 +1,4 @@
-package com.InsightMarket.domain.user;
+package com.InsightMarket.domain.member;
 
 import com.InsightMarket.domain.common.BaseEntity;
 import com.InsightMarket.domain.company.Company;
@@ -10,14 +10,14 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "users",
+@Table(name = "member",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_users_email", columnNames = "email")
+                @UniqueConstraint(name = "uk_member_email", columnNames = "email")
         })
-public class User extends BaseEntity {
+public class Member extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id")
+    @Column(name = "member_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -37,9 +37,24 @@ public class User extends BaseEntity {
     @Column(name = "system_role", nullable = false, length = 30)
     private SystemRole systemRole;
 
+    @Column(name = "is_social", nullable = false)
+    private boolean isSocial;
+
     @Column(name = "is_approved", nullable = false)
     private boolean isApproved;
 
     @Column(name = "is_expired", nullable = false)
     private boolean isExpired;
+
+    public void changeName(String name) {
+        this.name = name;
+    }
+
+    public void changePassword(String password){
+        this.password = password;
+    }
+
+    public void changeIsSocial(boolean isSocial) {
+        this.isSocial = isSocial;
+    }
 }
