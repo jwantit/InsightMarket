@@ -42,10 +42,10 @@ public class JWTCheckFilter extends OncePerRequestFilter {
 
         log.info("check uri......................." + path);
 
-        // api/member/ 경로의 호출은 체크하지 않음
+        // /member/ 경로의 호출은 체크하지 않음
         // “JWTCheckFilter는 ‘로그인 이후 영역’만 담당한다”
-        // "/api/member/"는 JWT를 발급받기 위한 경로이기 때문
-        if (path.startsWith("/api/member/")) {
+        // "/member/"는 JWT를 발급받기 위한 경로이기 때문
+        if (path.startsWith("/member/")) {
             return true;
         }
 

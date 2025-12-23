@@ -26,8 +26,7 @@ public class MemberUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         log.info("----------------loadUserByUsername-----------------------------");
-
-        Member member = memberRepository.findWithCompanyByEmail(username)
+        Member member = memberRepository.findByEmail(username)
                 .orElseThrow(() ->
                         new UsernameNotFoundException("Not Found: " + username) // new APILoginFailHandler() 가 호출됨
                 );

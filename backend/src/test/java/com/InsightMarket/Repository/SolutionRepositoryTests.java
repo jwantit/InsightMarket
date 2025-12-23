@@ -1,4 +1,4 @@
-package com.InsightMarket.solution;
+package com.InsightMarket.Repository;
 
 import com.InsightMarket.domain.project.Project;
 import com.InsightMarket.domain.solution.Solution;
@@ -14,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @SpringBootTest

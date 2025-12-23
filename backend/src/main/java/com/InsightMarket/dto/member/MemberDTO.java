@@ -1,5 +1,6 @@
 package com.InsightMarket.dto.member;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,11 +34,14 @@ public class MemberDTO extends User {
 
     // JWT 발급용 claims 제공
     public Map<String, Object> getClaims() {
-        return Map.of(
-                "email", email,
-                "name", name,
-                "social", isSocial,
-                "role", roleNames.get(0) // 단일 role
-        );
+
+        Map<String, Object> dataMap = new HashMap<>();
+
+        dataMap.put("email", email);
+        dataMap.put("name", name);
+        dataMap.put("isSocial", isSocial);
+        dataMap.put("role", roleNames.get(0));
+
+        return dataMap;
     }
 }

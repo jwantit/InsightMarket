@@ -12,4 +12,7 @@ public interface MemberRepository extends JpaRepository<Member, String> {
     @EntityGraph(attributePaths = {"company"})
     @Query("select m from Member m where m.email = :email")
     Optional<Member> findWithCompanyByEmail(@Param("email") String email);
+
+    //이메일로 회원정보 조회
+    Optional<Member> findByEmail(String email);
 }

@@ -52,7 +52,7 @@ public class SecurityConfig {
                 );;
 
         http.formLogin(config -> {
-            config.loginPage("/login");
+            config.loginPage("/member/login");
             config.successHandler(new LoginSuccessHandler());
             config.failureHandler(new LoginFailHandler());
         });

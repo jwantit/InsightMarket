@@ -10,6 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
+@ToString
 @Table(name = "member",
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_member_email", columnNames = "email")
@@ -56,5 +57,9 @@ public class Member extends BaseEntity {
 
     public void changeIsSocial(boolean isSocial) {
         this.isSocial = isSocial;
+    }
+
+    public void changeSystemRole(SystemRole systemRole){
+        this.systemRole = systemRole;
     }
 }
