@@ -23,15 +23,12 @@ public class MemberDTO extends User {
     private boolean isSocial;
     private List<String> roleNames;
 
-    public MemberDTO(String email, String password, String name, boolean isSocial, List<String> roleNames) {
-        super(email, password,
-                roleNames.stream()
-                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                        .collect(Collectors.toList()));
+    public MemberDTO(String email, String password, String name, boolean isSocial, String roleName) {
+        super(email, password, List.of(new SimpleGrantedAuthority("ROLE_" + roleName)));
         this.email = email;
         this.name = name;
         this.isSocial = isSocial;
-        this.roleNames = roleNames;
+        this.roleNames = List.of(roleName);
     }
 
     // JWT 발급용 claims 제공
@@ -40,7 +37,7 @@ public class MemberDTO extends User {
                 "email", email,
                 "name", name,
                 "social", isSocial,
-                "roleNames", roleNames
+                "role", roleNames.get(0) // 단일 role
         );
     }
 }
