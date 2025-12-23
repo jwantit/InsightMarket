@@ -6,6 +6,8 @@ import com.InsightMarket.domain.strategy.Strategy;
 import com.InsightMarket.repository.project.ProjectRepository;
 import com.InsightMarket.repository.solution.SolutionRepository;
 import com.InsightMarket.repository.strategy.StrategyRepository;
+import lombok.ToString;
+import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,8 +15,11 @@ import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @SpringBootTest
+@Log4j2
+@ToString
 public class SolutionRepositoryTests {
 
 
@@ -60,25 +65,25 @@ public class SolutionRepositoryTests {
         // 🔹 전략 4개 생성
         Strategy strategyA = strategyRepository.save(
                 Strategy.builder()
-                        .title("인스타 성장 전략")
+                        .title("SNS 브랜드 인게이지먼트 전략")
                         .build()
         );
 
         Strategy strategyB = strategyRepository.save(
                 Strategy.builder()
-                        .title("트렌드 분석 전략")
+                        .title("타깃 오디언스 확장 전략")
                         .build()
         );
 
         Strategy strategyC = strategyRepository.save(
                 Strategy.builder()
-                        .title("고객 참여 유도 전략")
+                        .title("콘텐츠 리치 최적화 전략")
                         .build()
         );
 
         Strategy strategyD = strategyRepository.save(
                 Strategy.builder()
-                        .title("콘텐츠 최적화 전략")
+                        .title("전환율 기반 퍼포먼스 전략")
                         .build()
         );
 //-------------------------------------------------------------------------------------------------
@@ -136,5 +141,13 @@ public class SolutionRepositoryTests {
         }
         System.out.println("=== 테스트 완료 ===");
     }
+
+    @Test
+    @Transactional
+    @Commit
+    public void SolutionGetTests() {
+        List<Solution> getList = solutionRepository.findAll();
+        getList.forEach(solution -> log.info("solution={}", solution));    }
+
 
 }

@@ -12,6 +12,7 @@ import lombok.*;
 @Builder
 @Entity
 @Table(name = "solution")
+@ToString(exclude = {"strategy", "project"})
 public class Solution extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,4 +36,7 @@ public class Solution extends BaseEntity {
     @Lob
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
+
+    @Column(columnDefinition = "TINYINT(1)")
+    private boolean deleted = false;
 }
