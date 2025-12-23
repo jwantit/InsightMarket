@@ -1,6 +1,7 @@
 package com.InsightMarket.service;
 import com.InsightMarket.domain.common.PageRequestDTO;
 import com.InsightMarket.domain.common.PageResponseDTO;
+import com.InsightMarket.dto.solution.ProjectListDTO;
 import com.InsightMarket.dto.solution.SolutionDTO;
 import com.InsightMarket.repository.project.ProjectRepository;
 import com.InsightMarket.repository.solution.SolutionRepository;
@@ -13,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 
 @SpringBootTest
@@ -50,5 +53,20 @@ public class SolutionServiceTests {
             log.info("SolutionDTO={}", dto);
         });
 
+    }
+
+    @Test
+    @Transactional
+    @Commit
+    public void testGetProject() {
+
+        Long brandId = 1L;
+
+        List<ProjectListDTO> projectList =
+                solutionService.getProjectsByBrandId(brandId);
+
+        projectList.forEach(dto ->
+                log.info("projectId={}, name={}", dto.getProjectId(), dto.getName())
+        );
     }
 }

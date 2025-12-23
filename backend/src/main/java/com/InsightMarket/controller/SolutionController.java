@@ -4,13 +4,15 @@ package com.InsightMarket.controller;
 import com.InsightMarket.domain.common.PageRequestDTO;
 import com.InsightMarket.domain.common.PageResponseDTO;
 import com.InsightMarket.domain.solution.Solution;
+import com.InsightMarket.dto.solution.ProjectListDTO;
 import com.InsightMarket.dto.solution.SolutionDTO;
 import com.InsightMarket.service.solution.SolutionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,6 +22,7 @@ public class SolutionController {
 
     private final SolutionService solutionService;
 
+    //프로젝트 단위 조회
     @GetMapping("/list")
     public PageResponseDTO<SolutionDTO> list(PageRequestDTO pageRequestDTO){
 
@@ -27,11 +30,35 @@ public class SolutionController {
 
         return solutionService.getSolutionsByProjectId(pageRequestDTO);
     }
-    @GetMapping("/test")
-    public String test() {
-        return "ok";
+
+    //프로젝트 선택
+    @GetMapping("/brand/{brandId}")
+    public List<ProjectListDTO> getProjectsByBrand(
+            @PathVariable Long brandId
+    ) {
+        log.info("SolutionController 진입 프로젝트 선택");
+
+        return solutionService.getProjectsByBrandId(brandId);
     }
 
+    //프로젝트 단위 솔루션 전략 최근 필터 필터용
+    @GetMapping("/latest/strategy/{projectid}")
+    public List<SolutionDTO> getStrategyBySolution(
+            @PathVariable("projectid") Long projectid
+    ) {
+        log.info("SolutionController 진입 최근전략");
+        return solutionService.getLatestSolutionByProject(projectid);
+    }
 
+    //솔루션 삭제(숨김)
+    @DeleteMapping("delete/{solutionid}")
+    public Map<String, String> remove(@PathVariable("solutionid") Long solutionid){
 
+        solutionService.deleteSolutionProduct(solutionid);
+     return Map.of("RESULT", "SUCCESS");
+    }
 }
+
+
+
+

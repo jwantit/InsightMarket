@@ -2,10 +2,13 @@ package com.InsightMarket.service.solution;
 
 import com.InsightMarket.domain.common.PageRequestDTO;
 import com.InsightMarket.domain.common.PageResponseDTO;
+import com.InsightMarket.domain.project.Project;
 import com.InsightMarket.domain.solution.Solution;
+import com.InsightMarket.dto.solution.ProjectListDTO;
 import com.InsightMarket.dto.solution.SolutionDTO;
+import com.InsightMarket.repository.project.ProjectRepository;
 import com.InsightMarket.repository.solution.SolutionRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -15,7 +18,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Log4j2
@@ -24,6 +30,7 @@ import java.util.List;
 public class SolutionServiceImpl implements SolutionService {
 
     private final SolutionRepository solutionRepository;
+    private final ProjectRepository projectRepository;
 
     @Override
     public PageResponseDTO<SolutionDTO> getSolutionsByProjectId(PageRequestDTO pageRequestDTO) {
@@ -55,13 +62,17 @@ public class SolutionServiceImpl implements SolutionService {
 
         List<SolutionDTO> dtoList = result.getContent().stream()
                 .map(solution -> SolutionDTO.builder()
-                        .Solutionid(solution.getId())
+                        .solutionid(solution.getId())
                         .title(solution.getTitle())
                         .price(solution.getPrice())
                         .description(solution.getDescription())
+                        .projectname(solution.getProject().getName())
                         .strategyId(solution.getStrategy().getId())
+                        .strategytitle(solution.getStrategy().getTitle())
                         .projectId(solution.getProject().getId())
                         .deleted(solution.isDeleted())
+                        .createdAt( solution.getCreatedAt()
+                                .format(DateTimeFormatter.ofPattern("yyyy년MM월dd일")))
                         .build()
                 )
                 .toList();
@@ -76,5 +87,54 @@ public class SolutionServiceImpl implements SolutionService {
 
     }
 
+    //브랜드에 해당하는 프로젝트 가져오기
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProjectListDTO> getProjectsByBrandId(Long brandId) {
 
+        List<Project> projects = projectRepository.findByBrandIdProject(brandId);
+
+        return projects.stream()
+                .map(project -> ProjectListDTO.builder()
+                        .projectId(project.getId())
+                        .name(project.getName())
+                        .build()
+                )
+                .toList();
+    }
+
+    //전략에 해당하는 솔루션 가지고 오기
+    @Override
+    public List<SolutionDTO> getLatestSolutionByProject(Long projectid){
+
+        Optional<Solution> solutions = solutionRepository.findTopByProject_IdOrderByCreatedAtDescIdDesc(projectid);
+
+        Solution top = solutions.orElseThrow();
+
+        List<Solution> result = solutionRepository.findSolutionsByProjectAndStrategy(
+                top.getProject().getId(),top.getStrategy().getId());
+
+        return result.stream()
+                .map(solution -> SolutionDTO.builder()
+                        .solutionid(solution.getId())
+                        .title(solution.getTitle())
+                        .price(solution.getPrice())
+                        .description(solution.getDescription())
+                        .projectname(solution.getProject().getName())
+                        .strategyId(solution.getStrategy().getId())
+                        .strategytitle(solution.getStrategy().getTitle())
+                        .projectId(solution.getProject().getId())
+                        .deleted(solution.isDeleted())
+                        .createdAt( solution.getCreatedAt()
+                                .format(DateTimeFormatter.ofPattern("yyyy년MM월dd일")))
+                        .build()
+                )
+                .toList();
+    }
+
+    @Override
+    public void deleteSolutionProduct(Long solutionid) {
+        solutionRepository.softDeleteById(solutionid);
+        log.info("삭제(숨김처리 완료)");
+    }
 }
