@@ -1,4 +1,4 @@
-package com.InsightMarket.domain.common;
+package com.InsightMarket.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

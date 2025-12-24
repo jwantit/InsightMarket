@@ -11,7 +11,7 @@ import lombok.*;
 @Builder
 @Entity
 @Table(name = "files")
-public class Files extends SoftDeleteEntity {
+public class UploadedFile extends SoftDeleteEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "file_id")

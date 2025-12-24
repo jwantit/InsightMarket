@@ -13,7 +13,8 @@ import lombok.*;
 @Table(name = "comment")
 public class Comment extends SoftDeleteEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "comment_id")
     private Long id;
 
@@ -32,4 +33,9 @@ public class Comment extends SoftDeleteEntity {
     @Lob
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
+
+    // ===== 변경 메서드 =====
+    public void changeContent(String content) {
+        this.content = content;
+    }
 }

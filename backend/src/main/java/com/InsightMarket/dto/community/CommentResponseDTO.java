@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 // [댓글 응답 DTO] 부모/대댓글 공용 (2단만 사용)
@@ -11,9 +12,10 @@ import java.util.List;
 @Builder
 public class CommentResponseDTO {
 
-    private Long id;
-    private Long parentId;        // 부모면 null
+    private Long commentId;
+    private Long parentCommentId;        // 부모면 null
 
+    private Long boardId;
     private Long writerId;
     private String writerName;
 
@@ -25,5 +27,6 @@ public class CommentResponseDTO {
     private List<FileResponseDTO> files;
 
     // 부모 댓글에만 채움(대댓글은 빈 리스트)
-    private List<CommentResponseDTO> replies;
+    @Builder.Default
+    private List<CommentResponseDTO> replies = new ArrayList<>();
 }

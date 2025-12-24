@@ -1,11 +1,14 @@
 package com.InsightMarket.controller;
 
+import com.InsightMarket.dto.PageRequestDTO;
+import com.InsightMarket.dto.PageResponseDTO;
 import com.InsightMarket.dto.community.BoardResponseDTO;
-import com.InsightMarket.dto.community.BoardUpsertRequestDTO;
+import com.InsightMarket.dto.community.BoardModifyDTO;
 import com.InsightMarket.service.community.BoardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,19 +27,19 @@ public class BoardController {
     /**
      * 게시글 생성 (파일 한번에 업로드)
      * multipart:
-     *  - data  : BoardUpsertRequestDTO (JSON)
+     *  - data  : BoardModifyDTO (JSON)
      *  - files : List<MultipartFile> (optional)
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public BoardResponseDTO create(
             @PathVariable Long brandId,
-            @RequestPart("data") BoardUpsertRequestDTO data,
+            @RequestPart("data") BoardModifyDTO dto,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
         log.info("[BOARD][CREATE] brandId={}, title={}, files={}",
-                brandId, data.getTitle(), files == null ? 0 : files.size());
+                brandId, dto.getTitle(), files == null ? 0 : files.size());
 
-        return boardService.create(brandId, data, files);
+        return boardService.create(brandId, dto, files);
     }
 
     /**
@@ -50,30 +53,30 @@ public class BoardController {
     public BoardResponseDTO update(
             @PathVariable Long brandId,
             @PathVariable Long boardId,
-            @RequestPart("data") BoardUpsertRequestDTO data,
+            @RequestPart("data") BoardModifyDTO dto,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
         log.info("[BOARD][UPDATE] brandId={}, boardId={}, keepFileIds={}, newFiles={}",
                 brandId,
                 boardId,
-                data.getKeepFileIds() == null ? "null" : data.getKeepFileIds().size(),
+                dto.getKeepFileIds() == null ? "null" : dto.getKeepFileIds().size(),
                 files == null ? 0 : files.size());
 
-        return boardService.update(brandId, boardId, data, files);
+        return boardService.update(brandId, boardId, dto, files);
     }
 
     /**
      * 게시글 목록 (최신순 고정, 커서 기반)
      */
     @GetMapping
-    public List<BoardResponseDTO> list(
+    public PageResponseDTO<BoardResponseDTO> list(
             @PathVariable Long brandId,
-            @RequestParam(required = false) Long lastId,
-            @RequestParam(defaultValue = "20") int size
+            PageRequestDTO pageRequestDTO
     ) {
-        log.info("[BOARD][LIST] brandId={}, lastId={}, size={}", brandId, lastId, size);
+        log.info("[BOARD][LIST] brandId={}, page={}, size={}",
+                brandId, pageRequestDTO.getPage(), pageRequestDTO.getSize());
 
-        return boardService.list(brandId, lastId, size);
+        return boardService.list(brandId, pageRequestDTO);
     }
 
     /**
@@ -93,12 +96,13 @@ public class BoardController {
      * 게시글 삭제 (soft delete + 첨부 연쇄 soft delete)
      */
     @DeleteMapping("/{boardId}")
-    public void delete(
+    public ResponseEntity<Void> delete(
             @PathVariable Long brandId,
             @PathVariable Long boardId
     ) {
         log.info("[BOARD][DELETE] brandId={}, boardId={}", brandId, boardId);
 
         boardService.delete(brandId, boardId);
+        return ResponseEntity.noContent().build();
     }
 }

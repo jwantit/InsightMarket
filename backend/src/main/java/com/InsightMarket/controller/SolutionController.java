@@ -1,10 +1,8 @@
 package com.InsightMarket.controller;
 
-
-import com.InsightMarket.domain.common.PageRequestDTO;
-import com.InsightMarket.domain.common.PageResponseDTO;
-import com.InsightMarket.domain.solution.Solution;
 import com.InsightMarket.dto.solution.ProjectListDTO;
+import com.InsightMarket.dto.PageRequestDTO;
+import com.InsightMarket.dto.PageResponseDTO;
 import com.InsightMarket.dto.solution.SolutionDTO;
 import com.InsightMarket.service.solution.SolutionService;
 import lombok.RequiredArgsConstructor;

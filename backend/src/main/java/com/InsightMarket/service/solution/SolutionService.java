@@ -1,8 +1,8 @@
 package com.InsightMarket.service.solution;
 
-import com.InsightMarket.domain.common.PageRequestDTO;
-import com.InsightMarket.domain.common.PageResponseDTO;
 import com.InsightMarket.dto.solution.ProjectListDTO;
+import com.InsightMarket.dto.PageRequestDTO;
+import com.InsightMarket.dto.PageResponseDTO;
 import com.InsightMarket.dto.solution.SolutionDTO;
 import jakarta.transaction.Transactional;
 

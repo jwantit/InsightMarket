@@ -1,11 +1,9 @@
 package com.InsightMarket.service;
-import com.InsightMarket.domain.common.PageRequestDTO;
-import com.InsightMarket.domain.common.PageResponseDTO;
+
 import com.InsightMarket.dto.solution.ProjectListDTO;
+import com.InsightMarket.dto.PageRequestDTO;
+import com.InsightMarket.dto.PageResponseDTO;
 import com.InsightMarket.dto.solution.SolutionDTO;
-import com.InsightMarket.repository.project.ProjectRepository;
-import com.InsightMarket.repository.solution.SolutionRepository;
-import com.InsightMarket.repository.strategy.StrategyRepository;
 import com.InsightMarket.service.solution.SolutionService;
 import lombok.ToString;
 import lombok.extern.log4j.Log4j2;

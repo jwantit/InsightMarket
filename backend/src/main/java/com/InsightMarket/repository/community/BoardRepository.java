@@ -1,7 +1,9 @@
 package com.InsightMarket.repository.community;
 
 import com.InsightMarket.domain.community.Board;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -48,4 +50,10 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     order by b.id desc
 """)
     List<Board> findFirstPageWithWriter(@Param("brandId") Long brandId, Pageable pageable);
+
+    List<Board> findByBrandIdAndDeletedAtIsNullOrderByIdDesc(Long brandId);
+
+    // N+1 해결
+    @EntityGraph(attributePaths = {"writer"})
+    Page<Board> findByBrandIdAndDeletedAtIsNull(Long brandId, Pageable pageable);
 }

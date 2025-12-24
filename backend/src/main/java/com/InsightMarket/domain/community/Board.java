@@ -32,4 +32,12 @@ public class Board extends SoftDeleteEntity {
     @Lob
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
+
+    public void changeTitle(String title) {
+        this.title = title;
+    }
+
+    public void changeContent(String content) {
+        this.content = content;
+    }
 }

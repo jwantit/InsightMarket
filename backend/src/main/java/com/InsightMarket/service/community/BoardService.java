@@ -1,22 +1,33 @@
 package com.InsightMarket.service.community;
 
+import com.InsightMarket.domain.brand.Brand;
 import com.InsightMarket.domain.community.Board;
 import com.InsightMarket.domain.files.FileTargetType;
-import com.InsightMarket.domain.files.Files;
+import com.InsightMarket.domain.files.UploadedFile;
+import com.InsightMarket.domain.member.Member;
+import com.InsightMarket.dto.PageRequestDTO;
+import com.InsightMarket.dto.PageResponseDTO;
 import com.InsightMarket.dto.community.BoardResponseDTO;
-import com.InsightMarket.dto.community.BoardUpsertRequestDTO;
+import com.InsightMarket.dto.community.BoardModifyDTO;
 import com.InsightMarket.dto.community.FileResponseDTO;
 import com.InsightMarket.repository.FileRepository;
 import com.InsightMarket.repository.community.BoardRepository;
+import com.InsightMarket.service.FileService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 // [게시글 서비스] CRUD + 파일 한번에 업로드/교체 + 로그
 @Service
@@ -27,92 +38,172 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final FileRepository fileRepository;
+    private final FileService fileService;
+
+    @PersistenceContext
+    private EntityManager entityManager; //JPA 표준 방식
 
     // TODO: BrandRepository, UserContext(로그인 유저), FileStorageClient(실제 업로드) 주입
 
-    public BoardResponseDTO create(Long brandId, BoardUpsertRequestDTO data, List<MultipartFile> files) {
-        log.info("[BOARD][SVC][CREATE] brandId={}, title={}, files={}",
-                brandId, data.getTitle(), files == null ? 0 : files.size());
+    // [기능] 게시글 생성 1단계 (Brand/User repository 없이)
+    // [원칙] FK는 존재한다고 가정하고 ID만 연결
+    @Transactional
+    public BoardResponseDTO create(Long brandId, BoardModifyDTO data, List<MultipartFile> files) {
 
-        // TODO 1) brand 조회
-        // TODO 2) writer(로그인 유저) 조회
-        // TODO 3) board 저장
-        // TODO 4) files 업로드 + Attachment 저장(targetType=BOARD, targetId=boardId)
-        // TODO 5) BoardResponseDTO 조립(파일 포함)
+        // 개발 중 임시 writerId
+        Long writerId = 1L;
 
-        throw new UnsupportedOperationException("TODO");
+        log.info("[BOARD][SVC][CREATE] brandId={}, writerId={}, title={}",
+                brandId, writerId, data.getTitle());
+
+        // 🔑 핵심: 실제 조회 없이 FK 프록시만 생성
+        Brand brandRef = entityManager.getReference(Brand.class, brandId);
+        Member writerRef = entityManager.getReference(Member.class, writerId);
+
+        Board board = Board.builder()
+                .brand(brandRef)
+                .writer(writerRef)
+                .title(data.getTitle())
+                .content(data.getContent())
+                .build();
+
+        // 1) Board 저장
+        Board saved = boardRepository.save(board);
+
+        // 2) 파일 저장
+        List<FileResponseDTO> savedFiles = fileService.saveFiles(
+                FileTargetType.BOARD,
+                saved.getId(),
+                writerId,          // 테스트용 1L이면 그대로
+                files
+        );
+
+        log.info("[BOARD][SVC][CREATE] savedFiles={}", savedFiles.size());
+
+        return BoardResponseDTO.builder()
+                .id(saved.getId())
+                .brandId(brandId)
+                .writerId(writerId)
+                .title(saved.getTitle())
+                .content(saved.getContent())
+                .files(savedFiles)
+                .createdAt(saved.getCreatedAt())
+                .updatedAt(saved.getUpdatedAt())
+                .build();
     }
 
-    public BoardResponseDTO update(Long brandId, Long boardId, BoardUpsertRequestDTO data, List<MultipartFile> files) {
+    @Transactional
+    public BoardResponseDTO update(
+            Long brandId,
+            Long boardId,
+            BoardModifyDTO dto,
+            List<MultipartFile> newFiles
+    ) {
 
-        log.info("[BOARD][UPDATE] brandId={}, boardId={}, keepFileIds={}, newFiles={}",
-                brandId, boardId,
-                data.getKeepFileIds() == null ? "null" : data.getKeepFileIds().size(),
-                files == null ? 0 : files.size());
+        Long updaterId = 1L; // 테스트용
 
-        // 1) 게시글 조회 (브랜드 스코프 + 미삭제)
         Board board = boardRepository.findByIdAndBrandIdAndDeletedAtIsNull(boardId, brandId)
-                .orElseThrow(() -> new IllegalArgumentException("Board not found"));
+                .orElseThrow();
 
-        // 2) 권한 체크 (작성자 본인)
-        // TODO: 로그인 유저 id 가져와서 board.getWriter().getId()와 비교
-        // 예) Long currentUserId = userContext.getCurrentUserId();
-        // if (!board.getWriter().getId().equals(currentUserId)) throw new AccessDeniedException("No permission");
+        // 1️⃣ 게시글 수정
+        board.changeTitle(dto.getTitle());
+        board.changeContent(dto.getContent());
 
-        // 3) 게시글 내용 수정
-        // TODO: board.changeTitle(data.getTitle()); board.changeContent(data.getContent());
-        // (엔티티에 change 메서드 없으면 setter 대신 명시적 메서드 추천)
+        // 2️⃣ 기존 파일 정리
+        fileService.cleanupFiles(
+                FileTargetType.BOARD,
+                boardId,
+                dto.getKeepFileIds()
+        );
 
-        // 4) 기존 첨부 조회 (BOARD 타겟)
-        List<Files> existing = fileRepository
-                .findByTargetTypeAndTargetIdAndDeletedAtIsNull(FileTargetType.BOARD, boardId);
+        // 3️⃣ 새 파일 추가
+        List<FileResponseDTO> files =
+                fileService.saveFiles(
+                        FileTargetType.BOARD,
+                        boardId,
+                        updaterId,
+                        newFiles
+                );
 
-        int existingCount = existing.size();
-        List<Long> keepFileIds = data.getKeepFileIds();
+        // 4️⃣ 현재 파일 목록 재조회 (응답용)
+        List<FileResponseDTO> currentFiles =
+                fileService.getFiles(FileTargetType.BOARD, boardId);
 
-        // 5) keepFileIds 규칙 적용
-        if (keepFileIds == null) {
-            // 파일 유지(삭제 없음) + 새 파일 들어오면 "추가만" (추가는 다음 단계에서)
-            log.info("[BOARD][UPDATE][FILES] keepFileIds=null => keep all existing. existing={}", existingCount);
-
-        } else {
-            // keepFileIds가 빈 리스트면 전부 삭제, 값 있으면 해당 id만 유지
-            Set<Long> keepSet = new HashSet<>(keepFileIds);
-
-            int deleteCount = 0;
-            int keepCount = 0;
-
-            for (Files att : existing) {
-                if (keepSet.contains(att.getId())) {
-                    keepCount++;
-                    continue;
-                }
-                att.softDelete();   // SoftDeleteEntity의 deletedAt 설정
-                deleteCount++;
-            }
-
-            log.info("[BOARD][UPDATE][FILES] existing={}, keepIds={}, keep={}, delete={}",
-                    existingCount, keepFileIds.size(), keepCount, deleteCount);
-        }
-
-        // 6) (다음 단계) 새 files 업로드 + Attachment 추가
-        // TODO
-
-        // 7) (다음 단계) BoardResponseDTO 조립(첨부 포함) 후 반환
-        throw new UnsupportedOperationException("TODO: 다음 단계에서 DTO 조립까지 완료");
+        return BoardResponseDTO.builder()
+                .id(board.getId())
+                .brandId(brandId)
+                .writerId(board.getWriter().getId())
+                .title(board.getTitle())
+                .content(board.getContent())
+                .files(currentFiles)
+                .createdAt(board.getCreatedAt())
+                .updatedAt(board.getUpdatedAt())
+                .build();
     }
 
     @Transactional(readOnly = true)
-    public List<BoardResponseDTO> list(Long brandId, Long lastId, int size) {
-        log.info("[BOARD][SVC][LIST] brandId={}, lastId={}, size={}", brandId, lastId, size);
+    public PageResponseDTO<BoardResponseDTO> list(Long brandId, PageRequestDTO pageRequestDTO) {
 
-        // TODO 1) board 목록 조회(first/next)
-        // TODO 2) boardIds 추출
-        // TODO 3) attachments IN 조회(targetType=BOARD, targetId in boardIds)
-        // TODO 4) Map<boardId, files>로 묶기
-        // TODO 5) DTO 리스트 조립
+        log.info("[BOARD][SVC][LIST] brandId={}, page={}, size={}",
+                brandId, pageRequestDTO.getPage(), pageRequestDTO.getSize());
 
-        throw new UnsupportedOperationException("TODO");
+        // page는 1부터 시작 → Pageable은 0부터
+        Pageable pageable = PageRequest.of(
+                pageRequestDTO.getPage() - 1,
+                pageRequestDTO.getSize(),
+                Sort.by("id").descending()
+        );
+
+        Page<Board> result =
+                boardRepository.findByBrandIdAndDeletedAtIsNull(brandId, pageable);
+
+        List<Board> boards = result.getContent();
+
+        // 게시글 ID 수집
+        List<Long> boardIds = boards.stream()
+                .map(Board::getId)
+                .toList();
+
+        // 파일 IN 조회
+        Map<Long, List<FileResponseDTO>> fileMap =
+                fileRepository
+                        .findByTargetTypeAndTargetIdInAndDeletedAtIsNull(
+                                FileTargetType.BOARD, boardIds)
+                        .stream()
+                        .collect(Collectors.groupingBy(
+                                UploadedFile::getTargetId,
+                                Collectors.mapping(f ->
+                                                FileResponseDTO.builder()
+                                                        .id(f.getId())
+                                                        .originalName(f.getFileName())
+                                                        .size(f.getSize())
+                                                        .contentType(f.getContentType())
+                                                        .build(),
+                                        Collectors.toList()
+                                )
+                        ));
+
+        // DTO 변환
+        List<BoardResponseDTO> dtoList = boards.stream()
+                .map(b -> BoardResponseDTO.builder()
+                        .id(b.getId())
+                        .brandId(brandId)
+                        .writerId(b.getWriter().getId())
+                        .title(b.getTitle())
+                        .content(b.getContent())
+                        .files(fileMap.getOrDefault(b.getId(), List.of()))
+                        .createdAt(b.getCreatedAt())
+                        .updatedAt(b.getUpdatedAt())
+                        .build()
+                )
+                .toList();
+
+        // ✅ 공용 PageResponseDTO 사용
+        return PageResponseDTO.<BoardResponseDTO>withAll()
+                .dtoList(dtoList)
+                .pageRequestDTO(pageRequestDTO)
+                .totalCount(result.getTotalElements())
+                .build();
     }
 
     // [기능] 게시글 상세 조회 1단계: 게시글 + (첨부파일 목록) 조회 후 DTO 반환
@@ -125,7 +216,7 @@ public class BoardService {
         Board board = boardRepository.findByIdAndBrandIdAndDeletedAtIsNull(boardId, brandId)
                 .orElseThrow(() -> new IllegalArgumentException("Board not found"));
 
-        List<Files> files = fileRepository
+        List<UploadedFile> files = fileRepository
                 .findByTargetTypeAndTargetIdAndDeletedAtIsNull(FileTargetType.BOARD, boardId);
 
         log.info("[BOARD][SVC][DETAIL] attachments={}", files.size());
@@ -150,14 +241,23 @@ public class BoardService {
                 .build();
     }
 
+    @Transactional
     public void delete(Long brandId, Long boardId) {
-        log.info("[BOARD][SVC][DELETE] brandId={}, boardId={}", brandId, boardId);
 
-        // TODO 1) board 조회 + 권한 체크
-        // TODO 2) board.softDelete()
-        // TODO 3) (옵션) attachments도 soft delete 할지 정책 결정
+        Board board = boardRepository.findByIdAndBrandIdAndDeletedAtIsNull(boardId, brandId)
+                .orElseThrow();
 
-        throw new UnsupportedOperationException("TODO");
+        // [기능] 게시글 soft delete
+        board.softDelete();
+        log.info("[BOARD][SVC][DELETE] boardId={}, brandId={}", boardId, brandId);
+
+        // [기능] 게시글 첨부파일 연쇄 soft delete
+        fileService.cleanupFiles(
+                FileTargetType.BOARD,
+                boardId,
+                List.of() // 빈 리스트 → 전부 삭제
+        );
+        log.info("[BOARD][SVC][DELETE] cascade files targetId={}", boardId);
     }
 }
 

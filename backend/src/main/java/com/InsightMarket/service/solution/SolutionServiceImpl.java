@@ -1,15 +1,14 @@
 package com.InsightMarket.service.solution;
 
-import com.InsightMarket.domain.common.PageRequestDTO;
-import com.InsightMarket.domain.common.PageResponseDTO;
 import com.InsightMarket.domain.project.Project;
+import com.InsightMarket.dto.PageRequestDTO;
+import com.InsightMarket.dto.PageResponseDTO;
 import com.InsightMarket.domain.solution.Solution;
 import com.InsightMarket.dto.solution.ProjectListDTO;
 import com.InsightMarket.dto.solution.SolutionDTO;
 import com.InsightMarket.repository.project.ProjectRepository;
 import com.InsightMarket.repository.solution.SolutionRepository;
 import org.springframework.transaction.annotation.Transactional;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
