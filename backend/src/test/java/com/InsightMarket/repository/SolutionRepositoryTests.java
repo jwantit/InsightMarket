@@ -1,4 +1,4 @@
-package com.InsightMarket.Repository;
+package com.InsightMarket.repository;
 
 import com.InsightMarket.domain.brand.Brand;
 import com.InsightMarket.domain.project.Project;
@@ -42,9 +42,12 @@ public class SolutionRepositoryTests {
     @Commit
     public void testInsertProject () {
 
-
-        Brand brand = brandRepository.findById(1L).orElseThrow(() -> new RuntimeException("project1 없음"));
-
+        Brand brand = brandRepository.save(
+                Brand.builder()
+                        .name("삼성")
+                        .description("스마트폰")
+                        .build()
+        );
 
         Project project = Project.builder()
                 .name("갤럭시 행사")
@@ -58,9 +61,9 @@ public class SolutionRepositoryTests {
 
         projectRepository.save(project);
         projectRepository.save(project1);
-
-
     }
+
+
     @Test
     @Transactional
     @Commit

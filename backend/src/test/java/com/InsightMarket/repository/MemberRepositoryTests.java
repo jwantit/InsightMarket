@@ -1,4 +1,4 @@
-package com.InsightMarket.Repository;
+package com.InsightMarket.repository;
 
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;

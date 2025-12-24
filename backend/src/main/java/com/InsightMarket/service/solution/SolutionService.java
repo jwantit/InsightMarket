@@ -8,7 +8,6 @@ import jakarta.transaction.Transactional;
 
 import java.util.List;
 
-@Transactional
 public interface SolutionService {
     PageResponseDTO<SolutionDTO> getSolutionsByProjectId(PageRequestDTO pageRequestDTO);
 
@@ -17,8 +16,5 @@ public interface SolutionService {
     List<SolutionDTO> getLatestSolutionByProject(Long projectid);
 
     void deleteSolutionProduct(Long solutionid);
-
-
-
 
 }

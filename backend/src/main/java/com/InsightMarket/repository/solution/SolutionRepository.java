@@ -1,13 +1,13 @@
 package com.InsightMarket.repository.solution;
 
 import com.InsightMarket.domain.solution.Solution;
-import com.InsightMarket.domain.strategy.Strategy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -41,5 +41,19 @@ public interface SolutionRepository extends JpaRepository<Solution, Long> {
         @Modifying //업데이트 /삭제 를 위한 어노
         @Query("update Solution s set s.deleted = true where s.id = :solutionId")
         void softDeleteById(@Param("solutionId") Long solutionId);
-    }
+
+
+
+
+
+        @Query("""
+           select s
+           from Solution s
+           where s.id = :solutionId
+           and s.project.id = :projectId""")
+    Optional<Solution> findSolutionOfProject(
+            @Param("solutionId") Long solutionId,
+            @Param("projectId") Long projectId
+    );
+}
 
