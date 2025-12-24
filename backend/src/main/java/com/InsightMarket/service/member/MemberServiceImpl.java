@@ -37,7 +37,7 @@ public class MemberServiceImpl implements MemberService {
 
         log.info("email: " + email);
 
-        Optional<Member> result = memberRepository.findById(email);
+        Optional<Member> result = memberRepository.findByEmail(email);
 
         // 기존의 회원
         if (result.isPresent()) {
@@ -96,7 +96,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public void modifyMember(MemberModifyDTO memberModifyDTO) {
 
-        Optional<Member> result = memberRepository.findById(memberModifyDTO.getEmail());
+        Optional<Member> result = memberRepository.findByEmail(memberModifyDTO.getEmail());
 
         Member member = result.orElseThrow();
 
