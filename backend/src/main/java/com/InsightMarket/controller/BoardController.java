@@ -72,7 +72,7 @@ public class BoardController {
 //     - null : 기존 파일 유지
 //     - []   : 기존 파일 전부 삭제
 //     - [id] : 해당 id만 유지
-    @PreAuthorize("principal.username == #BoardModifyDTO.writer")
+//    @PreAuthorize("principal.username == #BoardModifyDTO.writer")
     @PutMapping(value = "/{boardId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public BoardResponseDTO update(
             @PathVariable Long brandId,
@@ -115,7 +115,7 @@ public class BoardController {
     }
 
     // 게시글 삭제 (soft delete + 첨부 연쇄 soft delete)
-    @PreAuthorize("principal.username == #BoardModifyDTO.writer")
+//    @PreAuthorize("principal.username == #BoardModifyDTO.writer")
     @DeleteMapping("/{boardId}")
     public ResponseEntity<Void> delete(
             @PathVariable Long brandId,

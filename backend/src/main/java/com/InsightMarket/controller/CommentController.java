@@ -72,7 +72,7 @@ public class CommentController {
     }
 
     // [기능] 댓글/대댓글 수정 (multipart)
-    @PreAuthorize("principal.username == #CommentModifyDTO.writer")
+//    @PreAuthorize("principal.username == #CommentModifyDTO.writer")
     @PutMapping(value = "/{commentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public CommentResponseDTO update(
             @PathVariable Long brandId,
@@ -92,7 +92,7 @@ public class CommentController {
     }
 
     // [기능] 댓글/대댓글 삭제
-    @PreAuthorize("principal.username == #CommentModifyDTO.writer")
+//    @PreAuthorize("principal.username == #CommentModifyDTO.writer")
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> delete(
             @PathVariable Long brandId,
