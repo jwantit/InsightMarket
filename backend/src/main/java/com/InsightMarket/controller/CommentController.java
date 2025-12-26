@@ -56,7 +56,6 @@ public class CommentController {
     }
 
     // [기능] 댓글/대댓글 생성 (multipart)
-    @PreAuthorize("principal.username == #CommentModifyDTO.writer")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public CommentResponseDTO create(
             @PathVariable Long brandId,
