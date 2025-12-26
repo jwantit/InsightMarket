@@ -47,6 +47,7 @@ public class SecurityConfig {
 
         http.csrf(config -> config.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/member/join", "/member/login").permitAll() // 인증없이 접근 가능. JWT 없어도됨
                         .requestMatchers("/api/**").permitAll()  // 개발 중 전부 오픈
                         .anyRequest().permitAll()
                 );;

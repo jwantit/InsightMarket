@@ -36,6 +36,7 @@ public class MemberUserDetailsService implements UserDetailsService {
                 member.getPassword(),
                 member.getName(),
                 member.isSocial(),
+                member.isApproved(),
                 member.getSystemRole().name());
 
         log.info(memberDTO);

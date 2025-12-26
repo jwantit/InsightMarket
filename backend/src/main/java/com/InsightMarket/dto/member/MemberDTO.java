@@ -22,13 +22,15 @@ public class MemberDTO extends User {
     private String email;
     private String name;
     private boolean isSocial;
+    private boolean isApproved;
     private List<String> roleNames;
 
-    public MemberDTO(String email, String password, String name, boolean isSocial, String roleName) {
+    public MemberDTO(String email, String password, String name, boolean isSocial, boolean isApproved, String roleName) {
         super(email, password, List.of(new SimpleGrantedAuthority("ROLE_" + roleName)));
         this.email = email;
         this.name = name;
         this.isSocial = isSocial;
+        this.isApproved = isApproved;
         this.roleNames = List.of(roleName);
     }
 
@@ -40,6 +42,7 @@ public class MemberDTO extends User {
         dataMap.put("email", email);
         dataMap.put("name", name);
         dataMap.put("isSocial", isSocial);
+        dataMap.put("isApproved", isApproved);
         dataMap.put("role", roleNames.get(0));
 
         return dataMap;

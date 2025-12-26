@@ -42,25 +42,22 @@ public class JWTCheckFilter extends OncePerRequestFilter {
 
         log.info("check uri......................." + path);
 
-        // /member/ 경로의 호출은 체크하지 않음
+        // /member/login 와 /member/join 경로의 호출은 체크하지 않음
         // “JWTCheckFilter는 ‘로그인 이후 영역’만 담당한다”
-        // "/member/"는 JWT를 발급받기 위한 경로이기 때문
-        if (path.startsWith("/member/")) {
+        // "/member/login" 는 JWT를 발급받기 위한 경로이기 때문에 스킵
+        // "/member/approve" 는 filter 적용해야함
+        if (path.equals("/member/login") || path.equals("/member/join") || path.equals("/member/kakao")) {
             return true;
         }
 
-        // 이미지 조회 경로는 체크하지 않는다면
-        // 공개 리소스, 비회원도 접근가능하고, JWT 요구하지 않는 페이지이기 때문에
-        if (path.startsWith("/api/products/view/")) {
-            return true;
-        }
+        // 회사 목록 조회는 JWT 없이 허용
+        if (path.startsWith("/api/company")) return true;
 
         return false;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         log.info("------------------------JWTCheckFilter------------------");
 
@@ -76,22 +73,21 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             // filterChain.doFilter(request, response);
 
             String email = (String) claims.get("email");
-            String pw = (String) claims.get("pw");
-            String name = (String) claims.get("nickname");
-            Boolean isSocial = (Boolean) claims.get("social");
+            String name = (String) claims.get("name");
+            Boolean isSocial = (Boolean) claims.get("isSocial");
+            Boolean isApproved = (Boolean) claims.get("isApproved");
             String role = (String) claims.get("role");
 
             // MemberDTO는 UserDetails 구현체
             // JWT에 들어 있던 사용자 정보를 Security가 이해할 수 있는 사용자 객체로 변환
-            MemberDTO memberDTO = new MemberDTO(email, pw, name, isSocial.booleanValue(), role);
+            MemberDTO memberDTO = new MemberDTO(email, "", name, isSocial.booleanValue(), isApproved.booleanValue(), role);
 
             log.info("-----------------------------------");
             log.info(memberDTO);
             log.info(memberDTO.getAuthorities());
 
             // Authentication 객체를 만들고
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(memberDTO, pw,
-                    memberDTO.getAuthorities());
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(memberDTO, null, memberDTO.getAuthorities());
 
             // SecurityContextHolder에 넣어서 “인증된 사용자”로 만들어줌
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);

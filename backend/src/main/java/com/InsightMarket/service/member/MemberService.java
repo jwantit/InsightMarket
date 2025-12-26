@@ -1,13 +1,23 @@
 package com.InsightMarket.service.member;
 
+import com.InsightMarket.dto.member.MemberJoinRequestDTO;
+import com.InsightMarket.dto.member.MemberResponseDTO;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.InsightMarket.domain.member.Member;
 import com.InsightMarket.dto.member.MemberDTO;
 import com.InsightMarket.dto.member.MemberModifyDTO;
 
+import java.util.List;
+
 @Transactional
 public interface MemberService {
+
+    void join(MemberJoinRequestDTO dto);
+
+    void approve(Long targetMemberId, MemberDTO currentUser);
+
+    List<MemberResponseDTO> getPendingMembers(MemberDTO memberDTO);
 
     MemberDTO getKakaoMember(String accessToken);
 
@@ -20,6 +30,7 @@ public interface MemberService {
                 member.getPassword(),
                 member.getName(),
                 member.isSocial(),
+                member.isApproved(),
                 member.getSystemRole().name());
         return dto;
     }

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
 
+import com.InsightMarket.domain.member.SystemRole;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
@@ -22,12 +24,19 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler{
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException{
-        log.info("-------------------------------");
+        log.info("--------------LoginSuccessHandler-----------------");
         log.info(authentication);
         log.info("-------------------------------");
 
         MemberDTO memberDTO = (MemberDTO)authentication.getPrincipal();
 
+        // 승인 안 된 일반 USER 차단
+        if (!memberDTO.isApproved() && memberDTO.getRoleNames().contains("USER")) {
+
+            throw new AuthenticationServiceException("NOT_APPROVED");
+        }
+
+        // 승인된 경우만 JWT 발급
         Map<String, Object> claims  = memberDTO.getClaims();
 
         String accessToken = JWTUtil.generateToken(claims, 60);

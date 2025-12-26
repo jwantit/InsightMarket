@@ -38,6 +38,10 @@ public class Member extends BaseEntity {
     @Column(name = "system_role", nullable = false, length = 30)
     private SystemRole systemRole;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "requested_company_id")
+    private Company requestedCompany;
+
     @Column(name = "is_social", nullable = false)
     private boolean isSocial;
 
@@ -55,11 +59,23 @@ public class Member extends BaseEntity {
         this.password = password;
     }
 
+    public void changeCompany(Company company) {
+        this.company = company;
+    }
+
     public void changeIsSocial(boolean isSocial) {
         this.isSocial = isSocial;
     }
 
     public void changeSystemRole(SystemRole systemRole){
         this.systemRole = systemRole;
+    }
+
+    public void changeIsApproved(boolean isApproved){
+        this.isApproved = isApproved;
+    }
+
+    public void clearRequestedCompany() {
+        this.requestedCompany = null;
     }
 }
