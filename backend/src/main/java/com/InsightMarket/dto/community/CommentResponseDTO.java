@@ -23,6 +23,7 @@ public class CommentResponseDTO {
     private boolean deleted;
 
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     private List<FileResponseDTO> files;
 

@@ -11,9 +11,8 @@ import com.InsightMarket.dto.community.FileResponseDTO;
 import com.InsightMarket.repository.FileRepository;
 import com.InsightMarket.repository.community.BoardRepository;
 import com.InsightMarket.repository.community.CommentRepository;
+import com.InsightMarket.repository.member.MemberRepository;
 import com.InsightMarket.service.FileService;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,30 +36,28 @@ public class CommentService {
     private final BoardRepository boardRepository;
     private final FileRepository fileRepository;
     private final FileService fileService;
-
-    @PersistenceContext
-    private EntityManager entityManager; //JPA 표준 방식
-
-    // TODO: UserContext, FileStorageClient
+    private final MemberRepository memberRepository;
 
     @Transactional
     public CommentResponseDTO create(
             Long brandId,
             Long boardId,
             CommentModifyDTO data,
-            List<MultipartFile> files
+            List<MultipartFile> files,
+            Member currentMember
     ) {
         log.info("[COMMENT][SVC][CREATE] brandId={}, boardId={}, parentId={}, files={}",
                 brandId, boardId, data.getParentCommentId(), files == null ? 0 : files.size());
 
-        Long writerId = 1L; // 테스트용
+        Long writerId = currentMember.getId();
 
         // 1) board 조회(brand 스코프)
         Board board = boardRepository.findByIdAndBrandIdAndDeletedAtIsNull(boardId, brandId)
                 .orElseThrow();
 
-        // 2) writer 프록시
-        Member writerRef = entityManager.getReference(Member.class, writerId);
+        // 2) writer 실제 조회
+        Member writer = memberRepository.findById(writerId)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found: " + writerId));
 
         // 3) parentId 있으면 parent 조회 + 2단 제한 검사
         Comment parent = null;
@@ -83,7 +80,7 @@ public class CommentService {
         Comment saved = commentRepository.save(
                 Comment.builder()
                         .board(board)
-                        .writer(writerRef)
+                        .writer(writer)
                         .parent(parent)
                         .content(data.getContent())
                         .build()
@@ -107,10 +104,11 @@ public class CommentService {
                 .parentCommentId(parent != null ? parent.getId() : null)
                 .boardId(boardId)
                 .content(saved.getContent())
-                .writerId(writerRef.getId())
-                // writerName이 필요하면 여기서 member를 조회해야 하는데, 지금은 테스트 단계라 생략 가능
+                .writerId(writer.getId())
+                .writerName(currentMember.getName())
                 .files(savedFiles)
                 .createdAt(saved.getCreatedAt())
+                .updatedAt(saved.getUpdatedAt())
                 .replies(List.of())
                 .build();
     }
@@ -121,14 +119,15 @@ public class CommentService {
             Long boardId,
             Long commentId,
             CommentModifyDTO data,
-            List<MultipartFile> files
+            List<MultipartFile> files,
+            Member currentMember
     ) {
         log.info("[COMMENT][SVC][UPDATE] brandId={}, boardId={}, commentId={}, keepFileIds={}, newFiles={}",
                 brandId, boardId, commentId,
                 data.getKeepFileIds() == null ? "null" : data.getKeepFileIds().size(),
                 files == null ? 0 : files.size());
 
-        Long writerId = 1L; // 테스트용
+        Long writerId = currentMember.getId();
 
         // 1) board 스코프 확인
         boardRepository.findByIdAndBrandIdAndDeletedAtIsNull(boardId, brandId)
@@ -161,8 +160,10 @@ public class CommentService {
                 .boardId(boardId)
                 .content(comment.getContent())
                 .writerId(comment.getWriter().getId())
+                .writerName(comment.getWriter().getName())
                 .files(currentFiles)
                 .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
                 .replies(List.of()) // 단건 응답이므로 비움
                 .build();
     }
@@ -248,6 +249,7 @@ public class CommentService {
                 .writerName(c.getWriter().getName())
                 .files(fileMap.getOrDefault(c.getId(), List.of()))
                 .createdAt(c.getCreatedAt())
+                .updatedAt(c.getUpdatedAt())
                 .build();
     }
 }

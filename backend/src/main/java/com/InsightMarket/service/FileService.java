@@ -5,8 +5,7 @@ import com.InsightMarket.domain.files.UploadedFile;
 import com.InsightMarket.domain.member.Member;
 import com.InsightMarket.dto.community.FileResponseDTO;
 import com.InsightMarket.repository.FileRepository;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import com.InsightMarket.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,9 +28,7 @@ import java.util.stream.Collectors;
 public class FileService {
 
     private final FileRepository fileRepository;
-
-    @PersistenceContext
-    private EntityManager entityManager;
+    private final MemberRepository memberRepository;
 
     private static final String BASE_DIR = "uploads";
 
@@ -41,13 +39,11 @@ public class FileService {
             List<MultipartFile> files
     ) {
 
-        if (files == null || files.isEmpty()) {
-            return List.of();
-        }
+        if (files == null || files.isEmpty()) {return List.of();}
 
-        // 🔹 여기서 User 프록시 생성
-        Member uploaderRef = entityManager.getReference(Member.class, uploaderId);
-
+        // Member 실제 조회
+        Member uploader = memberRepository.findById(uploaderId)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found: " + uploaderId));
         List<FileResponseDTO> result = new ArrayList<>();
 
         for (MultipartFile file : files) {
@@ -68,7 +64,7 @@ public class FileService {
                     .filter(s -> !s.isBlank())
                     .orElse("application/octet-stream"); // 기본값
 
-            String storageKey = generateStorageKey(targetType, targetId, file);
+            String storageKey = generateStorageKey(targetType, targetId, originalName);
 
             // 1️⃣ 로컬 저장
             saveToLocal(storageKey, file);
@@ -78,7 +74,7 @@ public class FileService {
                     UploadedFile.builder()
                             .targetType(targetType)
                             .targetId(targetId)
-                            .uploadedBy(uploaderRef)
+                            .uploadedBy(uploader)
                             .fileName(originalName)
                             .storageKey(storageKey)
                             .contentType(contentType)
@@ -87,14 +83,7 @@ public class FileService {
             );
 
             // 3️⃣ DTO 변환
-            result.add(
-                    FileResponseDTO.builder()
-                            .id(saved.getId())
-                            .originalName(saved.getFileName())
-                            .contentType(saved.getContentType())
-                            .size(saved.getSize())
-                            .build()
-            );
+            result.add(toDTO(saved));
         }
         if (result.isEmpty()) {
             log.info("[FILE][UPLOAD] no valid files. targetType={}, targetId={}", targetType, targetId);
@@ -117,13 +106,18 @@ public class FileService {
         }
     }
 
-    private String generateStorageKey(FileTargetType targetType, Long targetId, MultipartFile file) {
-        String ext = Optional.ofNullable(file.getOriginalFilename())
-                .filter(n -> n.contains("."))
-                .map(n -> n.substring(n.lastIndexOf(".")))
-                .orElse("");
-
+    //  MultipartFile 대신 "정제된 파일명"을 받게 변경
+    private String generateStorageKey(FileTargetType targetType, Long targetId, String originalName) {
+        String ext = extractExt(originalName);
         return targetType.name() + "/" + targetId + "/" + UUID.randomUUID() + ext;
+    }
+
+    // 확장자 추출 규칙도 한 군데로 고정
+    private String extractExt(String filename) {
+        if (filename == null) return "";
+        int idx = filename.lastIndexOf(".");
+        if (idx < 0 || idx == filename.length() - 1) return "";
+        return filename.substring(idx);
     }
 
     @Transactional
@@ -143,7 +137,6 @@ public class FileService {
                         targetType, targetId);
 
         for (UploadedFile file : existingFiles) {
-
             // keep 목록에 없으면 soft delete
             if (!keepFileIds.contains(file.getId())) {
                 file.softDelete(); // deletedAt 설정
@@ -158,13 +151,7 @@ public class FileService {
         return fileRepository
                 .findByTargetTypeAndTargetIdAndDeletedAtIsNull(targetType, targetId)
                 .stream()
-                .map(f -> FileResponseDTO.builder()
-                        .id(f.getId())
-                        .originalName(f.getFileName())
-                        .contentType(f.getContentType())
-                        .size(f.getSize())
-                        .build()
-                )
+                .map(this::toDTO)
                 .toList();
     }
 
@@ -173,6 +160,7 @@ public class FileService {
     public Map<Long, List<FileResponseDTO>> getFilesGrouped(FileTargetType targetType, List<Long> targetIds) {
 
         if (targetIds == null || targetIds.isEmpty()) {
+            log.debug("[FILE][GROUP] empty targetIds. targetType={}", targetType);
             return Map.of();
         }
 
@@ -184,6 +172,32 @@ public class FileService {
                         UploadedFile::getTargetId,
                         Collectors.mapping(this::toDTO, Collectors.toList())
                 ));
+    }
+
+    // 파일 다운로드
+    @Transactional(readOnly = true)
+    public byte[] downloadFile(Long fileId) {
+        UploadedFile file = fileRepository.findByIdAndDeletedAtIsNull(fileId)
+                .orElseThrow(() -> new IllegalArgumentException("File not found: " + fileId));
+        
+        Path filePath = Paths.get(BASE_DIR, file.getStorageKey());
+        
+        if (!Files.exists(filePath)) {
+            throw new RuntimeException("File not found on disk: " + filePath);
+        }
+        
+        try {
+            return Files.readAllBytes(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read file: " + filePath, e);
+        }
+    }
+
+    // 파일 정보 조회 (다운로드용)
+    @Transactional(readOnly = true)
+    public UploadedFile getFileInfo(Long fileId) {
+        return fileRepository.findByIdAndDeletedAtIsNull(fileId)
+                .orElseThrow(() -> new IllegalArgumentException("File not found: " + fileId));
     }
 
     private FileResponseDTO toDTO(UploadedFile f) {

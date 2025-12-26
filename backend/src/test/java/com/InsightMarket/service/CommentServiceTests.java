@@ -31,7 +31,7 @@ class CommentServiceTests {
 
     @Test
     void 댓글_트리_조회() throws JsonProcessingException {
-        List<CommentResponseDTO> tree = commentService.getCommentTree(5L);
+        List<CommentResponseDTO> tree = commentService.getCommentTree(5L, 1L);
 
         // 1) JSON으로 전체 출력 (가장 보기 편함)
         System.out.println("\n==== Comment Tree (JSON) ====");

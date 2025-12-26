@@ -21,7 +21,7 @@ export const router = createBrowserRouter([
   },
   // 앱 내부 (로그인 필수)
   {
-    path: "/app/:tenantId",
+    path: "/app/:brandId",
     element: <RequireAuth />, // 로그인 체크
     children: [
       {

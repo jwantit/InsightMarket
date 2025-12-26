@@ -3,18 +3,16 @@ package com.InsightMarket.service.community;
 import com.InsightMarket.domain.brand.Brand;
 import com.InsightMarket.domain.community.Board;
 import com.InsightMarket.domain.files.FileTargetType;
-import com.InsightMarket.domain.files.UploadedFile;
 import com.InsightMarket.domain.member.Member;
 import com.InsightMarket.dto.PageRequestDTO;
 import com.InsightMarket.dto.PageResponseDTO;
 import com.InsightMarket.dto.community.BoardResponseDTO;
 import com.InsightMarket.dto.community.BoardModifyDTO;
 import com.InsightMarket.dto.community.FileResponseDTO;
-import com.InsightMarket.repository.FileRepository;
+import com.InsightMarket.repository.brand.BrandRepository;
 import com.InsightMarket.repository.community.BoardRepository;
+import com.InsightMarket.repository.member.MemberRepository;
 import com.InsightMarket.service.FileService;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -27,7 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 // [게시글 서비스] CRUD + 파일 한번에 업로드/교체 + 로그
 @Service
@@ -37,32 +34,29 @@ import java.util.stream.Collectors;
 public class BoardService {
 
     private final BoardRepository boardRepository;
-    private final FileRepository fileRepository;
     private final FileService fileService;
-
-    @PersistenceContext
-    private EntityManager entityManager; //JPA 표준 방식
-
-    // TODO: BrandRepository, UserContext(로그인 유저), FileStorageClient(실제 업로드) 주입
+    private final BrandRepository brandRepository;
+    private final MemberRepository memberRepository;
 
     // [기능] 게시글 생성 1단계 (Brand/User repository 없이)
     // [원칙] FK는 존재한다고 가정하고 ID만 연결
     @Transactional
-    public BoardResponseDTO create(Long brandId, BoardModifyDTO data, List<MultipartFile> files) {
+    public BoardResponseDTO create(Long brandId, BoardModifyDTO data, List<MultipartFile> files, Member currentMember) {
 
-        // 개발 중 임시 writerId
-        Long writerId = 1L;
+        Long writerId = currentMember.getId();
 
         log.info("[BOARD][SVC][CREATE] brandId={}, writerId={}, title={}",
                 brandId, writerId, data.getTitle());
 
-        // 🔑 핵심: 실제 조회 없이 FK 프록시만 생성
-        Brand brandRef = entityManager.getReference(Brand.class, brandId);
-        Member writerRef = entityManager.getReference(Member.class, writerId);
+        // Brand와 Member 실제 조회
+        Brand brand = brandRepository.findById(brandId)
+                .orElseThrow(() -> new IllegalArgumentException("Brand not found: " + brandId));
+        Member writer = memberRepository.findById(writerId)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found: " + writerId));
 
         Board board = Board.builder()
-                .brand(brandRef)
-                .writer(writerRef)
+                .brand(brand)
+                .writer(writer)
                 .title(data.getTitle())
                 .content(data.getContent())
                 .build();
@@ -80,16 +74,7 @@ public class BoardService {
 
         log.info("[BOARD][SVC][CREATE] savedFiles={}", savedFiles.size());
 
-        return BoardResponseDTO.builder()
-                .id(saved.getId())
-                .brandId(brandId)
-                .writerId(writerId)
-                .title(saved.getTitle())
-                .content(saved.getContent())
-                .files(savedFiles)
-                .createdAt(saved.getCreatedAt())
-                .updatedAt(saved.getUpdatedAt())
-                .build();
+        return toDTO(saved, brandId, savedFiles);
     }
 
     @Transactional
@@ -97,10 +82,11 @@ public class BoardService {
             Long brandId,
             Long boardId,
             BoardModifyDTO dto,
-            List<MultipartFile> newFiles
+            List<MultipartFile> newFiles,
+            Member currentMember
     ) {
 
-        Long updaterId = 1L; // 테스트용
+        Long updaterId = currentMember.getId();
 
         Board board = boardRepository.findByIdAndBrandIdAndDeletedAtIsNull(boardId, brandId)
                 .orElseThrow();
@@ -110,35 +96,15 @@ public class BoardService {
         board.changeContent(dto.getContent());
 
         // 2️⃣ 기존 파일 정리
-        fileService.cleanupFiles(
-                FileTargetType.BOARD,
-                boardId,
-                dto.getKeepFileIds()
-        );
+        fileService.cleanupFiles(FileTargetType.BOARD,boardId,dto.getKeepFileIds());
 
         // 3️⃣ 새 파일 추가
-        List<FileResponseDTO> files =
-                fileService.saveFiles(
-                        FileTargetType.BOARD,
-                        boardId,
-                        updaterId,
-                        newFiles
-                );
+        fileService.saveFiles(FileTargetType.BOARD, boardId, updaterId, newFiles);
 
         // 4️⃣ 현재 파일 목록 재조회 (응답용)
-        List<FileResponseDTO> currentFiles =
-                fileService.getFiles(FileTargetType.BOARD, boardId);
+        List<FileResponseDTO> currentFiles = fileService.getFiles(FileTargetType.BOARD, boardId);
 
-        return BoardResponseDTO.builder()
-                .id(board.getId())
-                .brandId(brandId)
-                .writerId(board.getWriter().getId())
-                .title(board.getTitle())
-                .content(board.getContent())
-                .files(currentFiles)
-                .createdAt(board.getCreatedAt())
-                .updatedAt(board.getUpdatedAt())
-                .build();
+        return toDTO(board, brandId, currentFiles);
     }
 
     @Transactional(readOnly = true)
@@ -154,8 +120,7 @@ public class BoardService {
                 Sort.by("id").descending()
         );
 
-        Page<Board> result =
-                boardRepository.findByBrandIdAndDeletedAtIsNull(brandId, pageable);
+        Page<Board> result = boardRepository.findByBrandIdAndDeletedAtIsNull(brandId, pageable);
 
         List<Board> boards = result.getContent();
 
@@ -165,37 +130,15 @@ public class BoardService {
                 .toList();
 
         // 파일 IN 조회
-        Map<Long, List<FileResponseDTO>> fileMap =
-                fileRepository
-                        .findByTargetTypeAndTargetIdInAndDeletedAtIsNull(
-                                FileTargetType.BOARD, boardIds)
-                        .stream()
-                        .collect(Collectors.groupingBy(
-                                UploadedFile::getTargetId,
-                                Collectors.mapping(f ->
-                                                FileResponseDTO.builder()
-                                                        .id(f.getId())
-                                                        .originalName(f.getFileName())
-                                                        .size(f.getSize())
-                                                        .contentType(f.getContentType())
-                                                        .build(),
-                                        Collectors.toList()
-                                )
-                        ));
+        Map<Long, List<FileResponseDTO>> fileMap = fileService.getFilesGrouped(FileTargetType.BOARD, boardIds);
 
         // DTO 변환
         List<BoardResponseDTO> dtoList = boards.stream()
-                .map(b -> BoardResponseDTO.builder()
-                        .id(b.getId())
-                        .brandId(brandId)
-                        .writerId(b.getWriter().getId())
-                        .title(b.getTitle())
-                        .content(b.getContent())
-                        .files(fileMap.getOrDefault(b.getId(), List.of()))
-                        .createdAt(b.getCreatedAt())
-                        .updatedAt(b.getUpdatedAt())
-                        .build()
-                )
+                .map(board -> toDTO(
+                        board,
+                        brandId,
+                        fileMap.getOrDefault(board.getId(), List.of())
+                ))
                 .toList();
 
         // ✅ 공용 PageResponseDTO 사용
@@ -216,29 +159,10 @@ public class BoardService {
         Board board = boardRepository.findByIdAndBrandIdAndDeletedAtIsNull(boardId, brandId)
                 .orElseThrow(() -> new IllegalArgumentException("Board not found"));
 
-        List<UploadedFile> files = fileRepository
-                .findByTargetTypeAndTargetIdAndDeletedAtIsNull(FileTargetType.BOARD, boardId);
+        List<FileResponseDTO> fileDtos = fileService.getFiles(FileTargetType.BOARD, boardId);
+        log.info("[BOARD][SVC][DETAIL] attachments={}", fileDtos.size());
 
-        log.info("[BOARD][SVC][DETAIL] attachments={}", files.size());
-
-        return BoardResponseDTO.builder()
-                .id(board.getId())
-                .brandId(board.getBrand().getId())
-                .writerId(board.getWriter().getId())
-                .writerName(board.getWriter().getName())
-                .title(board.getTitle())
-                .content(board.getContent())
-                .deleted(board.getDeletedAt() != null)
-                .createdAt(board.getCreatedAt())
-                .updatedAt(board.getUpdatedAt())
-                .files(files.stream().map(f -> FileResponseDTO.builder()
-                        .id(f.getId())
-                        .originalName(f.getFileName())
-                        .size(f.getSize())
-                        .contentType(f.getContentType())
-                        .build()
-                ).toList())
-                .build();
+        return toDTO(board, brandId, fileDtos);
     }
 
     @Transactional
@@ -258,6 +182,22 @@ public class BoardService {
                 List.of() // 빈 리스트 → 전부 삭제
         );
         log.info("[BOARD][SVC][DELETE] cascade files targetId={}", boardId);
+    }
+
+    // [기능] Board -> BoardResponseDTO 변환 규칙 단일화 (writerName 항상 포함)
+    private BoardResponseDTO toDTO(Board board, Long brandId, List<FileResponseDTO> files) {
+        return BoardResponseDTO.builder()
+                .id(board.getId())
+                .brandId(brandId)
+                .writerId(board.getWriter().getId())
+                .writerName(board.getWriter().getName())
+                .title(board.getTitle())
+                .content(board.getContent())
+                .deleted(board.getDeletedAt() != null)
+                .createdAt(board.getCreatedAt())
+                .updatedAt(board.getUpdatedAt())
+                .files(files)
+                .build();
     }
 }
 
