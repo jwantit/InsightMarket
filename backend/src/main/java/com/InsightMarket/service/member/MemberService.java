@@ -1,5 +1,6 @@
 package com.InsightMarket.service.member;
 
+import com.InsightMarket.domain.member.SystemRole;
 import com.InsightMarket.dto.member.MemberJoinRequestDTO;
 import com.InsightMarket.dto.member.MemberResponseDTO;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,5 +34,16 @@ public interface MemberService {
                 member.isApproved(),
                 member.getSystemRole().name());
         return dto;
+    }
+
+    // DTO -> Entity 수동 매핑
+    default Member dtoToEntity(MemberDTO dto) {
+        return Member.builder()
+                .email(dto.getEmail())
+                .name(dto.getName())
+                .isSocial(dto.isSocial())
+                .isApproved(dto.isApproved())
+                .systemRole(SystemRole.valueOf(dto.getRoleNames().get(0)))
+                .build();
     }
 }

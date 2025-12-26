@@ -5,6 +5,9 @@ import com.InsightMarket.domain.company.Company;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -13,7 +16,8 @@ import lombok.*;
 @Table(name = "brand")
 public class Brand extends BaseEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "brand_id")
     private Long id;
 
@@ -27,4 +31,18 @@ public class Brand extends BaseEntity {
     @Lob
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    //cascade = ALL → Brand 삭제 시 관련 BrandMember도 자동 삭제
+    //orphanRemoval = true → 부모에서 제거된 자식도 삭제
+    //BrandRepository에서 delete 호출하면 FK 문제 없이 삭제 가능
+    @OneToMany(mappedBy = "brand", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BrandMember> members = new ArrayList<>();
+
+    public void changeName(String name) {
+        this.name = name;
+    }
+
+    public void changeDescription(String description) {
+        this.description = description;
+    }
 }

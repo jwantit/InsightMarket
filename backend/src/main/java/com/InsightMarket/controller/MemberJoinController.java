@@ -45,11 +45,7 @@ public class MemberJoinController {
     //승인 대기 목록 조회
     @PreAuthorize("hasAnyRole('ADMIN','COMPANY_ADMIN')")
     @GetMapping("/pending")
-    public ResponseEntity<List<MemberResponseDTO>> pending(
-            @AuthenticationPrincipal MemberDTO memberDTO
-    ) {
-        return ResponseEntity.ok(
-                memberService.getPendingMembers(memberDTO)
-        );
+    public ResponseEntity<List<MemberResponseDTO>> pending(@AuthenticationPrincipal MemberDTO memberDTO) {
+        return ResponseEntity.ok(memberService.getPendingMembers(memberDTO));
     }
 }
