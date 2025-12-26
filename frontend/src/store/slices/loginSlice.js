@@ -23,9 +23,22 @@ const loadMemberCookie = () => {
 
 //createAsyncThunk -> RTK가 자동으로 pending, fulfilled, rejected 액션을 만들어 줌
 //사용 목적: 서버 로그인 API 호출 + 상태 관리
-export const loginPostAsync = createAsyncThunk("loginPostAsync", (param) => {
-  return loginPost(param); //memberApi.js에서 Axios POST 요청
-});
+// export const loginPostAsync = createAsyncThunk("loginPostAsync", (param) => {
+//   return loginPost(param); //memberApi.js에서 Axios POST 요청
+// });
+
+export const loginPostAsync = createAsyncThunk(
+  "loginPostAsync",
+  async (param, { rejectWithValue }) => {
+    try {
+      const res = await loginPost(param);
+      return res;
+    } catch (e) {
+      console.log(e.response?.data);
+      return rejectWithValue(e.response?.data);
+    }
+  }
+);
 
 //loginSlice.getState().login 으로 상태 접근 가능
 const loginSlice = createSlice({
