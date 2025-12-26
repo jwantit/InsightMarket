@@ -32,12 +32,6 @@ export const joinMember = async (joinParam) => {
   return res.data;
 };
 
-//회사 목록 조회
-export const getCompanies = async () => {
-  const res = await axios.get(`${API_SERVER_HOST}/api/company`);
-  return res.data;
-};
-
 //승인 대기 회원 조회
 export const getPendingMembers = async () => {
   const res = await jwtAxios.get(`${host}/pending`);
