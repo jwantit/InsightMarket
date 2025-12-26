@@ -1,6 +1,6 @@
 package com.InsightMarket.controller;
 
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.InsightMarket.dto.member.MemberDTO;
 import com.InsightMarket.dto.member.MemberModifyDTO;
@@ -12,18 +12,15 @@ import lombok.extern.log4j.Log4j2;
 
 import java.util.Map;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
 @RestController
 @Log4j2
 @RequiredArgsConstructor
+@RequestMapping("/member")
 public class SocialLoginController {
 
     private final MemberService memberService;
 
-    @GetMapping("/member/kakao")
+    @GetMapping("/kakao")
     public Map<String, Object> getMemberFromKakao(String accessToken) {
 
         log.info("accessToken ");
@@ -42,7 +39,7 @@ public class SocialLoginController {
         return claims;
     }
 
-    @PutMapping("/member/modify")
+    @PutMapping("/modify")
     public Map<String, String> modify(@RequestBody MemberModifyDTO memberModifyDTO) {
 
         log.info("member modify: " + memberModifyDTO);

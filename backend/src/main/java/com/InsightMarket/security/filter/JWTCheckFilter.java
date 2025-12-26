@@ -51,7 +51,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         }
 
         // 회사 목록 조회는 JWT 없이 허용
-        if (path.startsWith("/api/company")) return true;
+        if (path.startsWith("/api/company/list")) return true;
 
         return false;
     }

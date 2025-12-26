@@ -19,7 +19,7 @@ public class CompanyController {
     private final ModelMapper modelMapper;
 
     // 회사 목록 조회 (회원가입용)
-    @GetMapping
+    @GetMapping("/list")
     public List<CompanyDTO> getCompanyList() {
         return companyRepository.findAll().stream()
                 .map(company -> modelMapper.map(company, CompanyDTO.class))
