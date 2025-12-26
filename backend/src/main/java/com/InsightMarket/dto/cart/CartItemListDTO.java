@@ -22,12 +22,15 @@ public class CartItemListDTO {
 
     private String solutionDescription;
 
-    public CartItemListDTO(Long cartitemid,Long solutionid, String solutiontitle, int price, String solutionDescription){
+    private String strategyTitle;
+
+    public CartItemListDTO(Long cartitemid,Long solutionid, String solutiontitle, int price, String solutionDescription ,String strategyTitle){
         this.cartitemid = cartitemid;
         this.solutionid = solutionid;
         this.solutiontitle = solutiontitle;
         this.solutionprice = price;
         this.solutionDescription = solutionDescription;
+        this.strategyTitle = strategyTitle;
     }
 
 }

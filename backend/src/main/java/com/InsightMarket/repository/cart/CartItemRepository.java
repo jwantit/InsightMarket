@@ -26,7 +26,8 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
             " s.id, " +            // Solution의 PK
             " s.title, " +  // Solution 이름
             " s.price, " +          // Solution 가격
-            " s.description " +
+            " s.description, " +
+            " s.strategy.title" +
             ") " +
             "from CartItem ci " +
             "join ci.cart c " +  //CartItem.cart
@@ -50,7 +51,8 @@ Long getCartFromItem(@Param("cartItemId") Long cartItemId);
         s.id,              
         s.title,    
         s.price,
-        s.description
+        s.description,
+        s.strategy.title
     )
     from CartItem ci
         join ci.cart c        
@@ -58,7 +60,4 @@ Long getCartFromItem(@Param("cartItemId") Long cartItemId);
     where c.id = :cartId       
     order by ci.id desc     """)
     List<CartItemListDTO> getItemsOfCartDTOByCart(@Param("cartId") Long cartId);
-
-
-
 }

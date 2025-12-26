@@ -1,7 +1,7 @@
 import { lazy } from "react";
 
-const MarketList = lazy(() => import("../pages/market/MarketList"));
-const Cart = lazy(() => import("../pages/market/Cart"));
+const MarketList = lazy(() => import("../pages/market/MarketListPage"));
+const Cart = lazy(() => import("../pages/market/CartPage"));
 
 const marketRouter = (wrap) => [
     { path: "solutions", element: wrap(MarketList) },

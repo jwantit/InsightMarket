@@ -16,7 +16,7 @@ public class PageRequestDTO {
     private int page = 1;
 
     @Builder.Default
-    private int size = 10;
+    private int size = 5;
 
     private Long projectid;
 }

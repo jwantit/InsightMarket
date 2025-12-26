@@ -51,7 +51,7 @@ public class SolutionController {
     //솔루션 삭제(숨김)
     @DeleteMapping("delete/{solutionid}")
     public Map<String, String> remove(@PathVariable("solutionid") Long solutionid){
-
+        log.info("SolutionController 진입 삭제");
         solutionService.deleteSolutionProduct(solutionid);
      return Map.of("RESULT", "SUCCESS");
     }

@@ -5,12 +5,14 @@ import com.InsightMarket.domain.project.Project;
 import com.InsightMarket.domain.strategy.Strategy;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Where;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 @Entity
+@Where(clause = "deleted = false")
 @Table(name = "solution")
 @ToString(exclude = {"strategy", "project"})
 public class Solution extends BaseEntity {
