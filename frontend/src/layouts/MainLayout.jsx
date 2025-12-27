@@ -8,14 +8,8 @@ const MainLayout = () => {
       <TopBar />
       <div className="flex">
         <SideBar />
-        <main className="flex-1 p-6">
-          <div className="mx-auto max-w-6xl">
-            <div className="rounded-2xl border bg-white shadow-sm">
-              <div className="p-6">
-                <Outlet />
-              </div>
-            </div>
-          </div>
+        <main className="flex-1 p-3 w-full">
+          <Outlet />
         </main>
       </div>
     </div>
