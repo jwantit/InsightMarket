@@ -11,7 +11,7 @@ import java.util.List;
 
 @SpringBootTest
 @Log4j2
-public class CompanyRepositoryTest {
+public class CompanyRepositoryTests {
 
     @Autowired
     private CompanyRepository companyRepository;
