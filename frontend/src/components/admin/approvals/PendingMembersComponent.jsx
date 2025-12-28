@@ -1,5 +1,6 @@
+
 import { useEffect, useState } from "react";
-import { getPendingMembers, approveMember } from "../../api/memberApi";
+import { approveMember, getPendingApprovals } from "../../../api/adminApi";
 
 const PendingMembersComponent = () => {
   const [members, setMembers] = useState([]);
@@ -8,7 +9,7 @@ const PendingMembersComponent = () => {
   const loadMembers = async () => {
     try {
       setLoading(true);
-      const data = await getPendingMembers();
+      const data = await getPendingApprovals();
       setMembers(Array.isArray(data) ? data : []);
     } catch (e) {
       alert("승인 대기 회원 조회 실패");
@@ -32,7 +33,7 @@ const PendingMembersComponent = () => {
 
   return (
     <section>
-      <h2 className="text-lg font-bold mb-4">가입 승인 요청</h2>
+      <h2 className="text-lg font-bold mb-4">승인 대기 회원</h2>
 
       <div className="space-y-3">
         {loading && (

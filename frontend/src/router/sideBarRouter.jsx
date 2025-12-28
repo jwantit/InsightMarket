@@ -4,6 +4,7 @@ import aiRouter from "./aiRouter";
 import boardRouter from "./boardRouter";
 import marketRouter from "./marketRouter";
 import adminRouter from "./adminRouter";
+import AdminGuard from "../components/common/AdminGuard";
 
 const Dashboard = lazy(() => import("../pages/dashboard/Dashboard"));
 const BrandPage = lazy(() => import("../pages/brands-manage/BrandPage"));
@@ -38,6 +39,7 @@ const sideBarRouter = (wrap) => [
 
     {
       path: "admin",
+      element: <AdminGuard />,
       children: adminRouter(wrap),
     },
 ];

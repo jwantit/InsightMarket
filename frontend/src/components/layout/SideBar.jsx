@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useBrand } from "../../hooks/useBrand";
+import { useSelector } from "react-redux";
 
 const cx = (...arr) => arr.filter(Boolean).join(" ");
 
@@ -38,6 +39,13 @@ const Section = ({ title, open, onToggle, children }) => (
 const SideBar = ({ onNavigate }) => {
   const { brandId } = useBrand();
   const location = useLocation();
+
+  const loginState = useSelector((state) => state.loginSlice);
+  const systemRole = loginState?.role; // "ADMIN" | "COMPANY_ADMIN" | "USER"
+  const isAdminArea = systemRole === "ADMIN" || systemRole === "COMPANY_ADMIN";
+  
+  console.log("loginState:", loginState);
+console.log("systemRole candidate:", loginState?.systemRole);
 
   const [openMap, setOpenMap] = useState(() => {
     const p = location.pathname;
@@ -149,18 +157,29 @@ const SideBar = ({ onNavigate }) => {
           </SideLink>
         </Section>
 
-        <Section
-          title="관리자"
-          open={openMap.admin}
-          onToggle={() => toggle("admin")}
-        >
-          <SideLink
-            to={`/app/${brandId}/admin/system`}
-            onNavigate={onNavigate}
+        {isAdminArea && (
+          <Section
+            title="관리자"
+            open={openMap.admin}
+            onToggle={() => toggle("admin")}
           >
-            시스템 설정
-          </SideLink>
-        </Section>
+            <SideLink to={`/app/${brandId}/admin/approvals`} onNavigate={onNavigate}>
+              가입 승인
+            </SideLink>
+            <SideLink to={`/app/${brandId}/admin/users`} onNavigate={onNavigate}>
+              사용자 계정 관리
+            </SideLink>
+            <SideLink
+              to={`/app/${brandId}/admin/brand-permissions`}
+              onNavigate={onNavigate}
+            >
+              브랜드 권한 관리
+            </SideLink>
+            <SideLink to={`/app/${brandId}/admin/system`} onNavigate={onNavigate}>
+              시스템 설정
+            </SideLink>
+          </Section>
+        )}
 
         <div className="mt-6 px-3 text-xs text-gray-400">
           © {new Date().getFullYear()} InsightMarket
