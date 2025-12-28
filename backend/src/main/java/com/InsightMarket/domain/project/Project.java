@@ -31,6 +31,12 @@ public class Project extends BaseEntity {
 
     @Column(name = "end_date")//nullable = false
     private LocalDate endDate;
+
+    public void changeInfo(String name, LocalDate startDate, LocalDate endDate) {
+        this.name = name;
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
 }
 
 

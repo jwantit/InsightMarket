@@ -32,4 +32,8 @@ public class ProjectKeyword extends BaseEntity {
 
     @Column(name = "is_enabled", nullable = false)
     private boolean enabled;
+
+    public void changeEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
 }
