@@ -30,22 +30,4 @@ public class MemberJoinController {
         memberService.join(request);
         return ResponseEntity.ok().build();
     }
-
-    //가입 승인
-    @PreAuthorize("hasAnyRole('ADMIN','COMPANY_ADMIN')")
-    @PostMapping("/approve")
-    public ResponseEntity<?> approve(@RequestBody MemberApproveRequestDTO request, @AuthenticationPrincipal MemberDTO memberDTO) {
-        log.info("Post approve----");
-        log.info(request.getMemberId());
-        log.info(memberDTO);
-        memberService.approve(request.getMemberId(), memberDTO);
-        return ResponseEntity.ok().build();
-    }
-
-    //승인 대기 목록 조회
-    @PreAuthorize("hasAnyRole('ADMIN','COMPANY_ADMIN')")
-    @GetMapping("/pending")
-    public ResponseEntity<List<MemberResponseDTO>> pending(@AuthenticationPrincipal MemberDTO memberDTO) {
-        return ResponseEntity.ok(memberService.getPendingMembers(memberDTO));
-    }
 }

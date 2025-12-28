@@ -1,6 +1,7 @@
 package com.InsightMarket.repository.member;
 
 import com.InsightMarket.domain.company.Company;
+import com.InsightMarket.domain.member.SystemRole;
 import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import com.InsightMarket.domain.member.Member;
@@ -28,4 +29,34 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     //즉, 해당 회사로 가입한 아직 승인 안된 회원들 조회
     @EntityGraph(attributePaths = {"requestedCompany"})
     List<Member> findByIsApprovedFalseAndRequestedCompany(Company company);
+
+    // ADMIN용(전체 회원 검색)
+    @Query("""
+                select m from Member m
+                where (:keyword is null or :keyword = '' or lower(m.name) like lower(concat('%', :keyword, '%')) or lower(m.email) like lower(concat('%', :keyword, '%')))
+                  and (:expired is null or m.isExpired = :expired)
+                  and (:role is null or m.systemRole = :role)
+                order by m.id desc
+            """)
+    List<Member> searchMembers(
+            @Param("keyword") String keyword,
+            @Param("expired") Boolean expired,
+            @Param("role") SystemRole role
+    );
+
+    // COMPANY_ADMIN용(회사 제한하여 회원 검색)
+    @Query("""
+                select m from Member m
+                where m.company.id = :companyId
+                  and (:keyword is null or :keyword = '' or lower(m.name) like lower(concat('%', :keyword, '%')) or lower(m.email) like lower(concat('%', :keyword, '%')))
+                  and (:expired is null or m.isExpired = :expired)
+                  and (:role is null or m.systemRole = :role)
+                order by m.id desc
+            """)
+    List<Member> searchMembersByCompany(
+            @Param("companyId") Long companyId,
+            @Param("keyword") String keyword,
+            @Param("expired") Boolean expired,
+            @Param("role") SystemRole role
+    );
 }

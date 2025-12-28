@@ -203,6 +203,84 @@ public class MemberServiceImpl implements MemberService {
         memberRepository.save(member);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<AdminMemberResponseDTO> getCompanyMembers(MemberDTO requesterDTO, String keyword, Boolean expired, String role) {
+        Member requester = getRequester(requesterDTO);
+        checkAdmin(requester);
+
+        // role 문자열 -> enum 변환(옵션)
+        SystemRole roleEnum = null;
+        if (role != null && !role.isBlank()) {
+            try {
+                roleEnum = SystemRole.valueOf(role.trim());
+            } catch (Exception e) {
+                throw new IllegalArgumentException("role 값이 올바르지 않습니다.");
+            }
+        }
+
+        List<Member> members;
+
+        // ADMIN은 전체(원하면 회사 제한도 가능)
+        if (requester.getSystemRole() == SystemRole.ADMIN) {
+            members = memberRepository.searchMembers(keyword, expired, roleEnum);
+        } else {
+            members = memberRepository.searchMembersByCompany(requester.getCompany().getId(), keyword, expired, roleEnum);
+        }
+
+        return members.stream().map(m -> AdminMemberResponseDTO.builder()
+                .memberId(m.getId())
+                .name(m.getName())
+                .email(m.getEmail())
+                .role(m.getSystemRole())
+                .isApproved(m.isApproved())
+                .isExpired(m.isExpired())
+                .isSocial(m.isSocial())
+                .build()
+        ).toList();
+    }
+
+    @Override
+    public void changeSystemRole(MemberDTO requesterDTO, Long targetMemberId, SystemRole nextRole) {
+        Member requester = getRequester(requesterDTO);
+        checkAdmin(requester);
+
+        Member target = memberRepository.findById(targetMemberId).orElseThrow();
+
+        checkSameCompanyOrAdmin(requester, target);
+
+        // 본인 role 변경 방지(추천)
+        if (requester.getId().equals(target.getId())) {
+            throw new IllegalStateException("본인 권한은 변경할 수 없습니다.");
+        }
+
+        // COMPANY_ADMIN이 COMPANY_ADMIN 승격 못하게 막기 -> 팀과 상의 후 결정
+        //        if (requester.getSystemRole() == SystemRole.COMPANY_ADMIN &&
+        //                nextRole == SystemRole.COMPANY_ADMIN) {
+        //            throw new AccessDeniedException("회사 관리자는 다른 사용자를 COMPANY_ADMIN으로 승격할 수 없습니다.");
+        //        }
+
+        target.changeSystemRole(nextRole);
+    }
+
+    @Override
+    @Transactional
+    public void changeExpired(MemberDTO requesterDTO, Long targetMemberId, boolean isExpired) {
+        Member requester = getRequester(requesterDTO);
+        checkAdmin(requester);
+
+        Member target = memberRepository.findById(targetMemberId).orElseThrow();
+
+        checkSameCompanyOrAdmin(requester, target);
+
+        // 본인 탈퇴 처리 방지
+        if (requester.getId().equals(target.getId())) {
+            throw new IllegalStateException("본인 계정은 탈퇴 처리할 수 없습니다.");
+        }
+
+        target.changeIsExpired(isExpired);
+    }
+
     private String getEmailFromKakaoAccessToken(String accessToken) {
 
         String kakaoGetUserURL = "https://kapi.kakao.com/v2/user/me";
@@ -268,5 +346,26 @@ public class MemberServiceImpl implements MemberService {
             buffer.append((char) ((int) (Math.random() * 55) + 65));
         }
         return buffer.toString();
+    }
+
+    private Member getRequester(MemberDTO requesterDTO) {
+        return memberRepository.findByEmail(requesterDTO.getEmail()).orElseThrow();
+    }
+
+    private void checkAdmin(Member requester) {
+        if (requester.getSystemRole() != SystemRole.ADMIN &&
+                requester.getSystemRole() != SystemRole.COMPANY_ADMIN) {
+            throw new AccessDeniedException("권한이 없습니다.");
+        }
+    }
+
+    private void checkSameCompanyOrAdmin(Member requester, Member target) {
+        if (requester.getSystemRole() == SystemRole.ADMIN) return;
+        if (requester.getCompany() == null || target.getCompany() == null) {
+            throw new AccessDeniedException("회사 정보가 없습니다.");
+        }
+        if (!requester.getCompany().getId().equals(target.getCompany().getId())) {
+            throw new AccessDeniedException("다른 회사 멤버는 관리할 수 없습니다.");
+        }
     }
 }

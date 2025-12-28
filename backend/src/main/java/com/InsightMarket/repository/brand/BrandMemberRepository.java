@@ -14,7 +14,7 @@ public interface BrandMemberRepository extends JpaRepository<BrandMember, Long> 
 
     Optional<BrandMember> findByMemberIdAndBrandId(Long memberId, Long brandId);
 
-    // 회원이 같은 brand와 join 조회 (n+1)
+    // 회원이 같은 brand와 join 조회 :(n+1) 방지
     @Query("""
             select bm
             from BrandMember bm
@@ -24,4 +24,11 @@ public interface BrandMemberRepository extends JpaRepository<BrandMember, Long> 
     List<BrandMember> findByMemberWithBrand(@Param("member") Member member);
 
     void deleteByBrand(Brand brand);
+
+    List<BrandMember> findByBrandId(Long brandId);
+
+    boolean existsByBrandIdAndMemberId(Long brandId, Long memberId);
+
+    Optional<BrandMember> findByBrandIdAndMemberId(Long brandId, Long memberId);
+
 }

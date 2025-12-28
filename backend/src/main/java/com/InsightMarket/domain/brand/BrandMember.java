@@ -33,4 +33,8 @@ public class BrandMember extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "brand_role", nullable = false, length = 30)
     private BrandRole brandRole;
+
+    public void changeRole(BrandRole brandRole) {
+        this.brandRole = brandRole;
+    }
 }

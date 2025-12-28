@@ -75,6 +75,10 @@ public class Member extends BaseEntity {
         this.isApproved = isApproved;
     }
 
+    public void changeIsExpired(boolean isExpired) {
+        this.isExpired = isExpired;
+    }
+
     public void clearRequestedCompany() {
         this.requestedCompany = null;
     }

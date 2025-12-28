@@ -1,13 +1,10 @@
 package com.InsightMarket.service.member;
 
 import com.InsightMarket.domain.member.SystemRole;
-import com.InsightMarket.dto.member.MemberJoinRequestDTO;
-import com.InsightMarket.dto.member.MemberResponseDTO;
+import com.InsightMarket.dto.member.*;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.InsightMarket.domain.member.Member;
-import com.InsightMarket.dto.member.MemberDTO;
-import com.InsightMarket.dto.member.MemberModifyDTO;
 
 import java.util.List;
 
@@ -23,6 +20,12 @@ public interface MemberService {
     MemberDTO getKakaoMember(String accessToken);
 
     void modifyMember(MemberModifyDTO memberModifyDTO);
+
+    List<AdminMemberResponseDTO> getCompanyMembers(MemberDTO requester, String keyword, Boolean expired, String role);
+
+    void changeSystemRole(MemberDTO requester, Long targetMemberId, SystemRole nextRole);
+
+    void changeExpired(MemberDTO requester, Long targetMemberId, boolean isExpired);
 
     default MemberDTO entityToDTO(Member member) {
 
