@@ -1,5 +1,4 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-
 import { getCookie, removeCookie, setCookie } from "../../util/cookieUtil";
 import { loginPost } from "../../api/memberApi";
 
@@ -60,6 +59,18 @@ const loginSlice = createSlice({
       removeCookie("member");
       return { ...initState }; //Redux state 초기화 + 쿠키 삭제
     },
+    updateProfile: (state, action) => {
+      const { name } = action.payload;
+
+      const next = {
+        ...state,
+        name,
+      };
+
+      // 쿠키도 함께 갱신해야 새로고침/Topbar에 바로 반영됨
+      setCookie("member", JSON.stringify(next), 1);
+      return next;
+    },
   },
   extraReducers: (builder) => {
     //createAsyncThunk에서 생성된 비동기 액션 처리
@@ -87,5 +98,5 @@ const loginSlice = createSlice({
   },
 });
 
-export const { login, logout } = loginSlice.actions; //Slice 안에서 정의한 동기 액션 login, logout export
+export const { login, logout, updateProfile } = loginSlice.actions; //Slice 안에서 정의한 동기 액션 login, logout export
 export default loginSlice.reducer; //이 Slice의 리듀서를 외부에서 import해서 Store에 등록하겠다
