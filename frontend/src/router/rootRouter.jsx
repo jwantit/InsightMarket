@@ -20,19 +20,26 @@ export const router = createBrowserRouter([
     children: memberRouter(),
   },
   // 앱 내부 (로그인 필수)
+  //- brandId 없는 /app 엔트리 생성
   {
-    path: "/app/:brandId",
-    element: <RequireAuth />, // 로그인 체크
+    path: "/app",
+    element: <RequireAuth />, 
     children: [
+      // /app (brandId 없음) -> RequireAuth가 redirect 처리
+      { path: ""},
+
+      // /app/:brandId 하위 
       {
+        path: ":brandId",
         element: <MainLayout />,
         children: [
-          ...topBarRouter(wrap), // TopBar 단일 경로
-          ...sideBarRouter(wrap), // SideBar 하위 경로 함수
+          ...topBarRouter(wrap),
+          ...sideBarRouter(wrap),
           { path: "", element: <div>기본 메인 화면</div> },
         ],
       },
     ],
   },
+
   { path: "/", element: <Navigate to="/member/login" replace /> },
 ]);

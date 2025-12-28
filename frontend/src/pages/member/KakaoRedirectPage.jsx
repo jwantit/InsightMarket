@@ -25,7 +25,7 @@ const KakaoRedirectPage = () => {
 
         // 소셜 회원이 아니라면
         if (memberInfo && !memberInfo.isSocial) {
-          moveToPath("/member/brand-select");
+          moveToPath("/app");
         } else {
           // 소셜 회원이라면 추가 정보 입력 페이지로 이동
           moveToPath("/member/modify");

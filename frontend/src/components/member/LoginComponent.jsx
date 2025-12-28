@@ -21,7 +21,7 @@ const LoginComponent = () => {
   const handleClickLogin = () => {
     doLogin(loginParam)
       .then((data) => {
-        moveToPath("/member/brand-select");
+        moveToPath("/app");
       })
       .catch((errorData) => {
         console.log("ERROR DATA:", errorData);

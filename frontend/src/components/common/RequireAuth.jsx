@@ -41,10 +41,21 @@ const RequireAuth = () => {
 
   /**
    * brandId가 URL에 없는 경우 처리
+   *  - 브랜드 0개: 브랜드 생성 페이지로
    *  - 브랜드 1개 → 자동 진입
    *  - 브랜드 여러 개 → 선택 페이지
    */
   if (!brandIdParam) {
+    if (brands.length === 0) {
+      // 관리자면 생성 페이지
+      if (loginState?.role === "COMPANY_ADMIN") {
+        return <Navigate to="/member/brand-create" replace />;
+      }
+    
+      // 일반 유저면 접근 가능한 브랜드 없음 안내
+      return <Navigate to="/member/no-brand" replace />;
+    }
+
     if (brands.length === 1) {
       console.log("brands[0].brandId : ", brands[0].brandId)
       return (
