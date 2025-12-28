@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { NavLink, useLocation, useParams } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
+import { useBrand } from "../../hooks/useBrand";
 
 const cx = (...arr) => arr.filter(Boolean).join(" ");
 
@@ -35,11 +36,10 @@ const Section = ({ title, open, onToggle, children }) => (
 );
 
 const SideBar = ({ onNavigate }) => {
-  const { tenantId } = useParams();
+  const { brandId } = useBrand();
   const location = useLocation();
 
-  // 현재 페이지 기반으로 기본 섹션 open 처리
-  const defaultOpen = useMemo(() => {
+  const [openMap, setOpenMap] = useState(() => {
     const p = location.pathname;
     return {
       dash: true,
@@ -49,26 +49,26 @@ const SideBar = ({ onNavigate }) => {
       market: p.includes("/market/"),
       admin: p.includes("/admin/"),
     };
-  }, [location.pathname]);
-
-  const [openMap, setOpenMap] = useState(defaultOpen);
+  });
 
   const toggle = (key) => setOpenMap((m) => ({ ...m, [key]: !m[key] }));
+
+  if (!brandId) return null;
 
   return (
     <aside className="w-72 lg:w-64 shrink-0 border-r bg-white h-[calc(100vh-56px)] sticky top-14 overflow-y-auto">
       <div className="p-4">
         <div className="mt-6 space-y-1">
-          <SideLink to={`/app/${tenantId}/dashboard`} onNavigate={onNavigate}>
+          <SideLink to={`/app/${brandId}/dashboard`} onNavigate={onNavigate}>
             대시보드
           </SideLink>
           <SideLink
-            to={`/app/${tenantId}/brands-manage`}
+            to={`/app/${brandId}/brands-manage`}
             onNavigate={onNavigate}
           >
             브랜드 관리
           </SideLink>
-          <SideLink to={`/app/${tenantId}/projects`} onNavigate={onNavigate}>
+          <SideLink to={`/app/${brandId}/projects`} onNavigate={onNavigate}>
             프로젝트 / 캠페인
           </SideLink>
         </div>
@@ -79,19 +79,19 @@ const SideBar = ({ onNavigate }) => {
           onToggle={() => toggle("sns")}
         >
           <SideLink
-            to={`/app/${tenantId}/sns/keywords`}
+            to={`/app/${brandId}/sns/keywords`}
             onNavigate={onNavigate}
           >
             키워드 관리
           </SideLink>
           <SideLink
-            to={`/app/${tenantId}/sns/sentiment`}
+            to={`/app/${brandId}/sns/sentiment`}
             onNavigate={onNavigate}
           >
             감성/트렌드
           </SideLink>
           <SideLink
-            to={`/app/${tenantId}/sns/comparison`}
+            to={`/app/${brandId}/sns/comparison`}
             onNavigate={onNavigate}
           >
             경쟁사 비교
@@ -103,10 +103,16 @@ const SideBar = ({ onNavigate }) => {
           open={openMap.ai}
           onToggle={() => toggle("ai")}
         >
-          <SideLink to={`/app/${tenantId}/ai/strategy`} onNavigate={onNavigate}>
+          <SideLink
+            to={`/app/${brandId}/ai/strategy`}
+            onNavigate={onNavigate}
+          >
             전략 추천
           </SideLink>
-          <SideLink to={`/app/${tenantId}/ai/chatbot`} onNavigate={onNavigate}>
+          <SideLink
+            to={`/app/${brandId}/ai/chatbot`}
+            onNavigate={onNavigate}
+          >
             챗봇
           </SideLink>
         </Section>
@@ -117,7 +123,7 @@ const SideBar = ({ onNavigate }) => {
           onToggle={() => toggle("board")}
         >
           <SideLink
-            to={`/app/${tenantId}/board/discussion`}
+            to={`/app/${brandId}/board/discussion`}
             onNavigate={onNavigate}
           >
             전략 토론
@@ -130,12 +136,15 @@ const SideBar = ({ onNavigate }) => {
           onToggle={() => toggle("market")}
         >
           <SideLink
-            to={`/app/${tenantId}/market/solutions`}
+            to={`/app/${brandId}/market/solutions`}
             onNavigate={onNavigate}
           >
             상품 목록
           </SideLink>
-          <SideLink to={`/app/${tenantId}/market/cart`} onNavigate={onNavigate}>
+          <SideLink
+            to={`/app/${brandId}/market/cart`}
+            onNavigate={onNavigate}
+          >
             장바구니
           </SideLink>
         </Section>
@@ -146,7 +155,7 @@ const SideBar = ({ onNavigate }) => {
           onToggle={() => toggle("admin")}
         >
           <SideLink
-            to={`/app/${tenantId}/admin/system`}
+            to={`/app/${brandId}/admin/system`}
             onNavigate={onNavigate}
           >
             시스템 설정

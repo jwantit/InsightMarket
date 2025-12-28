@@ -6,6 +6,7 @@ const Join = lazy(() => import("../pages/member/JoinPage"));
 const KakaoRedirect = lazy(() => import("../pages/member/KakaoRedirectPage"));
 const MemberModify = lazy(() => import("../pages/member/ModifyPage"));
 const TokenRefresh = lazy(() => import("../pages/member/TokenRefresh"));
+const BrandSelectPage = lazy(() => import("../pages/member/BrandSelectPage"));
 
 const wrap = (Component) => (
   <Suspense fallback={<Loading />}>
@@ -19,6 +20,7 @@ const memberRouter = () => [
   { path: "kakao", element: wrap(KakaoRedirect) },
   { path: "modify", element: wrap(MemberModify) },
   { path: "refresh", element: wrap(TokenRefresh) },
+  { path: "brand-select", element: wrap(BrandSelectPage) },
 ];
 
 export default memberRouter;

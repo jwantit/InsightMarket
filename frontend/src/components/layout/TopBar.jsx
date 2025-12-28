@@ -1,18 +1,22 @@
 import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import useCustomLogin from "../../hooks/useCustomLogin";
+import { useBrand } from "../../hooks/useBrand";
+import TopBarBrandSelectComponent from "./TopBarBrandSelectComponent";
 
-const TopBar = ({ onToggleSidebar }) => {
-  const { tenantId } = useParams();
+const TopBar = ({ onToggleSidebar, brands = [] }) => {
   const [open, setOpen] = useState(false);
 
+  const { brandId } = useBrand();
   const { doLogout, moveToPath } = useCustomLogin();
 
   const handleLogout = () => {
     doLogout();
     alert("로그아웃되었습니다.");
-    moveToPath("/"); // "/" → /member/login 으로 리다이렉트됨
+    moveToPath("/"); // "/" → /member/login
   };
+
+  if (!brandId) return null; // brandId 없으면 TopBar 자체를 안 그림
 
   return (
     <header className="h-14 w-full border-b bg-white/90 backdrop-blur sticky top-0 z-40">
@@ -32,21 +36,18 @@ const TopBar = ({ onToggleSidebar }) => {
           </button>
 
           <Link
-            to={`/app/${tenantId}`}
-            className="font-extrabold tracking-tight text-base sm:text-lg whitespace-nowrap"
+            to={`/app/${brandId}`}
+            className="font-extrabold tracking-tight whitespace-nowrap text-lg sm:text-xl"
           >
             Insight<span className="text-blue-600">Market</span>
           </Link>
 
-          {/* 워크스페이스 전환 (드롭다운으로 쓸 자리) */}
-          <nav className="hidden md:flex items-center gap-1 text-sm">
-            <Link
-              to={`/app/${tenantId}/brands`}
-              className="px-3 py-2 rounded-md hover:bg-gray-100 text-gray-700"
-            >
-              브랜드
-            </Link>
-          </nav>
+          {/* 브랜드 선택 */}
+          {brands.length > 0 && (
+             <div className="hidden sm:block ml-2">
+              <TopBarBrandSelectComponent brands={brands} />
+            </div>
+          )}
         </div>
 
         {/* Right */}
@@ -69,7 +70,7 @@ const TopBar = ({ onToggleSidebar }) => {
                 USER
               </div>
               <div className="text-[11px] text-gray-500 truncate w-[150px]">
-                {tenantId}
+                Brand #{brandId}
               </div>
             </div>
 
@@ -80,7 +81,7 @@ const TopBar = ({ onToggleSidebar }) => {
           {open && (
             <div className="absolute right-0 top-14 w-56 rounded-xl border bg-white shadow-lg overflow-hidden">
               <Link
-                to={`/app/${tenantId}/profile`}
+                to={`/app/${brandId}/profile`}
                 className="block px-4 py-3 text-sm hover:bg-gray-50"
                 onClick={() => setOpen(false)}
               >
