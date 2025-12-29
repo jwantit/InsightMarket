@@ -191,27 +191,4 @@ public class SolutionRepositoryTests {
         );
     }
 
-    @Test
-    @Transactional
-    @Commit
-    public void FindSolutionsByProjectAndStrategy() {
-
-
-        Long a = 1L;
-        Optional<Solution> latestOpt =
-                solutionRepository.findTopByProject_IdOrderByCreatedAtDescIdDesc(a);
-
-        Solution latest = latestOpt.orElseThrow();
-
-        Long projectId = latest.getProject().getId();
-        Long strategyId = latest.getStrategy().getId();
-
-        List<Solution> solutions =
-                solutionRepository.findSolutionsByProjectAndStrategy(projectId, strategyId);
-
-        solutions.forEach(solution ->
-                log.info("solution={}", solution)
-        );
-    }
-
 }

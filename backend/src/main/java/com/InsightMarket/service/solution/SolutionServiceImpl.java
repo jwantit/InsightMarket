@@ -31,12 +31,12 @@ public class SolutionServiceImpl implements SolutionService {
     private final SolutionRepository solutionRepository;
     private final ProjectRepository projectRepository;
 
-    @Override
+    @Override//프로젝트 단위 모든 솔루션 상품조회
     public PageResponseDTO<SolutionDTO> getSolutionsByProjectId(PageRequestDTO pageRequestDTO) {
 
         log.info("SolutionServiceImpl 진입 페이징처리 + DB솔루션 조회중");
 
-
+//    //프로젝트 단위 모든 솔루션 상품조회
 //        public class PageRequestDTO {
 //            private int page = 1;
 //            private int size = 10;
@@ -106,7 +106,7 @@ public class SolutionServiceImpl implements SolutionService {
     @Override
     public List<SolutionDTO> getLatestSolutionByProject(Long projectid){
 
-        Optional<Solution> solutions = solutionRepository.findTopByProject_IdOrderByCreatedAtDescIdDesc(projectid);
+        Optional<Solution> solutions = solutionRepository.findTopByProject_IdAndIsPurchasedFalseOrderByCreatedAtDescIdDesc(projectid);
 
         Solution top = solutions.orElseThrow();
 
