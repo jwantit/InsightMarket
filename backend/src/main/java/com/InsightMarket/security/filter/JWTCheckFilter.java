@@ -53,6 +53,14 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         // 회사 목록 조회는 JWT 없이 허용
         if (path.startsWith("/api/company/list")) return true;
 
+        // 파일 다운로드는 JWT 없이 허용 (img 태그의 src 요청이나 window.open에는 Authorization 헤더가 없음)
+        if (path.startsWith("/api/files/")) {
+            // 썸네일 또는 일반 파일 다운로드 모두 허용
+            if (path.endsWith("/thumbnail") || path.matches("/api/files/\\d+")) {
+                return true;
+            }
+        }
+
         return false;
     }
 

@@ -1,5 +1,6 @@
 package com.InsightMarket.controller;
 
+import com.InsightMarket.domain.member.Member;
 import com.InsightMarket.dto.member.MemberApproveRequestDTO;
 import com.InsightMarket.dto.member.MemberDTO;
 import com.InsightMarket.dto.member.MemberJoinRequestDTO;
@@ -29,5 +30,35 @@ public class MemberJoinController {
     public ResponseEntity<?> join(@RequestBody MemberJoinRequestDTO request) {
         memberService.join(request);
         return ResponseEntity.ok().build();
+    }
+
+    //가입 승인
+    @PreAuthorize("hasAnyRole('ADMIN','COMPANY_ADMIN')")
+    @PostMapping("/approve")
+    public ResponseEntity<?> approve(@RequestBody MemberApproveRequestDTO request, @AuthenticationPrincipal MemberDTO memberDTO) {
+        log.info("Post approve----");
+        log.info(request.getMemberId());
+        log.info(memberDTO);
+        memberService.approve(request.getMemberId(), memberDTO);
+        return ResponseEntity.ok().build();
+    }
+
+    //승인 대기 목록 조회
+    @PreAuthorize("hasAnyRole('ADMIN','COMPANY_ADMIN')")
+    @GetMapping("/pending")
+    public ResponseEntity<List<MemberResponseDTO>> pending(@AuthenticationPrincipal MemberDTO memberDTO) {
+        return ResponseEntity.ok(memberService.getPendingMembers(memberDTO));
+    }
+
+    //현재 로그인한 사용자 정보 조회
+    @GetMapping("/current")
+    public ResponseEntity<MemberResponseDTO> getCurrentMember(@AuthenticationPrincipal MemberDTO memberDTO) {
+        if (memberDTO == null) {
+            throw new IllegalStateException("인증되지 않은 사용자입니다.");
+        }
+        log.info("현재 사용자 조회: {}", memberDTO.getEmail());
+        Member member = memberRepository.findByEmail(memberDTO.getEmail())
+                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다: " + memberDTO.getEmail()));
+        return ResponseEntity.ok(MemberResponseDTO.from(member));
     }
 }

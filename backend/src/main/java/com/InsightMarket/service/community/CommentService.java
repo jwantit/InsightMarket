@@ -15,6 +15,7 @@ import com.InsightMarket.repository.member.MemberRepository;
 import com.InsightMarket.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -142,6 +143,11 @@ public class CommentService {
             throw new IllegalStateException("댓글이 해당 게시글에 속하지 않습니다.");
         }
 
+        // 3-1) 본인 확인 (작성자만 수정 가능)
+        if (!comment.getWriter().getId().equals(writerId)) {
+            throw new AccessDeniedException("댓글 수정 권한이 없습니다.");
+        }
+
         // 4) content 수정
         comment.changeContent(data.getContent());
 
@@ -199,8 +205,10 @@ public class CommentService {
         // 4️⃣ 대댓글 그룹핑
         Map<Long, List<CommentResponseDTO>> replyMap = new HashMap<>();
         for (Comment reply : replies) {
+            CommentResponseDTO replyDTO = toDTO(reply, fileMap);
+            log.info("[COMMENT][TREE] 답글 commentId={}, files={}", reply.getId(), replyDTO.getFiles().size());
             replyMap.computeIfAbsent(reply.getParent().getId(), k -> new ArrayList<>())
-                    .add(toDTO(reply, fileMap));
+                    .add(replyDTO);
         }
 
         // 5️⃣ 부모에 replies 붙이기
@@ -215,7 +223,7 @@ public class CommentService {
     }
 
     @Transactional
-    public void delete(Long brandId, Long boardId, Long commentId) {
+    public void delete(Long brandId, Long boardId, Long commentId, Member currentMember) {
 
         // 1) board 스코프 확인
         boardRepository.findByIdAndBrandIdAndDeletedAtIsNull(boardId, brandId)
@@ -228,6 +236,11 @@ public class CommentService {
         // 3) board 소속 확인
         if (!comment.getBoard().getId().equals(boardId)) {
             throw new IllegalStateException("댓글이 해당 게시글에 속하지 않습니다.");
+        }
+
+        // 3-1) 본인 확인 (작성자만 삭제 가능)
+        if (!comment.getWriter().getId().equals(currentMember.getId())) {
+            throw new AccessDeniedException("댓글 삭제 권한이 없습니다.");
         }
 
         // 4) soft delete

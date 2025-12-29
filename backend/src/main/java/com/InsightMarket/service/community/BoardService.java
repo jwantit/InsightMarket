@@ -11,6 +11,7 @@ import com.InsightMarket.dto.community.BoardModifyDTO;
 import com.InsightMarket.dto.community.FileResponseDTO;
 import com.InsightMarket.repository.brand.BrandRepository;
 import com.InsightMarket.repository.community.BoardRepository;
+import com.InsightMarket.repository.community.CommentRepository;
 import com.InsightMarket.repository.member.MemberRepository;
 import com.InsightMarket.service.FileService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +39,7 @@ public class BoardService {
     private final FileService fileService;
     private final BrandRepository brandRepository;
     private final MemberRepository memberRepository;
+    private final CommentRepository commentRepository;
 
     // [기능] 게시글 생성 1단계 (Brand/User repository 없이)
     // [원칙] FK는 존재한다고 가정하고 ID만 연결
@@ -74,7 +77,7 @@ public class BoardService {
 
         log.info("[BOARD][SVC][CREATE] savedFiles={}", savedFiles.size());
 
-        return toDTO(saved, brandId, savedFiles);
+        return toDTO(saved, brandId, savedFiles, 0L);
     }
 
     @Transactional
@@ -91,6 +94,11 @@ public class BoardService {
         Board board = boardRepository.findByIdAndBrandIdAndDeletedAtIsNull(boardId, brandId)
                 .orElseThrow();
 
+        // 0️⃣ 본인 확인 (작성자만 수정 가능)
+        if (!board.getWriter().getId().equals(updaterId)) {
+            throw new AccessDeniedException("게시글 수정 권한이 없습니다.");
+        }
+
         // 1️⃣ 게시글 수정
         board.changeTitle(dto.getTitle());
         board.changeContent(dto.getContent());
@@ -104,7 +112,7 @@ public class BoardService {
         // 4️⃣ 현재 파일 목록 재조회 (응답용)
         List<FileResponseDTO> currentFiles = fileService.getFiles(FileTargetType.BOARD, boardId);
 
-        return toDTO(board, brandId, currentFiles);
+        return toDTO(board, brandId, currentFiles, 0L);
     }
 
     @Transactional(readOnly = true)
@@ -132,12 +140,20 @@ public class BoardService {
         // 파일 IN 조회
         Map<Long, List<FileResponseDTO>> fileMap = fileService.getFilesGrouped(FileTargetType.BOARD, boardIds);
 
+        // 댓글 수 조회 (부모 댓글 + 대댓글 모두 포함)
+        Map<Long, Long> commentCountMap = new java.util.HashMap<>();
+        for (Long boardId : boardIds) {
+            long count = commentRepository.countByBoardIdAndDeletedAtIsNull(boardId);
+            commentCountMap.put(boardId, count);
+        }
+
         // DTO 변환
         List<BoardResponseDTO> dtoList = boards.stream()
                 .map(board -> toDTO(
                         board,
                         brandId,
-                        fileMap.getOrDefault(board.getId(), List.of())
+                        fileMap.getOrDefault(board.getId(), List.of()),
+                        commentCountMap.getOrDefault(board.getId(), 0L)
                 ))
                 .toList();
 
@@ -162,14 +178,19 @@ public class BoardService {
         List<FileResponseDTO> fileDtos = fileService.getFiles(FileTargetType.BOARD, boardId);
         log.info("[BOARD][SVC][DETAIL] attachments={}", fileDtos.size());
 
-        return toDTO(board, brandId, fileDtos);
+        return toDTO(board, brandId, fileDtos, 0L);
     }
 
     @Transactional
-    public void delete(Long brandId, Long boardId) {
+    public void delete(Long brandId, Long boardId, Member currentMember) {
 
         Board board = boardRepository.findByIdAndBrandIdAndDeletedAtIsNull(boardId, brandId)
                 .orElseThrow();
+
+        // 본인 확인 (작성자만 삭제 가능)
+        if (!board.getWriter().getId().equals(currentMember.getId())) {
+            throw new AccessDeniedException("게시글 삭제 권한이 없습니다.");
+        }
 
         // [기능] 게시글 soft delete
         board.softDelete();
@@ -185,7 +206,7 @@ public class BoardService {
     }
 
     // [기능] Board -> BoardResponseDTO 변환 규칙 단일화 (writerName 항상 포함)
-    private BoardResponseDTO toDTO(Board board, Long brandId, List<FileResponseDTO> files) {
+    private BoardResponseDTO toDTO(Board board, Long brandId, List<FileResponseDTO> files, Long commentCount) {
         return BoardResponseDTO.builder()
                 .id(board.getId())
                 .brandId(brandId)
@@ -197,6 +218,7 @@ public class BoardService {
                 .createdAt(board.getCreatedAt())
                 .updatedAt(board.getUpdatedAt())
                 .files(files)
+                .commentCount(commentCount)
                 .build();
     }
 }

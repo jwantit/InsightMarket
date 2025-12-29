@@ -26,4 +26,6 @@ public class BoardResponseDTO {
     private LocalDateTime updatedAt;
 
     private List<FileResponseDTO> files;
+    
+    private Long commentCount; // 댓글 수 (부모 댓글 + 대댓글 모두 포함)
 }

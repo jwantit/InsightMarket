@@ -57,7 +57,9 @@ public class SecurityConfig {
             config.failureHandler(new LoginFailHandler());
         });
 
-         // http.addFilterBefore(new JWTCheckFilter(), UsernamePasswordAuthenticationFilter.class); // JWT 체크
+        // JWT 필터를 TraceIdFilter보다 먼저 실행 (JWT 체크 후 TraceId 추가)
+        http.addFilterBefore(new JWTCheckFilter(), UsernamePasswordAuthenticationFilter.class); // JWT 체크
+        http.addFilterBefore(new TraceIdFilter(), UsernamePasswordAuthenticationFilter.class);
 
         // 인증은 됐는데 권한이 없을 때 실행되는 핸들러, @PreAuthorize("hasRole('ADMIN')") 로 설정된 주소에 'user' 가 접근 시 발생
         http.exceptionHandling(config -> {

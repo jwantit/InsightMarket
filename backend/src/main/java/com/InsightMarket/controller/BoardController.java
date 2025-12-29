@@ -5,8 +5,7 @@ import com.InsightMarket.dto.PageRequestDTO;
 import com.InsightMarket.dto.PageResponseDTO;
 import com.InsightMarket.dto.community.BoardResponseDTO;
 import com.InsightMarket.dto.community.BoardModifyDTO;
-import com.InsightMarket.repository.member.MemberRepository;
-import com.InsightMarket.security.util.JWTUtil;
+import com.InsightMarket.controller.util.ControllerUtil;
 import com.InsightMarket.service.community.BoardService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Map;
 
 // [기능] 게시글 API 엔드포인트 정의 (브랜드별 게시판)
 // [역할] 요청 파싱 + 로그 + 서비스 위임
@@ -29,25 +27,7 @@ import java.util.Map;
 public class BoardController {
 
     private final BoardService boardService;
-    private final MemberRepository memberRepository;
-
-    // JWT 토큰에서 사용자 정보 가져오기
-    private Member getCurrentMember(HttpServletRequest request) {
-        String authHeaderStr = request.getHeader("Authorization");
-        if (authHeaderStr == null || !authHeaderStr.startsWith("Bearer ")) {
-            throw new IllegalStateException("인증 토큰이 없습니다.");
-        }
-        try {
-            String accessToken = authHeaderStr.substring(7);
-            Map<String, Object> claims = JWTUtil.validateToken(accessToken);
-            String email = (String) claims.get("email");
-            return memberRepository.findByEmail(email)
-                    .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다: " + email));
-        } catch (Exception e) {
-            log.error("JWT 토큰 파싱 실패", e);
-            throw new IllegalStateException("인증 토큰 처리 중 오류가 발생했습니다.", e);
-        }
-    }
+    private final ControllerUtil controllerUtil;
 
     // 게시글 생성 (파일 한번에 업로드)
 //     multipart:
@@ -63,7 +43,7 @@ public class BoardController {
         log.info("[BOARD][CREATE] brandId={}, title={}, files={}",
                 brandId, dto.getTitle(), files == null ? 0 : files.size());
 
-        Member currentMember = getCurrentMember(request);
+        Member currentMember = controllerUtil.getCurrentMember(request);
         return boardService.create(brandId, dto, files, currentMember);
     }
 
@@ -72,7 +52,8 @@ public class BoardController {
 //     - null : 기존 파일 유지
 //     - []   : 기존 파일 전부 삭제
 //     - [id] : 해당 id만 유지
-    @PreAuthorize("principal.username == #BoardModifyDTO.writer")
+    // 이중 검증: @PreAuthorize (1차) + 서비스 레이어 (2차, 실제 DB 조회)
+    @PreAuthorize("#dto.writerId == @memberRepository.findByEmail(principal.username).orElseThrow().getId()")
     @PutMapping(value = "/{boardId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public BoardResponseDTO update(
             @PathVariable Long brandId,
@@ -87,7 +68,7 @@ public class BoardController {
                 dto.getKeepFileIds() == null ? "null" : dto.getKeepFileIds().size(),
                 files == null ? 0 : files.size());
 
-        Member currentMember = getCurrentMember(request);
+        Member currentMember = controllerUtil.getCurrentMember(request);
         return boardService.update(brandId, boardId, dto, files, currentMember);
     }
 
@@ -115,15 +96,16 @@ public class BoardController {
     }
 
     // 게시글 삭제 (soft delete + 첨부 연쇄 soft delete)
-    @PreAuthorize("principal.username == #BoardModifyDTO.writer")
     @DeleteMapping("/{boardId}")
     public ResponseEntity<Void> delete(
             @PathVariable Long brandId,
-            @PathVariable Long boardId
+            @PathVariable Long boardId,
+            HttpServletRequest request
     ) {
         log.info("[BOARD][DELETE] brandId={}, boardId={}", brandId, boardId);
 
-        boardService.delete(brandId, boardId);
+        Member currentMember = controllerUtil.getCurrentMember(request);
+        boardService.delete(brandId, boardId, currentMember);
         return ResponseEntity.noContent().build();
     }
 }

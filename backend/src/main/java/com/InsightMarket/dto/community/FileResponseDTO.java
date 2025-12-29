@@ -11,5 +11,6 @@ public class FileResponseDTO {
     private String originalName;
     private Long size;
     private String contentType;
+    private Boolean hasThumbnail; // 썸네일 존재 여부
 }
 

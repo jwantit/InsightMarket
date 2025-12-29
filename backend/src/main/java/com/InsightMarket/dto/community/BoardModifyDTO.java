@@ -19,4 +19,7 @@ public class BoardModifyDTO {
 
     // update에서 파일 교체 기준 (유지할 파일 id)
     private List<Long> keepFileIds;
+    
+    // @PreAuthorize를 위한 작성자 ID (수정 시에만 사용, 프론트엔드에서 전송)
+    private Long writerId;
 }

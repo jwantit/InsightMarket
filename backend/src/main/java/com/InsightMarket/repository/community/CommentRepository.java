@@ -22,6 +22,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     );
 
     Optional<Comment> findByIdAndDeletedAtIsNull(Long commentId);
+    
+    // 게시글별 댓글 수 조회 (부모 댓글 + 대댓글 모두 포함)
+    long countByBoardIdAndDeletedAtIsNull(Long boardId);
 
     // 댓글 조회 + N+1 getCommentTree와 연결 필요
 //    @Query("""
