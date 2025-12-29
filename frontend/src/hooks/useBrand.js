@@ -27,12 +27,11 @@ export const useBrand = () => {
     }
   }, [parsedBrandId]);
 
-  // 2) 잘못된 brandId(문자 등)로 들어오면 안전하게 리다이렉트 
+  // 2) 잘못된 brandId(문자 등)로 들어오면 안전하게 리다이렉트
   useEffect(() => {
     // "/app/projects" 같은 경우 brandIdParam="projects" -> parsedBrandId null
     if (brandIdParam && parsedBrandId == null) {
-      // 로그인 화면 
-      navigate("/member/login", { replace: true, state: { from: location } });
+      console.warn("잘못된 brandId 접근:", brandIdParam);
     }
   }, [brandIdParam, parsedBrandId]);
 

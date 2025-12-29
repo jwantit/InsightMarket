@@ -1,24 +1,29 @@
 import { useEffect, useState } from "react";
 import { getBrandList } from "../api/brandApi";
+import { useDispatch, useSelector } from "react-redux";
+import { setBrandList } from "../store/slices/brandSlice";
 
 const useMyBrands = () => {
-  const [brands, setBrands] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const brands = useSelector((state) => state.brandSlice.brandList);
+  const loading = brands.length === 0;
+
+  const fetch = async () => {
+    const data = await getBrandList();
+    dispatch(
+      setBrandList(
+        (data || []).map((b) => ({
+          brandId: b.brandId,
+          name: b.name,
+        }))
+      )
+    );
+  };
 
   useEffect(() => {
-    getBrandList()
-      .then((data) => {
-        setBrands(
-          data.map((b) => ({
-            brandId: b.brandId,
-            name: b.name,
-          }))
-        );
-      })
-      .finally(() => setLoading(false));
+    fetch();
   }, []);
 
-  return { brands, loading };
+  return { brands, loading, refreshBrands: fetch };
 };
-
 export default useMyBrands;

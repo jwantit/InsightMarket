@@ -4,10 +4,12 @@ import { useSelector } from "react-redux";
 import useCustomLogin from "../../hooks/useCustomLogin";
 import { useBrand } from "../../hooks/useBrand";
 import TopBarBrandSelectComponent from "./TopBarBrandSelectComponent";
+import useMyBrands from "../../hooks/useMyBrands";
 
-const TopBar = ({ onToggleSidebar, brands = [] }) => {
+const TopBar = ({ onToggleSidebar }) => {
   const [open, setOpen] = useState(false);
 
+  const { brands } = useMyBrands();
   const { brandId } = useBrand();
   const { doLogout, moveToPath } = useCustomLogin();
 
@@ -15,7 +17,10 @@ const TopBar = ({ onToggleSidebar, brands = [] }) => {
   const loginInfo = useSelector((state) => state.loginSlice);
   const userName = loginInfo?.name || "USER";
   const userEmail = loginInfo?.email || "";
-  const initials = (userName || userEmail || "U").trim().slice(0, 1).toUpperCase();
+  const initials = (userName || userEmail || "U")
+    .trim()
+    .slice(0, 1)
+    .toUpperCase();
 
   // 드롭다운 바깥 클릭 / ESC 닫기
   const menuRef = useRef(null);

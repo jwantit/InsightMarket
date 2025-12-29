@@ -1,36 +1,13 @@
-// import { useBrand } from "../../hooks/useBrand";
-// import { useBrandNavigate } from "../../hooks/useBrandNavigate";
-
-// const TopBarBrandSelectComponent = ({ brands }) => {
-//   const { brandId } = useBrand();
-//   const { changeBrandKeepPath } = useBrandNavigate();
-
-//   const handleChange = (e) => {
-//     const nextBrandId = Number(e.target.value);
-//     if (nextBrandId === brandId) return;
-
-//     changeBrandKeepPath(nextBrandId);
-//   };
-
-//   return (
-//     <select value={brandId ?? ""} onChange={handleChange}>
-//       {brands.map((b) => (
-//         <option key={b.brandId} value={b.brandId}>
-//           {b.name}
-//         </option>
-//       ))}
-//     </select>
-//   );
-// };
-
-// export default TopBarBrandSelectComponent;
-
+import useMyBrands from "../../hooks/useMyBrands";
 import { useBrand } from "../../hooks/useBrand";
 import { useBrandNavigate } from "../../hooks/useBrandNavigate";
 
-const TopBarBrandSelectComponent = ({ brands }) => {
+const TopBarBrandSelectComponent = () => {
+  const { brands, loading } = useMyBrands();
   const { brandId } = useBrand();
   const { changeBrandKeepPath } = useBrandNavigate();
+
+  if (loading) return null;
 
   const handleChange = (e) => {
     const nextBrandId = Number(e.target.value);
@@ -68,7 +45,12 @@ const TopBarBrandSelectComponent = ({ brands }) => {
           viewBox="0 0 24 24"
           stroke="currentColor"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </div>
     </div>

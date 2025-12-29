@@ -1,18 +1,14 @@
 import { useSelector } from "react-redux";
 import { Navigate, Outlet, useParams } from "react-router-dom";
-import { getBrandList } from "../../api/brandApi";
-import { useEffect, useState } from "react";
 
-// 접근 권한 체크 하는 함수 
-//1. 로그인 여부 
-//2. 로그인 유저가 그 brandId에 접근 권한이 있는지 
+// 접근 권한 체크 하는 함수
+//1. 로그인 여부
+//2. 로그인 유저가 그 brandId에 접근 권한이 있는지
 //3. URL의 brandId가 유효한 숫자인지
 const RequireAuth = () => {
-
   const loginState = useSelector((state) => state.loginSlice);
+  const brands = useSelector((state) => state.brandSlice.brandList);
   const { brandId: brandIdParam } = useParams();
-
-  const [brands, setBrands] = useState(null); // null = 아직 로딩 안 됨
 
   //1. 로그인 여부
   if (!loginState || !loginState.email) {
@@ -20,25 +16,10 @@ const RequireAuth = () => {
     return <Navigate to="/member/login" replace />;
   }
 
+  // 브랜드 목록 아직 준비 안 됐으면 대기
+  if (!brands) return null;
+
   // 2. 접근 가능한 브랜드 목록 조회
-  useEffect(() => {
-    getBrandList()
-      .then((data) => {
-        console.log("getBrandList success:", data);
-        setBrands(data);
-      })
-      .catch((e) => {
-        console.error("getBrandList failed:", e);
-        setBrands([]); // 실패 시라도 null에서 벗어나게(디버깅 편함)
-      });
-  }, []);
-  
-
-  // 브랜드 목록 아직 안 왔으면 잠시 대기
-  if (brands === null) {
-    return null; // or <Loading />
-  }
-
   /**
    * brandId가 URL에 없는 경우 처리
    *  - 브랜드 0개: 브랜드 생성 페이지로
@@ -51,19 +32,14 @@ const RequireAuth = () => {
       if (loginState?.role === "COMPANY_ADMIN") {
         return <Navigate to="/member/brand-create" replace />;
       }
-    
+
       // 일반 유저면 접근 가능한 브랜드 없음 안내
       return <Navigate to="/member/no-brand" replace />;
     }
 
     if (brands.length === 1) {
-      console.log("brands[0].brandId : ", brands[0].brandId)
-      return (
-        <Navigate
-          to={`/app/${brands[0].brandId}`}
-          replace
-        />
-      );
+      console.log("brands[0].brandId : ", brands[0].brandId);
+      return <Navigate to={`/app/${brands[0].brandId}`} replace />;
     }
 
     return <Navigate to="/member/brand-select" replace />;
