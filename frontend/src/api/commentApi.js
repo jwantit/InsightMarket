@@ -9,6 +9,10 @@ export const getCommentTree = async ({ brandId, boardId }) => {
   const res = await jwtAxios.get(
     `${host}/${brandId}/boards/${boardId}/comments`
   );
+  // ERROR_ACCESS_TOKEN 응답인 경우 에러로 처리 (jwtUtil에서 자동 재시도)
+  if (res.data && res.data.error === "ERROR_ACCESS_TOKEN") {
+    throw new Error("ERROR_ACCESS_TOKEN");
+  }
   return res.data;
 };
 

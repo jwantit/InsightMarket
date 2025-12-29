@@ -26,6 +26,9 @@ const BoardList = ({ items = [], onClickItem }) => {
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
               제목
             </th>
+            <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider w-24">
+              썸네일
+            </th>
             <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider w-32">
               작성자
             </th>
@@ -45,7 +48,46 @@ const BoardList = ({ items = [], onClickItem }) => {
               className="hover:bg-gray-50 cursor-pointer transition-colors"
             >
               <td className="px-4 py-3 text-sm text-gray-600">{item.id}</td>
-              <td className="px-4 py-3 text-sm text-gray-900">{item.title}</td>
+              <td className="px-4 py-3 text-sm text-gray-900">
+                <div className="flex items-center gap-2">
+                  <span>{item.title}</span>
+                  {item.commentCount !== undefined && item.commentCount > 0 && (
+                    <span className="text-xs text-blue-600 font-medium">
+                      [{item.commentCount}]
+                    </span>
+                  )}
+                </div>
+              </td>
+              <td className="px-4 py-3">
+                {(() => {
+                  // 첫 번째 이미지 파일 찾기 (hasThumbnail이 true인 파일만)
+                  const firstImageFile = item.files?.find(f => f.hasThumbnail === true);
+                  
+                  if (firstImageFile) {
+                    return (
+                      <div className="flex items-center gap-2">
+                        <img
+                          key={firstImageFile.id}
+                          src={`${API_SERVER_HOST}/api/files/${firstImageFile.id}/thumbnail`}
+                          alt="썸네일"
+                          className="w-16 h-16 object-cover rounded border border-gray-200"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleFileDownload(e, firstImageFile.id);
+                          }}
+                          onError={(e) => {
+                            console.error('썸네일 로드 실패:', firstImageFile.id, firstImageFile);
+                            e.target.style.display = 'none';
+                          }}
+                          style={{ cursor: 'pointer' }}
+                        />
+                      </div>
+                    );
+                  }
+                  
+                  return <span className="text-gray-400 text-xs">-</span>;
+                })()}
+              </td>
               <td className="px-4 py-3 text-sm text-gray-600">
                 {item.writerName}
               </td>

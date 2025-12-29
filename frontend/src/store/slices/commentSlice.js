@@ -8,9 +8,17 @@ import {
 
 export const fetchCommentTree = createAsyncThunk(
   "comment/tree",
-  async ({ brandId, boardId }) => {
-    const data = await getCommentTree({ brandId, boardId });
-    return { boardId, data };
+  async ({ brandId, boardId }, { rejectWithValue }) => {
+    try {
+      const data = await getCommentTree({ brandId, boardId });
+      // ERROR_ACCESS_TOKEN 응답 체크
+      if (data && data.error === "ERROR_ACCESS_TOKEN") {
+        return rejectWithValue("ERROR_ACCESS_TOKEN");
+      }
+      return { boardId, data };
+    } catch (error) {
+      return rejectWithValue(error);
+    }
   }
 );
 

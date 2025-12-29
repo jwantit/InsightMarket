@@ -19,9 +19,17 @@ export const fetchBoardList = createAsyncThunk(
 
 export const fetchBoardDetail = createAsyncThunk(
   "board/detail",
-  async ({ brandId, boardId }) => {
-    const data = await getBoardDetail({ brandId, boardId });
-    return { boardId, data };
+  async ({ brandId, boardId }, { rejectWithValue }) => {
+    try {
+      const data = await getBoardDetail({ brandId, boardId });
+      // ERROR_ACCESS_TOKEN 응답 체크
+      if (data && data.error === "ERROR_ACCESS_TOKEN") {
+        return rejectWithValue("ERROR_ACCESS_TOKEN");
+      }
+      return { boardId, data };
+    } catch (error) {
+      return rejectWithValue(error);
+    }
   }
 );
 
@@ -76,6 +84,12 @@ const boardSlice = createSlice({
       .addCase(fetchBoardDetail.fulfilled, (state, action) => {
         const { boardId, data } = action.payload;
         state.detailById[boardId] = data;
+      })
+      .addCase(fetchBoardDetail.rejected, (state, action) => {
+        // ERROR_ACCESS_TOKEN인 경우 재시도하지 않고 상태만 유지
+        if (action.payload === "ERROR_ACCESS_TOKEN") {
+          // 상태는 유지하되, 에러로 표시하지 않음 (jwtUtil에서 자동 재시도)
+        }
       })
       .addCase(updateBoardThunk.fulfilled, (state, action) => {
         const { boardId, data } = action.payload;

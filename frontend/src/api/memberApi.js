@@ -43,3 +43,9 @@ export const approveMember = async (memberId) => {
   const res = await jwtAxios.post(`${host}/approve`, { memberId: memberId });
   return res.data;
 };
+
+//현재 로그인한 사용자 정보 조회
+export const getCurrentMember = async () => {
+  const res = await jwtAxios.get(`${host}/current`);
+  return res.data;
+};

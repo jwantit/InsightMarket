@@ -15,7 +15,11 @@ export const getBoardList = async ({ brandId, page = 1, size = 10 }) => {
     // 게시글 상세
 export const getBoardDetail = async ({ brandId, boardId }) => {
     const res = await jwtAxios.get(`${host}/${brandId}/boards/${boardId}`);
-      return res.data;
+    // ERROR_ACCESS_TOKEN 응답인 경우 에러로 처리 (jwtUtil에서 자동 재시도)
+    if (res.data && res.data.error === "ERROR_ACCESS_TOKEN") {
+      throw new Error("ERROR_ACCESS_TOKEN");
+    }
+    return res.data;
     };
 
     // 게시글 등록 (multipart: data + files)
