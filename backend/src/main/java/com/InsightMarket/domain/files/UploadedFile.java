@@ -45,4 +45,8 @@ public class UploadedFile extends SoftDeleteEntity {
 
     @Column(name = "file_size", nullable = false)
     private Long size;
+
+    // 썸네일 스토리지 키 (이미지 파일인 경우에만 사용)
+    @Column(name = "thumbnail_storage_key", length = 500)
+    private String thumbnailStorageKey;
 }
