@@ -7,7 +7,7 @@ const CartItemComponent = ({ item, onRemove, onToggle, isChecked }) => {
         <input
           type="checkbox"
           checked={isChecked}
-          onChange={() => onToggle(item.cartItemid)} // 체크박스 변경 시 onToggle 호출
+          onChange={() => onToggle(item.solutionid)} // 체크박스 변경 시 onToggle 호출
           className="form-checkbox h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
         />
       </div>
@@ -28,7 +28,7 @@ const CartItemComponent = ({ item, onRemove, onToggle, isChecked }) => {
 
       <div className="flex-shrink-0">
         <button
-          onClick={() => onRemove(item.cartitemid)}
+          onClick={() => onRemove([item.cartitemid])}
           className="p-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
           title="삭제"
         >

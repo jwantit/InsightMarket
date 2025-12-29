@@ -5,7 +5,7 @@ import SolutionToolbar from "../../components/maket/SolutionToolbar";
 import { getProjectsByTenant } from "../../api/selectProjectApi";
 
 const MarketListPage = () => {
-  const { tenantId } = useParams(); // 브랜드 명을 가져온다.
+  const { brandId } = useParams(); // 브랜드 명을 가져온다.
   const [searchParams] = useSearchParams(); // 쿼리스트링 가져온 solution?project=2&filter 등등
   const navigate = useNavigate(); // url 변경시
   const isInitialMount = useRef(true); // 렌더링 체크용
@@ -61,7 +61,8 @@ const MarketListPage = () => {
 
   //tenant 브랜드 기준 프로젝트 조회
   useEffect(() => {
-    if (!tenantId) return;
+
+    if (!brandId) return;
 
     // 프로젝트 목록조회 브랜드id전달 ->  selectProjectAPI.js -> 백앤드 호출 응답    
     //받아오는 데이터 리스트
@@ -69,8 +70,9 @@ const MarketListPage = () => {
     //projectId : n,
     //name : 갤럭시 행사
     //}
-    getProjectsByTenant(tenantId)
+    getProjectsByTenant(brandId)
       .then((res) => {
+        
         setProjectList(res); // 프로젝트 리스트를 useState 올림
 
         console.log("프로젝트 목록:", res);
@@ -100,7 +102,7 @@ const MarketListPage = () => {
       .catch((err) => {
         console.error("프로젝트 목록 조회 실패", err);
       });
-  }, [tenantId, projectIdFromUrl, filter, updateUrlParams]);
+  }, [brandId, projectIdFromUrl, filter, updateUrlParams]);
 
 
 //-----------------------------------------------------------------------------------------

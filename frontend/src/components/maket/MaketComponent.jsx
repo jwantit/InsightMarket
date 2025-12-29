@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { getLatestStrategyByProject, getAllSolutionByProject, removeSolution } from "../../api/solutionApi";
 import PageComponentA from "./PageComponentA";
 import useCustomMove from "../../hooks/useCustomMove";
 import FetchingModal from "../common/FetchingModal";
 import useCustomCart from "../../hooks/useCustomCart"; // useCustomCart 임포트
+import usePayment from "../../hooks/common/payment/useCustomPayment";
 
 const initState = {
   dtoList: [],
@@ -25,6 +26,9 @@ const MaketComponent = ({ projectId, filter }) => {
   const [loading, setLoading] = useState(false);
   const [selectedSolution, setSelectedSolution] = useState(null);
   const { addCartItem, cartState , refreshCart} = useCustomCart(projectId); // useCustomCart 훅 사용
+
+  const { handlePayment } = usePayment();
+  const navigate = useNavigate();
 
 
   const {items} = cartState;
@@ -206,11 +210,21 @@ const MaketComponent = ({ projectId, filter }) => {
         <FetchingModal
           solution={selectedSolution}
           onClose={() => setSelectedSolution(null)}
-          onPurchase={() => {
+          onPurchase={async() => {
+
+            if (!selectedSolution) return;
             console.log("구매하기:", selectedSolution);
-            // 구매 로직 추후 구현
-            alert("구매 기능은 추후 구현 예정입니다.");
-          }}
+
+            try{
+              const isSuccess = await handlePayment(projectId, [selectedSolution]);
+              if (isSuccess) {
+                setSelectedSolution(null);
+                navigate(0);   
+            }
+          }catch (error) {
+            console.error("단일 구매 중 에러:", error);
+          }
+        }}
           onDelete={async () => {
             if (window.confirm("솔루션을 정말 삭제하시겠습니까?")) {
               try {

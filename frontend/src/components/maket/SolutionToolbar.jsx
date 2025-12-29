@@ -13,7 +13,6 @@ const SolutionToolbar = ({
         <span className="text-sm font-medium text-gray-600">
           프로젝트
         </span>
-
         <select
           value={projectId ?? ""}
           onChange={(e) => {
