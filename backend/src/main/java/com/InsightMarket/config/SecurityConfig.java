@@ -2,6 +2,7 @@ package com.InsightMarket.config;
 
 import java.util.Arrays;
 
+import com.InsightMarket.security.filter.TraceIdFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
