@@ -5,7 +5,7 @@ import CartComponent from "../../components/maket/CartComponent";
 import { getProjectsByTenant } from "../../api/selectProjectApi";
 
 const CartPage = () => {
-  const { tenantId } = useParams(); // 브랜드 명을 가져온다.
+  const { brandId } = useParams(); // 브랜드 명을 가져온다.
   const [searchParams] = useSearchParams(); // 쿼리스트링 가져온 solution?project=2 등등
   const navigate = useNavigate(); // url 변경시
   const isInitialMount = useRef(true); // 렌더링 체크용
@@ -39,10 +39,10 @@ const CartPage = () => {
 
   // tenant 브랜드 기준 프로젝트 조회
   useEffect(() => {
-    if (!tenantId) return;
+    if (!brandId) return;
 
     // 프로젝트 목록조회 브랜드id전달 -> selectProjectAPI.js -> 백엔드 호출 응답
-    getProjectsByTenant(tenantId)
+    getProjectsByTenant(brandId)
       .then((res) => {
         setProjectList(res); // 프로젝트 리스트를 useState 올림
 
@@ -74,7 +74,7 @@ const CartPage = () => {
       .catch((err) => {
         console.error("프로젝트 목록 조회 실패", err);
       });
-  }, [tenantId, projectIdFromUrl, updateUrlParams]);
+  }, [brandId, projectIdFromUrl, updateUrlParams]);
 
   // projectId 변경 시 URL 업데이트 (초기 마운트 제외)
   useEffect(() => {

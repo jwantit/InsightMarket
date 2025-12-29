@@ -24,10 +24,10 @@ public class CartController {
         return cartService.addSolutionToCart(itemDTO);
     }
 
-    @DeleteMapping("/del/{cartItemid}")
-    public List<CartItemListDTO> removeCart(@PathVariable("cartItemid") Long cartItemid) {
+    @DeleteMapping("/del")
+    public List<CartItemListDTO> removeCart(@RequestBody List<Long> cartItemids) {
         log.info("카트 아이템을 삭제 했습니다.");
-        return cartService.cartItemremove(cartItemid);
+        return cartService.cartItemremove(cartItemids);
     }
 
     @GetMapping("/item")

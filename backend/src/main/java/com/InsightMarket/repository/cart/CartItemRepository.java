@@ -33,6 +33,7 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
             "join ci.cart c " +  //CartItem.cart
             "join ci.solution s " +//CartItem.solution
             "where c.project.id = :projectid " + //cart.project.id와 내가 요청한 id와 같은것 반환
+            "and s.isPurchased = false " + //판매중인상품만
             "order by ci.id desc")
     public List<CartItemListDTO> getItemsOfCartDTOByProjectId(@Param("projectid") Long projectid);
 
@@ -57,7 +58,8 @@ Long getCartFromItem(@Param("cartItemId") Long cartItemId);
     from CartItem ci
         join ci.cart c        
         join ci.solution s     
-    where c.id = :cartId       
+    where c.id = :cartId 
+    and s.isPurchased = false      
     order by ci.id desc     """)
     List<CartItemListDTO> getItemsOfCartDTOByCart(@Param("cartId") Long cartId);
 }

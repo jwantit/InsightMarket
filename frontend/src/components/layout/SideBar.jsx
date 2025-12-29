@@ -37,6 +37,7 @@ const Section = ({ title, open, onToggle, children }) => (
 );
 
 const SideBar = ({ onNavigate }) => {
+
   const { brandId } = useBrand();
   const location = useLocation();
 
@@ -45,7 +46,7 @@ const SideBar = ({ onNavigate }) => {
   const isAdminArea = systemRole === "ADMIN" || systemRole === "COMPANY_ADMIN";
   
   console.log("loginState:", loginState);
-console.log("systemRole candidate:", loginState?.systemRole);
+  console.log("systemRole candidate:", loginState?.systemRole);
 
   const [openMap, setOpenMap] = useState(() => {
     const p = location.pathname;
@@ -111,16 +112,10 @@ console.log("systemRole candidate:", loginState?.systemRole);
           open={openMap.ai}
           onToggle={() => toggle("ai")}
         >
-          <SideLink
-            to={`/app/${brandId}/ai/strategy`}
-            onNavigate={onNavigate}
-          >
+          <SideLink to={`/app/${brandId}/ai/strategy`} onNavigate={onNavigate}>
             전략 추천
           </SideLink>
-          <SideLink
-            to={`/app/${brandId}/ai/chatbot`}
-            onNavigate={onNavigate}
-          >
+          <SideLink to={`/app/${brandId}/ai/chatbot`} onNavigate={onNavigate}>
             챗봇
           </SideLink>
         </Section>
@@ -149,10 +144,8 @@ console.log("systemRole candidate:", loginState?.systemRole);
           >
             상품 목록
           </SideLink>
-          <SideLink
-            to={`/app/${brandId}/market/cart`}
-            onNavigate={onNavigate}
-          >
+
+          <SideLink to={`/app/${brandId}/market/cart`} onNavigate={onNavigate}>
             장바구니
           </SideLink>
         </Section>

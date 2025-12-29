@@ -41,4 +41,12 @@ public class Solution extends BaseEntity {
 
     @Column(columnDefinition = "TINYINT(1)")
     private boolean deleted = false;
+
+    @Builder.Default
+    @Column(name = "is_purchased", columnDefinition = "TINYINT(1)")
+    private boolean isPurchased = false;
+
+    public void markAsPurchased() {
+        this.isPurchased = true;
+    }
 }

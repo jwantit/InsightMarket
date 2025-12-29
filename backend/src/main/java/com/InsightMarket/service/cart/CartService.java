@@ -14,5 +14,5 @@ public interface CartService {
     //장바구니 아이템 조회
     List<CartItemListDTO> getCartItems(Long projectid);
 
-    List<CartItemListDTO> cartItemremove(Long cartItemid);
+    List<CartItemListDTO> cartItemremove(List<Long> cartItemid);
 }

@@ -23,8 +23,8 @@ export const addSolutionToCartAsync = createAsyncThunk(
 // 장바구니 아이템 삭제 비동기 액션
 export const removeCartItemAsync = createAsyncThunk(
   "cartSlice/removeCartItemAsync",
-  async (cartItemid) => {
-    const res = await removeCartItem(cartItemid);
+  async (cartItemIds) => {
+    const res = await removeCartItem(cartItemIds);
     return res;
   }
 );
@@ -32,7 +32,6 @@ export const removeCartItemAsync = createAsyncThunk(
 //초기값 State
 const initState = {
   items: [],
-  totalPrice: 0,
 };
 
 
@@ -51,27 +50,15 @@ const cartSlice = createSlice({
         //solutionid : 1
         //solutionprice : 1000
         //solutiontitle : "A전략 솔루션 1"}
-
-        state.totalPrice = state.items.reduce(
-          (acc, item) => acc + item.solutionprice, // 각 아이템의 solutionprice를 단순히 합산
-          0
-        ); // 총 금액 계산
       })
       .addCase(addSolutionToCartAsync.fulfilled, (state, action) => {
         console.log("addSolutionToCartAsync fulfilled");
         state.items = action.payload; // 백엔드에서 받은 아이템 목록으로 업데이트
-        state.totalPrice = state.items.reduce(
-          (acc, item) => acc + item.solutionprice, // 각 아이템의 solutionprice를 단순히 합산
-          0
-        ); // 총 금액 계산
+       
       })
       .addCase(removeCartItemAsync.fulfilled, (state, action) => {
         console.log("removeCartItemAsync fulfilled");
         state.items = action.payload; // 백엔드에서 받은 아이템 목록으로 업데이트
-        state.totalPrice = state.items.reduce(
-          (acc, item) => acc + item.solutionprice, // 각 아이템의 solutionprice를 단순히 합산
-          0
-        ); // 총 금액 계산
       });
   },
 });

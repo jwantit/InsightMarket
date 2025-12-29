@@ -28,6 +28,7 @@ public class CartServiceImpl implements CartService {
     private final ProjectRepository projectRepository;
     private final SolutionRepository solutionRepository;
 
+
     @Override
     public List<CartItemListDTO> addSolutionToCart(CartItemDTO cartItemDTO) {
 
@@ -79,17 +80,18 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public List<CartItemListDTO> cartItemremove(Long cartItemid) {
+    public List<CartItemListDTO> cartItemremove(List<Long> cartItemids) {
 
         //CartItem을 통해 Cart의 id를 Long타입으로 받는다.
-        Long cartId  = cartItemRepository.getCartFromItem(cartItemid);
+        Long cartId  = cartItemRepository.getCartFromItem(cartItemids.get(0));
 
-        log.info("cart no: " + cartItemid);
+        log.info("cart no: " + cartItemids);
 
-        cartItemRepository.deleteById(cartItemid); //삭제
+        cartItemRepository.deleteAllByIdInBatch(cartItemids); //전부삭제
+
 
         //Cartid 를 통해 아이템 조회
-        return cartItemRepository.getItemsOfCartDTOByCart(cartId);
+        return cartItemRepository.getItemsOfCartDTOByCart(cartId); //다시조회
     }
 
 
