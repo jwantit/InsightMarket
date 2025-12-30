@@ -42,28 +42,31 @@ public class PaymentRepositoryTests {
     @Commit
     public void getAllHistory() {
         // 1. 테스트할 유저 설정
-        String buyMemberEmail = "user9@aaa.com";
+        String buyMemberEmail = "user7@aaa.com";
 
         // 2. 페이징 설정 (0페이지, 10개씩)
         Pageable pageable = PageRequest.of(0, 10);
 
+        //멤버가져오기
         Optional<Member> member = memberRepository.findByEmail(buyMemberEmail);
         Member member1 = member.orElseThrow(() -> new RuntimeException("해당 이메일의 유저를 찾을 수 없습니다."));
 
-        // 3. 리포지토리 실행
+        // 3. 멤버id에 해당하는 Orders 가져오기
         Page<Orders> result = paymentRepository.findMyOrders(member1.getId(), pageable);
 
-        // 4. DTO 변환 로직 (유저님이 작성하신 완벽한 로직)
+        // 4. DTO 변환 로직
         List<OrderHistoryDTO> dtoList = result.getContent().stream()
                 .map(order -> {
                     List<SolutionDTO> solutionDTOList = order.getOrderItems().stream()
                             .map(item -> {
                                 Solution sol = item.getSolution();
                                 return SolutionDTO.builder()
-                                        .solutionid(sol.getId())
+                                        .solutionid(item.getId())
                                         .title(item.getSolutionName())
                                         .price(item.getOrderPrice())
                                         .projectname(sol.getProject().getName())
+                                        .strategytitle(sol.getStrategy().getTitle())
+                                        .strategyId(sol.getStrategy().getId())
                                         .projectId(sol.getProject().getId())
                                         .build();
                             })
@@ -74,7 +77,7 @@ public class PaymentRepositoryTests {
                             .merchantUid(order.getPaymentId())
                             .totalPrice(order.getTotalPrice())
                             .createdAt(order.getCreatedAt()
-                                    .format(DateTimeFormatter.ofPattern("yyyy년MM월dd일HH시 mm분")))
+                                    .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분")))
                             .receiptUrl(order.getReceiptUrl())
                             .orderItems(solutionDTOList) // 변환된 리스트 주입
                             .build();
@@ -93,12 +96,28 @@ public class PaymentRepositoryTests {
                 .build();
 
         // 6. 결과 검증 로그
+        // 6. 결과 검증 로그
         log.info("--------------------------------------");
         log.info("총 주문 건수: " + responseDTO.getTotalCount());
+
         responseDTO.getDtoList().forEach(orderDTO -> {
-            log.info("주문번호: " + orderDTO.getMerchantUid() + " | 결제금액: " + orderDTO.getTotalPrice());
-            orderDTO.getOrderItems().forEach(sol -> log.info("   ㄴ 포함된 솔루션: " + sol.getTitle()));
-        });
+            log.info("주문번호: " + orderDTO.getMerchantUid()
+                    + " | 결제금액: " + orderDTO.getTotalPrice()
+                    + " | 포함된 솔루션 개수: " + orderDTO.getOrderItems().size()
+                    + " | 결제일: " + orderDTO.getCreatedAt());
+
+
+            orderDTO.getOrderItems().forEach(sol ->
+                    log.info("   ㄴ 포함된 솔루션: {} | 프로젝트: {}({}) | 전략: {}({})",
+                            sol.getTitle(),
+                            sol.getProjectname(), sol.getProjectId(),
+                            sol.getStrategytitle(), sol.getStrategyId()
+                    )
+            );
+        }); // 👈 빠져있던 중괄호/괄호 닫기
+
         log.info("--------------------------------------");
     }
 }
+
+

@@ -1,7 +1,10 @@
 package com.InsightMarket.controller;
 
 import com.InsightMarket.domain.member.Member;
+import com.InsightMarket.dto.PageRequestDTO;
+import com.InsightMarket.dto.PageResponseDTO;
 import com.InsightMarket.dto.member.MemberDTO;
+import com.InsightMarket.dto.payment.OrderHistoryDTO;
 import com.InsightMarket.dto.payment.OrderRequestDTO;
 import com.InsightMarket.dto.payment.OrderResponseDTO;
 import com.InsightMarket.dto.payment.PaymentVerifyRequest;
@@ -82,6 +85,36 @@ public class PaymentController {
         }
     }
     //------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+    //조회로직(구매내역 또는 거래내역)----------------------------------------------------------------------
+    @GetMapping("/list/member")
+    public PageResponseDTO<OrderHistoryDTO> paymentListByMember(
+                               PageRequestDTO pageRequestDTO, Authentication authentication) {
+        log.info("구매내역 리스트 진입 기준(member) PaymentController ? " + authentication);
+        MemberDTO member = (MemberDTO) authentication.getPrincipal();
+        log.info("요청객체" + pageRequestDTO);
+
+
+        //날짜 조회필터
+        if (pageRequestDTO.getFrom() != null || pageRequestDTO.getTo() != null){
+            if (pageRequestDTO.getFrom() == null){
+                pageRequestDTO.setFromDefault();
+            }
+            if (pageRequestDTO.getTo() == null){
+                pageRequestDTO.setToDefault();
+            }
+            log.info("날짜필터링 시작");
+        }
+
+        PageResponseDTO<OrderHistoryDTO> dtoList = paymentService.getPaymentDetailsByUser(pageRequestDTO, member.getEmail());
+    return dtoList;
+    }
+    //----------------------------------------------------------------------
 }
 
 

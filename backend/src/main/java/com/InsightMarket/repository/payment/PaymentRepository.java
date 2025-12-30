@@ -2,22 +2,38 @@ package com.InsightMarket.repository.payment;
 
 import com.InsightMarket.domain.member.Member;
 import com.InsightMarket.domain.order.Orders;
+import com.InsightMarket.dto.PageRequestDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
+
 public interface PaymentRepository extends JpaRepository<Orders, Long> {
 
+    
+    //User기준으로 전체조회
     @Query("SELECT o FROM Orders o " +
             "WHERE o.buyMemberId = :buyMemberId " +
-            "AND o.status = com.InsightMarket.domain.order.OrderStatus.PAID " +
-            "ORDER BY o.createdAt DESC")
+            "AND o.status = com.InsightMarket.domain.order.OrderStatus.PAID ")
     Page<Orders> findMyOrders(
             @Param("buyMemberId") Long buyMemberId,
             Pageable pageable
     );
+    //User + Time
+    @Query("SELECT o FROM Orders o " +
+            "WHERE o.buyMemberId = :buyMemberId " +
+            "AND o.status = com.InsightMarket.domain.order.OrderStatus.PAID " +
+            "AND o.createdAt >= :startTime " +
+            "AND o.createdAt <= :endTime ")
+    Page<Orders> findMyOrdersTime(
+            @Param("buyMemberId") Long buyMemberId,
+            @Param("startTime")LocalDateTime startTime,
+            @Param("endTime")LocalDateTime endTime,
+            Pageable pageable
+            );
 
 
 

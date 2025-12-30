@@ -14,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 public class OrderHistoryDTO {
     private Long orderId;        // 주문 PK
+    private String orderTitle;
     private String merchantUid;  // 주문번호 (paymentId)
     private String buyerName;    // 구매자 이름
     private int totalPrice;      // 총 결제 금액

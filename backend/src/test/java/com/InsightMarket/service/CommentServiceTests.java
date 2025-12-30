@@ -2,18 +2,8 @@ package com.InsightMarket.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.InsightMarket.dto.community.CommentModifyDTO;
-import com.InsightMarket.dto.community.CommentResponseDTO;
-import com.InsightMarket.service.community.CommentService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @SpringBootTest
 @Transactional
@@ -99,4 +89,6 @@ class CommentServiceTests {
 //        assertThat(reply.getParentCommentId()).isEqualTo(parent.getCommentId());
 //    }
 
+    public static class PaymentServiceTests {
+    }
 }

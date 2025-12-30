@@ -42,12 +42,8 @@ public class SolutionRepositoryTests {
     @Commit
     public void testInsertProject () {
 
-        Brand brand = brandRepository.save(
-                Brand.builder()
-                        .name("삼성")
-                        .description("스마트폰")
-                        .build()
-        );
+        Optional<Brand> brand1 = brandRepository.findById(1L);
+        Brand brand = brand1.orElseThrow();
 
         Project project = Project.builder()
                 .name("갤럭시 행사")

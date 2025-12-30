@@ -5,10 +5,14 @@ import com.InsightMarket.domain.order.OrderItem;
 import com.InsightMarket.domain.order.OrderStatus;
 import com.InsightMarket.domain.order.Orders;
 import com.InsightMarket.domain.solution.Solution;
+import com.InsightMarket.dto.PageRequestDTO;
+import com.InsightMarket.dto.PageResponseDTO;
 import com.InsightMarket.dto.member.MemberDTO;
+import com.InsightMarket.dto.payment.OrderHistoryDTO;
 import com.InsightMarket.dto.payment.OrderItemDTO;
 import com.InsightMarket.dto.payment.OrderRequestDTO;
 import com.InsightMarket.dto.payment.OrderResponseDTO;
+import com.InsightMarket.dto.solution.SolutionDTO;
 import com.InsightMarket.repository.member.MemberRepository;
 import com.InsightMarket.repository.payment.PaymentRepository;
 import com.InsightMarket.repository.solution.SolutionRepository;
@@ -16,10 +20,19 @@ import com.InsightMarket.service.payment.PaymentService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -148,7 +161,7 @@ public class PaymentServiceImpl implements PaymentService {
                 //요청하여 응답받기.
                 .retrieve()
                 //바디(Body)에 담긴 데이터를 내가 원하는 객체 타입으로 변환 포트원의 JSON -> Map형태로 담기
-                .bodyToMono(Map.class)
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
                 .block();//"포트원 서버에서 대답이 올 때까지 대기하자
 
         //검증을 위해 오더테이블 가져오기
@@ -209,4 +222,108 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
     }
+
+//-------------------------------------------------------------------------------------------
+
+
+
+
+    
+    //거래내역 조회로직 User기준 PAID(결제완료) 인 것들만 조회
+    //--------------------------------------------------------------------------------------------------------------
+    @Override
+    public PageResponseDTO<OrderHistoryDTO> getPaymentDetailsByUser(PageRequestDTO pageRequestDTO, String memberEmail) {
+
+        //    //프로젝트 단위 모든 솔루션 상품조회
+//        public class PageRequestDTO {
+//            private int page = 1;
+//            private int size = 10;
+        //    private String sort;   -> 종류 최신순latest 높은금액순pricehigh 금액낮은순pricelow
+//            Long projectid;
+//        }
+
+        Sort sortCondition = switch (pageRequestDTO.getSort()) {
+            case "pricehigh" -> Sort.by("totalPrice").descending();
+            case "pricelow"  -> Sort.by("totalPrice").ascending();
+            default -> Sort.by("id").descending();
+        };
+
+        Pageable pageable = PageRequest.of(
+                pageRequestDTO.getPage() - 1,  //페이지 시작 번호가 0부터 시작하므로
+                pageRequestDTO.getSize(),
+                sortCondition
+                );
+
+        Optional<Member> memberFind = memberRepository.findByEmail(memberEmail);
+        Member member = memberFind.orElseThrow(() -> new RuntimeException("해당 이메일의 유저를 찾을 수 없습니다."));
+
+        String memberName = member.getName();
+
+        //----필터
+        if (pageRequestDTO.getFrom() != null && pageRequestDTO.getTo() != null){
+
+            LocalDateTime start = pageRequestDTO.getFromDateTime();
+            LocalDateTime end = pageRequestDTO.getToDateTime();
+
+            Page<Orders> result = paymentRepository.findMyOrdersTime(member.getId(),start,end,pageable );
+            PageResponseDTO<OrderHistoryDTO> dtoList = setDto(result, pageRequestDTO,memberName);
+            return dtoList;
+        }
+
+
+        Page<Orders> result = paymentRepository.findMyOrders(member.getId(), pageable);
+
+        PageResponseDTO<OrderHistoryDTO> dtoList = setDto(result, pageRequestDTO,memberName);
+
+        return dtoList;
+    } //--------------------------------------------------------------------------------------------------------------
+
+
+    //공통로직 페이징 처리된 DTO를 처리하기 위함---------------------------------------------------------------------------
+    public PageResponseDTO<OrderHistoryDTO> setDto(Page<Orders> result, PageRequestDTO pageRequestDTO, String memberName ){
+
+        List<OrderHistoryDTO> dtoList = result.getContent().stream()
+                .map(order -> {
+                    List<SolutionDTO> solutionDTOList = order.getOrderItems().stream()
+                            .map(item -> {
+                                Solution sol = item.getSolution();
+                                return SolutionDTO.builder()
+                                        .solutionid(item.getId())
+                                        .title(item.getSolutionName())
+                                        .price(item.getOrderPrice())
+                                        .projectname(sol.getProject().getName())
+                                        .strategytitle(sol.getStrategy().getTitle())
+                                        .strategyId(sol.getStrategy().getId())
+                                        .projectId(sol.getProject().getId())
+                                        .build();
+                            })
+                            .toList();
+
+                    return OrderHistoryDTO.builder()
+                            .orderId(order.getId())
+                            .merchantUid(order.getPaymentId())
+                            .buyerName(memberName)
+                            .totalPrice(order.getTotalPrice())
+                            .orderTitle(
+                                    order.getOrderItems().isEmpty() ? "구매 내역 없음" :
+                                            order.getOrderItems().get(0).getSolution().getTitle() +
+                                                    (order.getOrderItems().size() > 1 ? " 외 " + (order.getOrderItems().size() - 1) + "건" : "")
+                            )
+                            .createdAt(order.getCreatedAt()
+                                    .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분")))
+                            .receiptUrl(order.getReceiptUrl())
+                            .orderItems(solutionDTOList) // 변환된 리스트 주입
+                            .build();
+                })
+                .toList();
+
+        long totalCount = result.getTotalElements();
+
+        return PageResponseDTO.<OrderHistoryDTO>withAll()
+                .dtoList(dtoList)
+                .totalCount(totalCount)
+                .pageRequestDTO(pageRequestDTO)
+                .build();
+    }
+
 }

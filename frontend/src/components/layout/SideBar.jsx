@@ -148,6 +148,10 @@ const SideBar = ({ onNavigate }) => {
           <SideLink to={`/app/${brandId}/market/cart`} onNavigate={onNavigate}>
             장바구니
           </SideLink>
+
+          <SideLink to={`/app/${brandId}/market/history`} onNavigate={onNavigate}>
+            구매내역
+          </SideLink>
         </Section>
 
         {isAdminArea && (

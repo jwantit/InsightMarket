@@ -32,3 +32,13 @@ export const verifyPayment = async (paymentId, orderId) => {
         throw error;
     }
 };
+
+//결제내역 조회회-------------------------------------------------------
+
+export const findMember = async (pageRequest) => {
+    console.log("dd" + pageRequest)
+    const res = await jwtAxios.get(`${host}/list/member`, {
+      params: pageRequest
+    });
+    return res.data;
+  };
