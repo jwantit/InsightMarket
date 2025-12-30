@@ -2,6 +2,7 @@ import { useState } from "react";
 import { joinMember } from "../../api/memberApi";
 import { getCompanies } from "../../api/companyApi";
 import useCustomLogin from "../../hooks/useCustomLogin";
+import { getErrorMessage } from "../../util/errorUtil";
 
 const initState = {
   name: "",
@@ -57,7 +58,7 @@ const JoinComponent = () => {
       alert("회원가입 요청이 완료되었습니다!");
       moveToLogin();
     } catch (e) {
-      alert(e.response?.data?.message || "회원가입 실패");
+      alert(getErrorMessage(e, "회원가입 실패"));
     }
   };
 

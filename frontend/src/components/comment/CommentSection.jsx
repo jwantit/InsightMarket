@@ -3,12 +3,11 @@ import useComments from "../../hooks/comment/useComments";
 import { getCurrentMember } from "../../api/memberApi";
 import useCommentFileState from "../../hooks/comment/useCommentFileState";
 import CommentItem from "./CommentItem";
+import { getErrorMessage } from "../../util/errorUtil";
 
 const CommentSection = ({ brandId, boardId }) => {
-  const { tree, status, createComment, updateComment, deleteComment } = useComments(
-    brandId,
-    boardId
-  );
+  const { tree, status, createComment, updateComment, deleteComment } =
+    useComments(brandId, boardId);
   const [content, setContent] = useState("");
   const [parentId, setParentId] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -17,7 +16,7 @@ const CommentSection = ({ brandId, boardId }) => {
   const [replyContent, setReplyContent] = useState("");
   const [commentFiles, setCommentFiles] = useState([]);
   const [currentUserId, setCurrentUserId] = useState(null);
-  
+
   // 파일 상태 관리 훅
   const {
     getEditFiles,
@@ -56,17 +55,20 @@ const CommentSection = ({ brandId, boardId }) => {
     try {
       const files = getReplyFiles(targetCommentId);
       await createComment({
-        data: { content: content.trim(), parentCommentId: targetCommentId, keepFileIds: null },
+        data: {
+          content: content.trim(),
+          parentCommentId: targetCommentId,
+          keepFileIds: null,
+        },
         files: Array.from(files),
       });
       setReplyContent("");
       setParentId(null);
       clearReplyFiles(targetCommentId);
     } catch (error) {
-      alert("답글 등록에 실패했습니다. 다시 시도해주세요.");
+      alert(getErrorMessage(error, "답글 등록에 실패했습니다."));
     }
   };
-
 
   const handleEdit = (comment) => {
     if (editingId) {
@@ -106,10 +108,10 @@ const CommentSection = ({ brandId, boardId }) => {
     try {
       const files = getEditFiles(editingId);
       await updateComment(editingId, {
-        data: { 
-          content: editContent, 
+        data: {
+          content: editContent,
           keepFileIds: null,
-          writerId: editingComment?.writerId // @PreAuthorize를 위한 writerId
+          writerId: editingComment?.writerId, // @PreAuthorize를 위한 writerId
         },
         files: Array.from(files),
       });
@@ -118,7 +120,7 @@ const CommentSection = ({ brandId, boardId }) => {
       setEditContent("");
       clearEditFiles(editingId);
     } catch (error) {
-      alert("댓글 수정에 실패했습니다. 다시 시도해주세요.");
+      alert(getErrorMessage(error, "댓글 수정에 실패했습니다."));
     }
   };
 
@@ -153,14 +155,17 @@ const CommentSection = ({ brandId, boardId }) => {
                 reader.onload = (event) => {
                   const imageUrl = event.target.result;
                   const imageTag = `<img src="${imageUrl}" alt="${file.name}" style="max-width: 100%; height: auto; margin: 10px 0;" />`;
-                  setContent((prev) => prev + (prev ? '\n' : '') + imageTag);
+                  setContent((prev) => prev + (prev ? "\n" : "") + imageTag);
                 };
                 reader.readAsDataURL(file);
-                
+
                 // 파일도 함께 첨부
                 const dataTransfer = new DataTransfer();
                 dataTransfer.items.add(file);
-                setCommentFiles((prev) => [...prev, ...Array.from(dataTransfer.files)]);
+                setCommentFiles((prev) => [
+                  ...prev,
+                  ...Array.from(dataTransfer.files),
+                ]);
               }
             }
           }}
@@ -170,7 +175,7 @@ const CommentSection = ({ brandId, boardId }) => {
         />
         {commentFiles.length > 0 && (
           <div className="text-xs text-gray-600">
-            첨부된 파일: {commentFiles.map(f => f.name).join(", ")}
+            첨부된 파일: {commentFiles.map((f) => f.name).join(", ")}
           </div>
         )}
         <div className="flex items-center justify-between">
@@ -216,9 +221,13 @@ const CommentSection = ({ brandId, boardId }) => {
               originalCommentId={comment.commentId}
               currentUserId={currentUserId}
               replyFiles={getReplyFiles(comment.commentId)}
-              onReplyFilesChange={(updater) => setReplyFilesForComment(comment.commentId, updater)}
+              onReplyFilesChange={(updater) =>
+                setReplyFilesForComment(comment.commentId, updater)
+              }
               editFiles={getEditFiles(comment.commentId)}
-              onEditFilesChange={(updater) => setEditFilesForComment(comment.commentId, updater)}
+              onEditFilesChange={(updater) =>
+                setEditFilesForComment(comment.commentId, updater)
+              }
               getReplyFiles={getReplyFiles}
               setReplyFilesForComment={setReplyFilesForComment}
               getEditFiles={getEditFiles}

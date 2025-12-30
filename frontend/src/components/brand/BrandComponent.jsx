@@ -11,6 +11,7 @@ import BrandDetailComponent from "./BrandDetailComponent";
 import BrandFormComponent from "./BrandFormComponent";
 import { useDispatch } from "react-redux";
 import { setBrandList } from "../../store/slices/brandSlice";
+import { getErrorMessage } from "../../util/errorUtil";
 
 const initBrandForm = {
   name: "",
@@ -58,7 +59,7 @@ export default function BrandComponent() {
         )
       ); // Topbar용 (Redux)
     } catch (e) {
-      setErrorMsg(e?.message || "브랜드 목록을 불러오지 못했어요.");
+      setErrorMsg(getErrorMessage(e, "브랜드 목록을 불러오지 못했어요."));
     } finally {
       setLoadingList(false);
     }
@@ -108,7 +109,7 @@ export default function BrandComponent() {
       setScreen("DETAIL");
     } catch (e) {
       console.error("상세 정보 로드 오류:", e);
-      setErrorMsg(e?.message || "상세 정보를 불러오지 못했어요.");
+      setErrorMsg(getErrorMessage(e, "상세 정보를 불러오지 못했어요."));
       setScreen("LIST");
     } finally {
       setLoadingDetail(false);
@@ -154,7 +155,7 @@ export default function BrandComponent() {
       });
       setScreen("FORM");
     } catch (e) {
-      setErrorMsg(e?.message || "수정 화면을 열지 못했어요.");
+      setErrorMsg(getErrorMessage(e, "수정 화면을 열지 못했어요."));
       setScreen("LIST");
     } finally {
       setLoadingDetail(false);
@@ -223,9 +224,7 @@ export default function BrandComponent() {
       }
     } catch (e) {
       console.error("저장 오류:", e);
-      const errorMessage =
-        e?.response?.data?.message || e?.message || "저장에 실패했어요.";
-      setErrorMsg(errorMessage);
+      setErrorMsg(getErrorMessage(e, "저장에 실패했어요."));
     } finally {
       setSaving(false);
     }
@@ -241,7 +240,7 @@ export default function BrandComponent() {
         await fetchList();
         goList();
       } catch (e) {
-        setErrorMsg(e?.message || "삭제에 실패했어요.");
+        setErrorMsg(getErrorMessage(e, "삭제에 실패했어요."));
       } finally {
         setSaving(false);
       }
