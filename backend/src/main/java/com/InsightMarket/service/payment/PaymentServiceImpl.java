@@ -1,5 +1,7 @@
 package com.InsightMarket.service.payment;
 
+import com.InsightMarket.common.exception.ApiException;
+import com.InsightMarket.common.exception.ErrorCode;
 import com.InsightMarket.domain.member.Member;
 import com.InsightMarket.domain.order.OrderItem;
 import com.InsightMarket.domain.order.OrderStatus;
@@ -16,7 +18,6 @@ import com.InsightMarket.dto.solution.SolutionDTO;
 import com.InsightMarket.repository.member.MemberRepository;
 import com.InsightMarket.repository.payment.PaymentRepository;
 import com.InsightMarket.repository.solution.SolutionRepository;
-import com.InsightMarket.service.payment.PaymentService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,8 +46,6 @@ public class PaymentServiceImpl implements PaymentService {
     private final MemberRepository memberRepository;
     private final WebClient portOneWebClient;
 
-
-
     //목적 프론트-> 구매버튼 -> 백엔드 (주문서 제작)
     @Override
     @Transactional                       //회원 객체  ,  requestDTO {projectId , List[solutionId :n]}
@@ -61,7 +60,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         //멤버 이메일로 멤버 찾기
         Member memberFind = memberRepository.findByEmail(memberEmail)
-                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                 .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
         log.info("멤버 리파시토리 멤버찾기 " + memberFind);
 
 
@@ -86,7 +85,7 @@ public class PaymentServiceImpl implements PaymentService {
         for (OrderItemDTO itemDTO : requestDTO.getSolutions()){
             //솔루션 아이디에 해당하는 솔루션 찾기
             Solution solution = solutionRepository.findById(itemDTO.getSolutionId())
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 상품"));
+                    .orElseThrow(() -> new ApiException(ErrorCode.SOLUTION_NOT_FOUND));
             log.info("솔루션 찾기 " + solution);
 
             if (total == 0){ //첫번째 솔루션 이름가져오기
@@ -140,7 +139,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         // 해당 주문이 존재하는지 확인
         Orders order = paymentRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다. ID: " + orderId));
+                .orElseThrow(() -> new ApiException(ErrorCode.ORDER_NOT_FOUND));
 
         // 삭제 실행 (CascadeType.ALL에 의해 연관된 OrderItem도 같이 삭제됨)
         paymentRepository.delete(order);
@@ -166,7 +165,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         //검증을 위해 오더테이블 가져오기
         Orders orders = paymentRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 주문입니다."));
+                .orElseThrow(() -> new ApiException(ErrorCode.ORDER_NOT_FOUND));
 
 
         //{ 포트원에서 받는객체 ---------------------------------------------------------
@@ -198,13 +197,14 @@ public class PaymentServiceImpl implements PaymentService {
                     .bodyToMono(Void.class)
                     .block();
 
-            throw new IllegalStateException("결제 금액이 일치하지 않아 자동 환불되었습니다. 다시 시도해주세요.");
+            throw new ApiException(ErrorCode.PAYMENT_AMOUNT_MISMATCH);
         }
 
         //PAID일시 결제는 성공적으로 진행됐다.
         String status = (String) paymentResponse.get("status");
         if (!"PAID".equals(status)) { //PAID가 아닐시 결제는 안된상태
-            throw new IllegalStateException("결제가 완료되지 않은 상태입니다. 상태: " + status);
+            log.warn("Payment not completed. status={}", status);
+            throw new ApiException(ErrorCode.PAYMENT_NOT_COMPLETED);
         }
 
         String receiptUrl = (String) paymentResponse.get("receiptUrl");
@@ -255,7 +255,7 @@ public class PaymentServiceImpl implements PaymentService {
                 );
 
         Optional<Member> memberFind = memberRepository.findByEmail(memberEmail);
-        Member member = memberFind.orElseThrow(() -> new RuntimeException("해당 이메일의 유저를 찾을 수 없습니다."));
+        Member member = memberFind.orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
 
         String memberName = member.getName();
 
@@ -325,5 +325,4 @@ public class PaymentServiceImpl implements PaymentService {
                 .pageRequestDTO(pageRequestDTO)
                 .build();
     }
-
 }

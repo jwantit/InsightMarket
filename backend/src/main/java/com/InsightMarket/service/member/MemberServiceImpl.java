@@ -4,15 +4,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
+import com.InsightMarket.common.exception.ApiException;
+import com.InsightMarket.common.exception.ErrorCode;
 import com.InsightMarket.domain.company.Company;
 import com.InsightMarket.dto.member.*;
 import com.InsightMarket.repository.company.CompanyRepository;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +40,7 @@ public class MemberServiceImpl implements MemberService {
 
         //이메일 중복 체크
         if (memberRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+            throw new ApiException(ErrorCode.MEMBER_EMAIL_DUPLICATED);
         }
 
         Company company = null;
@@ -61,13 +59,13 @@ public class MemberServiceImpl implements MemberService {
         } else if (dto.getJoinType() == JoinType.JOIN_COMPANY) {
             // 기존 회사 가입
             company = companyRepository.findById(dto.getRequestedCompanyId())
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회사입니다."));
+                    .orElseThrow(() -> new ApiException(ErrorCode.COMPANY_NOT_FOUND));
 
             // 일반 회원은 USER
             role = SystemRole.USER;
 
         } else {
-            throw new IllegalArgumentException("올바르지 않은 가입 유형입니다.");
+            throw new ApiException(ErrorCode.INVALID_JOIN_TYPE);
         }
 
         Member member = Member.builder()
@@ -85,7 +83,7 @@ public class MemberServiceImpl implements MemberService {
         try {
             memberRepository.save(member);
         } catch (DataIntegrityViolationException e) {
-            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+            throw new ApiException(ErrorCode.MEMBER_EMAIL_DUPLICATED);
         }
     }
 
@@ -96,15 +94,15 @@ public class MemberServiceImpl implements MemberService {
         //approver : 현재 승인 유저
         Member approver = memberRepository
                 .findWithCompanyByEmail(currentUser.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
 
         //승인할 타겟 회원 조회
         Member target = memberRepository
                 .findById(targetMemberId)
-                .orElseThrow(() -> new IllegalArgumentException("승인할 회원이 존재하지 않습니다."));
+                .orElseThrow(() -> new ApiException(ErrorCode.TARGET_MEMBER_NOT_FOUND));
 
         if (target.isApproved()) {
-            throw new IllegalStateException("이미 승인된 회원입니다.");
+            throw new ApiException(ErrorCode.MEMBER_ALREADY_APPROVED);
         }
 
         SystemRole role = approver.getSystemRole();
@@ -122,11 +120,11 @@ public class MemberServiceImpl implements MemberService {
 
             // NEW_COMPANY 가입자는 승인 요청 없음 -> 건너뛰기 가능
             if (target.getRequestedCompany() == null) {
-                throw new IllegalStateException("승인할 대상이 없습니다.");
+                throw new ApiException(ErrorCode.NO_APPROVAL_TARGET);
             }
 
             if (!target.getRequestedCompany().equals(approver.getCompany())) {
-                throw new AccessDeniedException("다른 회사의 회원은 승인할 수 없습니다.");
+                throw new ApiException(ErrorCode.DIFFERENT_COMPANY_ACCESS);
             }
 
             target.changeIsApproved(true);
@@ -134,8 +132,6 @@ public class MemberServiceImpl implements MemberService {
             target.clearRequestedCompany();
             return;
         }
-
-
     }
 
     @Override
@@ -144,7 +140,7 @@ public class MemberServiceImpl implements MemberService {
         // 이메일로 DB Member 조회
         Member admin = memberRepository
                 .findWithCompanyByEmail(memberDTO.getEmail())
-                .orElseThrow();
+                .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
 
         // ADMIN : 전체 승인대기 멤버 조회
         if (admin.getSystemRole() == SystemRole.ADMIN) {
@@ -159,7 +155,7 @@ public class MemberServiceImpl implements MemberService {
                     .stream().map(MemberResponseDTO::from).toList();
         }
 
-        throw new AccessDeniedException("조회 권한이 없습니다.");
+        throw new ApiException(ErrorCode.ACCESS_DENIED);
     }
 
     @Override
@@ -173,9 +169,7 @@ public class MemberServiceImpl implements MemberService {
 
         // 기존의 회원
         if (result.isPresent()) {
-            MemberDTO memberDTO = entityToDTO(result.get());
-
-            return memberDTO;
+            return entityToDTO(result.get());
         }
 
         // 회원이 아니었다면
@@ -184,17 +178,14 @@ public class MemberServiceImpl implements MemberService {
         Member socialMember = makeSocialMember(email);
         memberRepository.save(socialMember);
 
-        MemberDTO memberDTO = entityToDTO(socialMember);
-
-        return memberDTO;
+        return entityToDTO(socialMember);
     }
 
     @Override
     public void modifyMember(MemberModifyDTO memberModifyDTO) {
 
-        Optional<Member> result = memberRepository.findByEmail(memberModifyDTO.getEmail());
-
-        Member member = result.orElseThrow();
+        Member member = memberRepository.findByEmail(memberModifyDTO.getEmail())
+                .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
 
         member.changePassword(passwordEncoder.encode(memberModifyDTO.getPassword()));
         member.changeIsSocial(false);
@@ -215,13 +206,13 @@ public class MemberServiceImpl implements MemberService {
             try {
                 roleEnum = SystemRole.valueOf(role.trim());
             } catch (Exception e) {
-                throw new IllegalArgumentException("role 값이 올바르지 않습니다.");
+                throw new ApiException(ErrorCode.INVALID_REQUEST);
             }
         }
 
         List<Member> members;
 
-        // ADMIN은 전체(원하면 회사 제한도 가능)
+        // ADMIN은 전체
         if (requester.getSystemRole() == SystemRole.ADMIN) {
             members = memberRepository.searchMembers(keyword, expired, roleEnum);
         } else {
@@ -245,20 +236,14 @@ public class MemberServiceImpl implements MemberService {
         Member requester = getRequester(requesterDTO);
         checkAdmin(requester);
 
-        Member target = memberRepository.findById(targetMemberId).orElseThrow();
+        Member target = memberRepository.findById(targetMemberId)
+                .orElseThrow(() -> new ApiException(ErrorCode.TARGET_MEMBER_NOT_FOUND));
 
         checkSameCompanyOrAdmin(requester, target);
 
-        // 본인 role 변경 방지(추천)
         if (requester.getId().equals(target.getId())) {
-            throw new IllegalStateException("본인 권한은 변경할 수 없습니다.");
+            throw new ApiException(ErrorCode.SELF_ROLE_CHANGE_FORBIDDEN);
         }
-
-        // COMPANY_ADMIN이 COMPANY_ADMIN 승격 못하게 막기 -> 팀과 상의 후 결정
-        //        if (requester.getSystemRole() == SystemRole.COMPANY_ADMIN &&
-        //                nextRole == SystemRole.COMPANY_ADMIN) {
-        //            throw new AccessDeniedException("회사 관리자는 다른 사용자를 COMPANY_ADMIN으로 승격할 수 없습니다.");
-        //        }
 
         target.changeSystemRole(nextRole);
     }
@@ -269,13 +254,13 @@ public class MemberServiceImpl implements MemberService {
         Member requester = getRequester(requesterDTO);
         checkAdmin(requester);
 
-        Member target = memberRepository.findById(targetMemberId).orElseThrow();
+        Member target = memberRepository.findById(targetMemberId)
+                .orElseThrow(() -> new ApiException(ErrorCode.TARGET_MEMBER_NOT_FOUND));
 
         checkSameCompanyOrAdmin(requester, target);
 
-        // 본인 탈퇴 처리 방지
         if (requester.getId().equals(target.getId())) {
-            throw new IllegalStateException("본인 계정은 탈퇴 처리할 수 없습니다.");
+            throw new ApiException(ErrorCode.SELF_EXPIRE_FORBIDDEN);
         }
 
         target.changeIsExpired(isExpired);
@@ -286,7 +271,7 @@ public class MemberServiceImpl implements MemberService {
         String kakaoGetUserURL = "https://kapi.kakao.com/v2/user/me";
 
         if (accessToken == null) {
-            throw new RuntimeException("Access Token is null");
+            throw new ApiException(ErrorCode.INVALID_ACCESS_TOKEN);
         }
         RestTemplate restTemplate = new RestTemplate();
 
@@ -349,23 +334,24 @@ public class MemberServiceImpl implements MemberService {
     }
 
     private Member getRequester(MemberDTO requesterDTO) {
-        return memberRepository.findByEmail(requesterDTO.getEmail()).orElseThrow();
+        return memberRepository.findByEmail(requesterDTO.getEmail())
+                .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
     }
 
     private void checkAdmin(Member requester) {
         if (requester.getSystemRole() != SystemRole.ADMIN &&
                 requester.getSystemRole() != SystemRole.COMPANY_ADMIN) {
-            throw new AccessDeniedException("권한이 없습니다.");
+            throw new ApiException(ErrorCode.ACCESS_DENIED);
         }
     }
 
     private void checkSameCompanyOrAdmin(Member requester, Member target) {
         if (requester.getSystemRole() == SystemRole.ADMIN) return;
         if (requester.getCompany() == null || target.getCompany() == null) {
-            throw new AccessDeniedException("회사 정보가 없습니다.");
+            throw new ApiException(ErrorCode.COMPANY_NOT_FOUND);
         }
         if (!requester.getCompany().getId().equals(target.getCompany().getId())) {
-            throw new AccessDeniedException("다른 회사 멤버는 관리할 수 없습니다.");
+            throw new ApiException(ErrorCode.DIFFERENT_COMPANY_ACCESS);
         }
     }
 }

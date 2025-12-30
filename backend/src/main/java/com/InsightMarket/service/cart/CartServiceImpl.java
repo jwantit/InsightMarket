@@ -1,6 +1,8 @@
 package com.InsightMarket.service.cart;
 
 
+import com.InsightMarket.common.exception.ApiException;
+import com.InsightMarket.common.exception.ErrorCode;
 import com.InsightMarket.domain.cart.Cart;
 import com.InsightMarket.domain.cart.CartItem;
 import com.InsightMarket.domain.project.Project;
@@ -45,7 +47,7 @@ public class CartServiceImpl implements CartService {
             Solution solution = solutionRepository
                     .findSolutionOfProject(solutionid, projectid)
                     .orElseThrow(() ->
-                            new RuntimeException("해당 프로젝트에 속한 솔루션이 아닙니다.")
+                            new ApiException(ErrorCode.SOLUTION_NOT_IN_PROJECT)
                     );
 
             cartItem = CartItem.builder()
@@ -73,7 +75,7 @@ public class CartServiceImpl implements CartService {
                     log.info("해당 프로젝트의 장바구니가 없어 새로 생성합니다.");
 
                     Project project = projectRepository.findById(projectid)
-                            .orElseThrow(() -> new RuntimeException("프로젝트를 찾을 수 없습니다."));
+                            .orElseThrow(() ->  new ApiException(ErrorCode.PROJECT_NOT_FOUND));
 
                     return cartRepository.save(Cart.builder().project(project).build());
                 });

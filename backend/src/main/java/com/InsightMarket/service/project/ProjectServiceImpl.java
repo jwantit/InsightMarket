@@ -1,5 +1,7 @@
 package com.InsightMarket.service.project;
 
+import com.InsightMarket.common.exception.ApiException;
+import com.InsightMarket.common.exception.ErrorCode;
 import com.InsightMarket.domain.brand.Brand;
 import com.InsightMarket.domain.keyword.Keyword;
 import com.InsightMarket.domain.keyword.ProjectKeyword;
@@ -25,7 +27,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
-
 public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
@@ -37,7 +38,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Long create(Long brandId, ProjectRequestDTO req) {
         Brand brand = brandRepository.findById(brandId)
-                .orElseThrow(() -> new IllegalArgumentException("brand not found"));
+                .orElseThrow(() -> new ApiException(ErrorCode.BRAND_NOT_FOUND));
 
         validateDate(req.getStartDate(), req.getEndDate());
 
@@ -76,7 +77,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional(readOnly = true)
     public ProjectResponseDTO detail(Long brandId, Long projectId) {
         Project p = projectRepository.findByIdAndBrandId(projectId, brandId)
-                .orElseThrow(() -> new IllegalArgumentException("project not found"));
+                .orElseThrow(() -> new ApiException(ErrorCode.PROJECT_NOT_FOUND));
 
         List<ProjectKeywordResponseDTO> keywords = projectKeywordRepository.findByProjectId(projectId).stream()
                 .map(pk -> ProjectKeywordResponseDTO.builder()
@@ -100,7 +101,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void update(Long brandId, Long projectId, ProjectRequestDTO req) {
         Project p = projectRepository.findByIdAndBrandId(projectId, brandId)
-                .orElseThrow(() -> new IllegalArgumentException("project not found"));
+                .orElseThrow(() -> new ApiException(ErrorCode.PROJECT_NOT_FOUND));
 
         validateDate(req.getStartDate(), req.getEndDate());
 
@@ -113,7 +114,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void delete(Long brandId, Long projectId) {
         Project p = projectRepository.findByIdAndBrandId(projectId, brandId)
-                .orElseThrow(() -> new IllegalArgumentException("project not found"));
+                .orElseThrow(() -> new ApiException(ErrorCode.PROJECT_NOT_FOUND));
 
         projectKeywordRepository.deleteAll(projectKeywordRepository.findByProjectId(p.getId()));
         projectRepository.delete(p);
@@ -160,7 +161,7 @@ public class ProjectServiceImpl implements ProjectService {
                 final Long kid = reqKeywordId;
                 // B) 기존 keywordId 루트: 존재 검증(선택)
                 keywordRepository.findById(keywordId)
-                        .orElseThrow(() -> new IllegalArgumentException("keyword not found: " + kid));
+                        .orElseThrow(() -> new ApiException(ErrorCode.KEYWORD_NOT_FOUND));
             }
 
             keepIds.add(keywordId);
@@ -170,7 +171,7 @@ public class ProjectServiceImpl implements ProjectService {
             if (pk == null) {
                 final Long kid = reqKeywordId;
                 Keyword keyword = keywordRepository.findById(keywordId)
-                        .orElseThrow(() -> new IllegalArgumentException("keyword not found: " + kid));
+                        .orElseThrow(() -> new ApiException(ErrorCode.KEYWORD_NOT_FOUND));
 
                 projectKeywordRepository.save(ProjectKeyword.builder()
                         .project(project)
@@ -192,7 +193,11 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private void validateDate(LocalDate start, LocalDate end) {
-        if (start == null || end == null) throw new IllegalArgumentException("date required");
-        if (end.isBefore(start)) throw new IllegalArgumentException("endDate must be >= startDate");
+        if (start == null || end == null) {
+            throw new ApiException(ErrorCode.PROJECT_DATE_INVALID);
+        }
+        if (end.isBefore(start)) {
+            throw new ApiException(ErrorCode.PROJECT_DATE_INVALID);
+        }
     }
 }

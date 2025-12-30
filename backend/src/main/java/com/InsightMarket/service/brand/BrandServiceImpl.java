@@ -1,5 +1,7 @@
 package com.InsightMarket.service.brand;
 
+import com.InsightMarket.common.exception.ApiException;
+import com.InsightMarket.common.exception.ErrorCode;
 import com.InsightMarket.domain.brand.Brand;
 import com.InsightMarket.domain.brand.BrandMember;
 import com.InsightMarket.domain.brand.BrandRole;
@@ -92,7 +94,7 @@ public class BrandServiceImpl implements BrandService {
                         Collectors.mapping(bk -> bk.getKeyword().getText(), Collectors.toList())
                 ));
 
-        // [추가] 경쟁사 한 번에
+        // 경쟁사 한 번에 조회
         List<Competitor> competitors = competitorRepository.findByBrandIn(brands);
 
         // brandId -> competitors
@@ -144,7 +146,7 @@ public class BrandServiceImpl implements BrandService {
 
         // 1) 이 멤버가 해당 브랜드에 속해있는지 확인 + role 가져오기
         BrandMember brandMember = brandMemberRepository.findByMemberIdAndBrandId(member.getId(), brandId)
-                .orElseThrow(() -> new IllegalArgumentException("브랜드 접근 권한이 없습니다."));
+                .orElseThrow(() ->  new ApiException(ErrorCode.ACCESS_DENIED));
 
         Brand brand = brandMember.getBrand();
 
@@ -170,7 +172,7 @@ public class BrandServiceImpl implements BrandService {
                             Collectors.mapping(ck -> ck.getKeyword().getText(), Collectors.toList())
                     ));
 
-            competitorIdToKeywordTexts.putAll(grouped); // ✅ 재할당 X
+            competitorIdToKeywordTexts.putAll(grouped); // 재할당 X
         }
 
         List<CompetitorResponseDTO> competitorDTOs = competitors.stream()
@@ -199,7 +201,7 @@ public class BrandServiceImpl implements BrandService {
     public void updateBrand(Long brandId, BrandRequestDTO brandRequestDTO) {
 
         Brand brand = brandRepository.findById(brandId)
-                .orElseThrow(() -> new IllegalArgumentException("브랜드가 존재하지 않습니다."));
+                .orElseThrow(() -> new ApiException(ErrorCode.BRAND_NOT_FOUND));
 
         brand.changeName(brandRequestDTO.getName());
         brand.changeDescription(brandRequestDTO.getDescription());
@@ -215,7 +217,7 @@ public class BrandServiceImpl implements BrandService {
     public void deleteBrand(Long brandId) {
 
         Brand brand = brandRepository.findById(brandId)
-                .orElseThrow(() -> new IllegalArgumentException("브랜드가 존재하지 않습니다."));
+                .orElseThrow(() -> new ApiException(ErrorCode.BRAND_NOT_FOUND));
 
         // 1) BrandKeyword 삭제
         brandKeywordRepository.deleteByBrand(brand);
@@ -252,7 +254,7 @@ public class BrandServiceImpl implements BrandService {
     private Keyword getOrCreateKeyword(String raw) {
         String text = normalize(raw);
         if (text == null || text.isBlank()) {
-            throw new IllegalArgumentException("keyword empty");
+            throw new ApiException(ErrorCode.INVALID_REQUEST);
         }
         return keywordRepository.findByText(text)
                 .orElseGet(() -> keywordRepository.save(Keyword.builder().text(text).build()));
@@ -337,7 +339,7 @@ public class BrandServiceImpl implements BrandService {
                 competitor = existingById.get(id);
                 if (competitor == null) {
                     // 다른 브랜드 competitorId로 삭제하는거 방지
-                    throw new IllegalArgumentException("잘못된 competitorId 입니다: " + id);
+                    throw new ApiException(ErrorCode.COMPETITOR_NOT_FOUND);
                 }
             } else {
                 competitor = Competitor.builder()
