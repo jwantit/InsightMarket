@@ -19,7 +19,7 @@ QDRANT_URL = "http://localhost:6333"
 COLLECTION = "im_chunks"
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
-OLLAMA_MODEL = "qwen3:8b"
+OLLAMA_MODEL = "qwen3:1.7b"
 
 EMBED_MODEL_NAME = "nlpai-lab/KoE5"
 

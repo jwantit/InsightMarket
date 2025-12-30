@@ -16,25 +16,33 @@ desktop.ini
 **/out/
 
 ################################
-# Backend - Spring Boot (Gradle)
+# Java / Kotlin compiled artifacts
 ################################
-backend/target/
+*.class
+
+################################
+# Backend - Spring Boot (Gradle / Maven / IDE outputs)
+################################
+# Gradle
+.gradle/
+**/build/
+
+# Maven (혹시 섞여있을 때 대비)
+**/target/
+
+# IDE / tool generated
+**/bin/
 backend/.settings/
 backend/.classpath
 backend/.project
-backend/.gradle/
-.gradle/
-**/build/
 
 ################################
 # Frontend - Node / Vite / React
 ################################
-frontend/node_modules/
-frontend/dist/
-frontend/.env
-frontend/.env.local
+**/node_modules/
+**/dist/
+**/.vite/
 .cache/
-.vite/
 .pnpm-store/
 .eslintcache
 *.tsbuildinfo
@@ -43,27 +51,28 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# env (로컬 전용이면 ignore 유지)
+frontend/.env
+frontend/.env.local
+
 ################################
 # Python
 ################################
 .venv/
 venv/
 env/
-
 __pycache__/
 *.py[cod]
 *.pyd
 *.so
-
 .pytest_cache/
 .coverage
 htmlcov/
 .mypy_cache/
 .ruff_cache/
-
 .ipynb_checkpoints/
 
-# Python ML caches (optional but recommended)
+# Python ML caches (optional)
 **/.cache/huggingface/
 **/.cache/torch/
 

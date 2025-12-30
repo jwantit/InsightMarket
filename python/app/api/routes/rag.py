@@ -5,6 +5,7 @@
 # ============================================================
 
 import time
+import traceback
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from sentence_transformers import SentenceTransformer
@@ -18,7 +19,7 @@ router = APIRouter(prefix="/rag", tags=["rag"])
 QDRANT_URL = "http://localhost:6333"
 COLLECTION = "im_chunks"
 OLLAMA_URL = "http://localhost:11434/api/generate"
-OLLAMA_MODEL = "qwen3:8b"
+OLLAMA_MODEL = "qwen3:1.7b"
 EMBED_MODEL_NAME = "nlpai-lab/KoE5"
 
 # ---- 모델은 서버 시작 시 1번만 로드(매 요청 로드 금지) ----
@@ -36,25 +37,50 @@ def get_embed_model() -> SentenceTransformer:
 
 @router.post("/ask")
 def ask(req: RagAskRequest):
-    embed_model = get_embed_model()
+    try:
+        print(f"[api][rag] /ask request brandId={req.brandId} topK={req.topK} questionLen={len(req.question) if req.question else 0}")
+        
+        embed_model = get_embed_model()
 
-    result = run_rag(
-        question=req.question,
-        brand_id=req.brandId,
-        qdrant_url=QDRANT_URL,
-        collection=COLLECTION,
-        embed_model=embed_model,
-        ollama_url=OLLAMA_URL,
-        ollama_model=OLLAMA_MODEL,
-        top_k=req.topK,
-        trace="api",
-        ollama_timeout_sec=600,
-        ollama_options=None,
-    )
+        result = run_rag(
+            question=req.question,
+            brand_id=req.brandId,
+            qdrant_url=QDRANT_URL,
+            collection=COLLECTION,
+            embed_model=embed_model,
+            ollama_url=OLLAMA_URL,
+            ollama_model=OLLAMA_MODEL,
+            top_k=req.topK,
+            trace="api",
+            ollama_timeout_sec=600,
+            ollama_options=None,
+        )
 
-    # ✅ 응답을 항상 JSONResponse로 감싸서 charset 강제
-    return JSONResponse(
-        content=result,
-        media_type="application/json",
-        headers={"Content-Type": "application/json; charset=utf-8"},
-    )
+        print(f"[api][rag] /ask response ok={result.get('ok', False)}")
+        
+        # ✅ 응답을 항상 JSONResponse로 감싸서 charset 강제
+        return JSONResponse(
+            content=result,
+            media_type="application/json",
+            headers={"Content-Type": "application/json; charset=utf-8"},
+        )
+    except Exception as e:
+        error_msg = str(e)
+        error_trace = traceback.format_exc()
+        print(f"[api][rag] /ask ERROR: {error_msg}")
+        print(f"[api][rag] /ask TRACEBACK:\n{error_trace}")
+        
+        # 에러 발생 시에도 ok=false 형태로 반환
+        error_result = {
+            "ok": False,
+            "reason": f"server_error: {error_msg}",
+            "raw": None,
+            "sources": [],
+        }
+        
+        return JSONResponse(
+            content=error_result,
+            media_type="application/json",
+            headers={"Content-Type": "application/json; charset=utf-8"},
+            status_code=500,
+        )
