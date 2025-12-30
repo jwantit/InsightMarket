@@ -6,7 +6,6 @@
 #   3) 컬렉션 dim 불일치 시 자동 재생성
 # [로그] 경로/첫 row/dim/업서트 수/컬렉션 상태 출력
 # ============================================================
-import hashlib
 import json
 import re
 import time
@@ -17,7 +16,6 @@ from typing import Any, Dict, List
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams, PointStruct
 from sentence_transformers import SentenceTransformer
-from app.utils.timer import timer
 
 # ---------------------------
 # [설정]
@@ -41,6 +39,18 @@ def log(msg: str) -> None:
 
 
 # ---------------------------
+# [간단 타이머] 외부 모듈 없이 elapsed 로그
+# ---------------------------
+def t_start() -> float:
+    return time.perf_counter()
+
+
+def t_end(label: str, t0: float) -> None:
+    elapsed = time.perf_counter() - t0
+    log(f"{label} end elapsed_sec={elapsed:.3f}")
+
+
+# ---------------------------
 # [텍스트 정제]
 # ---------------------------
 def clean_text(text: str) -> str:
@@ -54,7 +64,11 @@ def clean_text(text: str) -> str:
 # ---------------------------
 # [청킹] 문자 기반(초기 MVP용)
 # ---------------------------
-def simple_chunk(text: str, max_chars: int = CHUNK_MAX_CHARS, overlap: int = CHUNK_OVERLAP) -> List[str]:
+def simple_chunk(
+    text: str,
+    max_chars: int = CHUNK_MAX_CHARS,
+    overlap: int = CHUNK_OVERLAP,
+) -> List[str]:
     text = clean_text(text)
     if not text:
         return []
@@ -134,22 +148,25 @@ def ensure_collection(client: QdrantClient, collection_name: str, dim: int) -> N
     else:
         log(f"collection ready '{collection_name}' (dim={current_dim or dim})")
 
+
 # ---------------------------
 # [ID] deterministic point id
 # - 같은 데이터는 항상 같은 id
 # - 재인덱싱 시 중복 누적 방지
 # ---------------------------
 def make_point_id(base_payload: dict, row_idx: int, chunk_index: int, chunk_text: str) -> str:
-    key = "|".join([
-        str(base_payload.get("brandId") or ""),
-        str(base_payload.get("source") or ""),
-        str(base_payload.get("publishedAt") or ""),
-        str(base_payload.get("url") or ""),
-        str(base_payload.get("title") or ""),
-        str(row_idx),
-        str(chunk_index),
-        chunk_text.strip(),
-    ])
+    key = "|".join(
+        [
+            str(base_payload.get("brandId") or ""),
+            str(base_payload.get("source") or ""),
+            str(base_payload.get("publishedAt") or ""),
+            str(base_payload.get("url") or ""),
+            str(base_payload.get("title") or ""),
+            str(row_idx),
+            str(chunk_index),
+            chunk_text.strip(),
+        ]
+    )
     # deterministic UUID (Qdrant에서 허용)
     return str(uuid.uuid5(uuid.NAMESPACE_URL, key))
 
@@ -163,35 +180,35 @@ def main() -> None:
     log("run start")
 
     # 1) Qdrant 연결
-    # [왜?] 벡터/페이로드를 저장할 검색 DB(Qdrant)에 접속
-    with timer("qdrant_connect", log):
-        client = QdrantClient(url=QDRANT_URL)
+    t0 = t_start()
+    client = QdrantClient(url=QDRANT_URL)
+    t_end("qdrant_connect", t0)
     log(f"Qdrant URL={QDRANT_URL}")
 
     # 2) 임베딩 모델 로드
-    # [왜?] 텍스트를 '의미 벡터'로 바꿔서 의미검색이 가능해짐
-    with timer("load_embed_model", log):
-        log(f"loading embed model: {EMBED_MODEL_NAME}")
-        embed_model = SentenceTransformer(EMBED_MODEL_NAME)
+    t0 = t_start()
+    log(f"loading embed model: {EMBED_MODEL_NAME}")
+    embed_model = SentenceTransformer(EMBED_MODEL_NAME)
+    t_end("load_embed_model", t0)
     log("embed model loaded")
 
     # 3) 임베딩 차원(dim) 자동 감지
-    # [왜?] Qdrant 컬렉션 vectors.size와 임베딩 dim이 다르면 업서트가 실패함
-    with timer("detect_embedding_dim", log):
-        test_vec = embed_model.encode(["passage: 테스트"], normalize_embeddings=True)[0]
-        dim = len(test_vec)
+    t0 = t_start()
+    test_vec = embed_model.encode(["passage: 테스트"], normalize_embeddings=True)[0]
+    dim = len(test_vec)
+    t_end("detect_embedding_dim", t0)
     log(f"embedding dim={dim}")
 
     # 4) 컬렉션 준비(없으면 생성 / dim 다르면 재생성)
-    # [왜?] 컬렉션이 없으면 404, dim이 다르면 dimension mismatch로 터짐
-    with timer("ensure_collection", log):
-        ensure_collection(client, COLLECTION, dim)
+    t0 = t_start()
+    ensure_collection(client, COLLECTION, dim)
+    t_end("ensure_collection", t0)
 
     # 5) JSONL 로드
-    # [왜?] 더미 데이터(근거 텍스트)를 읽어서 인덱싱 재료로 사용
     log(f"DUMMY_PATH absolute = {DUMMY_PATH.resolve()}")
-    with timer("load_jsonl", log):
-        rows = load_jsonl(DUMMY_PATH)
+    t0 = t_start()
+    rows = load_jsonl(DUMMY_PATH)
+    t_end("load_jsonl", t0)
 
     if not rows:
         log("no rows. exit.")
@@ -203,52 +220,55 @@ def main() -> None:
     log(f"loaded rows={len(rows)} from {DUMMY_PATH}")
 
     # 6) rows → chunks → points 준비(청킹 + 임베딩)
-    # [왜?] Qdrant에 넣는 최소 단위는 Point(vector + payload)
-    with timer("build_points(chunk+embed)", log):
-        points: List[PointStruct] = []
-        total_chunks = 0
+    t0 = t_start()
+    points: List[PointStruct] = []
+    total_chunks = 0
 
-        for row_idx, r in enumerate(rows):
-            text = r.get("text", "")
-            chunks = simple_chunk(text)
-            if not chunks:
-                continue
+    for row_idx, r in enumerate(rows):
+        text = r.get("text", "")
+        chunks = simple_chunk(text)
+        if not chunks:
+            continue
 
-            total_chunks += len(chunks)
+        total_chunks += len(chunks)
 
-            # payload 기본 필드(필터/출처 표시용)
-            base_payload = {
-                "brandId": r.get("brandId"),
-                "brandName": r.get("brandName"),
-                "source": r.get("source"),
-                "publishedAt": r.get("publishedAt"),
-                "url": r.get("url"),
-                "title": r.get("title"),
-            }
+        # payload 기본 필드(필터/출처 표시용)
+        base_payload = {
+            "brandId": r.get("brandId"),
+            "brandName": r.get("brandName"),
+            "source": r.get("source"),
+            "publishedAt": r.get("publishedAt"),
+            "url": r.get("url"),
+            "title": r.get("title"),
+        }
 
-            # chunk를 한 번에 배치 임베딩(속도/일관성)
-            vecs = embed_model.encode(
-                [f"passage: {c}" for c in chunks],
-                normalize_embeddings=True
-            )
+        # chunk를 한 번에 배치 임베딩(속도/일관성)
+        vecs = embed_model.encode(
+            [f"passage: {c}" for c in chunks],
+            normalize_embeddings=True,
+        )
 
-            # chunk별로 point 생성
-            for ci, (chunk_text, vec) in enumerate(zip(chunks, vecs)):
-                payload = dict(base_payload)
-                payload.update({
+        # chunk별로 point 생성
+        for ci, (chunk_text, vec) in enumerate(zip(chunks, vecs)):
+            payload = dict(base_payload)
+            payload.update(
+                {
                     "chunkIndex": ci,
                     "chunkText": chunk_text,
-                })
+                }
+            )
 
-                pid = make_point_id(base_payload, row_idx, ci, chunk_text)
+            pid = make_point_id(base_payload, row_idx, ci, chunk_text)
 
-                points.append(
-                    PointStruct(
-                        id=pid,
-                        vector=vec.tolist(),
-                        payload=payload,
-                    )
+            points.append(
+                PointStruct(
+                    id=pid,
+                    vector=vec.tolist(),
+                    payload=payload,
                 )
+            )
+
+    t_end("build_points(chunk+embed)", t0)
 
     log(f"prepared points={len(points)} total_chunks={total_chunks}")
 
@@ -259,15 +279,15 @@ def main() -> None:
         return
 
     # 7) upsert(Qdrant 저장)
-    # [왜?] 인덱싱 완료 = Qdrant에 vector+payload가 저장되어 검색 가능 상태가 됨
-    with timer("qdrant_upsert", log):
-        client.upsert(collection_name=COLLECTION, points=points, wait=True)
+    t0 = t_start()
+    client.upsert(collection_name=COLLECTION, points=points, wait=True)
+    t_end("qdrant_upsert", t0)
     log("upsert done")
 
     # 8) 컬렉션 상태 확인
-    # [왜?] points_count 증가/green 상태로 정상 적재 확인
-    with timer("qdrant_get_collection", log):
-        info = client.get_collection(COLLECTION)
+    t0 = t_start()
+    info = client.get_collection(COLLECTION)
+    t_end("qdrant_get_collection", t0)
     log(f"collection status={info.status} points_count={info.points_count}")
 
     total_sec = time.perf_counter() - run_t0
