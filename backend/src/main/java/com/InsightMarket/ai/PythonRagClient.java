@@ -1,5 +1,6 @@
 package com.InsightMarket.ai;
 
+import com.InsightMarket.ai.scheduling.ProjectKeywordIdNameDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,4 +59,36 @@ public class PythonRagClient {
                 .timeout(Duration.ofSeconds(timeoutSec))
                 .block();
     }
+
+
+    //스케줄러 ~~ 프로젝트 키워드 -------------------------------------------------------
+    public void collect(String type, Long id, String keyword) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("type", type);      // "BRAND" 또는 "KEYWORD"
+        body.put("keyword", keyword);    // 유튜브에 검색할 실제 텍스트
+
+        if ("BRAND".equals(type)) {
+            body.put("brandId", id);
+        } else if ("PROJECT".equals(type)) {
+            body.put("projectKeywordId", id);
+        }
+
+        log.info("[PythonRagClient] 수집 요청 전송 -> 분류: {}, ID: {}, 검색어: {}", type, id, keyword);
+
+        webClientBuilder
+                .baseUrl(pythonBaseUrl)
+                .build()
+                .post()
+                .uri("api/collect")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .timeout(Duration.ofSeconds(timeoutSec))
+                .subscribe(
+                        response -> log.info("[Python] 수집 요청 응답 성공: {}", response),
+                        error -> log.error("[Python] 수집 요청 실패: {}", error.getMessage())
+                );
+    }
+    //-----------------------------
 }

@@ -1,3 +1,4 @@
+
 # app/main.py
 # ✅ FastAPI 엔트리: 라우터 등록 + 로깅 + TraceId 미들웨어 + (자동) Warmup
 
@@ -13,9 +14,11 @@ from app.api.routes.health import router as health_router
 from app.api.routes.rag import router as rag_router
 from app.api.routes.warmup import router as warmup_router
 
-# ✅ rag 라우트의 싱글톤 embed_model 로더 재사용
-from app.api.routes.rag import get_embed_model
-from app.config.settings import settings
+
+# ✅ rag 라우트의 싱글톤 embed_model 로더 및 Ollama 설정 재사용
+from app.api.routes.rag import get_embed_model, OLLAMA_URL, OLLAMA_MODEL
+from app.api.routes.collectBatchScheduler.scheduler.scheduler import api_router as post_scheduler
+
 
 class TraceIdFilter(logging.Filter):
     """로그 포맷에 traceId가 항상 들어가도록 보정"""
@@ -118,3 +121,5 @@ async def trace_id_middleware(request: Request, call_next):
 app.include_router(health_router, tags=["health"])
 app.include_router(rag_router, tags=["rag"])
 app.include_router(warmup_router, tags=["internal"])
+app.include_router(post_scheduler, tags=["api"])
+
