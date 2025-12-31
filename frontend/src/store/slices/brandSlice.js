@@ -4,7 +4,7 @@ const initialState = {
   brandId: null, // 브랜드 아이디
   brandName: null, // 브랜드 이름
   role: null, // 역할 (BRAND_ADMIN / MARKETER)
-  brandList: [], //브랜드 리스트
+  brandList: null, //브랜드 리스트 (null: 로드 전, []: 로드 후 빈 배열)
 };
 
 const brandSlice = createSlice({

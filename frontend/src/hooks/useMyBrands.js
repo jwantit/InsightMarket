@@ -6,7 +6,7 @@ import { setBrandList } from "../store/slices/brandSlice";
 const useMyBrands = () => {
   const dispatch = useDispatch();
   const brands = useSelector((state) => state.brandSlice.brandList);
-  const loading = brands.length === 0;
+  const loading = brands === null || brands === undefined;
 
   const fetch = async () => {
     const data = await getBrandList();
@@ -24,6 +24,6 @@ const useMyBrands = () => {
     fetch();
   }, []);
 
-  return { brands, loading, refreshBrands: fetch };
+  return { brands: brands || [], loading, refreshBrands: fetch };
 };
 export default useMyBrands;
