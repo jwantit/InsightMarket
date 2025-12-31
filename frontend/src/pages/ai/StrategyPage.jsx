@@ -9,12 +9,13 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { askAiInsight } from "../../api/insightAiApi";
+import { getErrorMessage } from "../../util/errorUtil";
 
 const StrategyPage = () => {
   const { brandId } = useParams();
 
-  const [topK, setTopK] = useState(5);
-  const [question, setQuestion] = useState("최근 반응 기반으로 문제/해결책을 추천해줘");
+  const [topK, setTopK] = useState(3);
+  const [question, setQuestion] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [traceId, setTraceId] = useState(null);
@@ -41,12 +42,13 @@ const StrategyPage = () => {
     } catch (e) {
       console.log("[StrategyPage] error", e);
 
+      // Spring ErrorResponse 포맷 우선 처리 (code, message, timestamp)
+      // 없으면 Python 응답의 reason 필드, 그 외 일반 에러 메시지
       const msg =
+        getErrorMessage(e, null) ||
         e?.response?.data?.reason ||
-        e?.response?.data?.message ||
         e?.response?.data?.detail ||
-        e?.message ||
-        "Unknown error";
+        "요청 처리 중 오류가 발생했습니다.";
 
       setError(msg);
     } finally {
@@ -104,14 +106,17 @@ const StrategyPage = () => {
       <div className="space-y-4">
         <div className="grid gap-4 max-w-3xl">
           <label className="text-sm font-medium text-gray-700">
-            질문
+            질문 <span className="text-red-500">*</span>
             <textarea
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               rows={4}
               className="mt-2 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
-              placeholder="예) 가격이 비싸다는 불만이 많은데, 원인과 해결책을 제안해줘"
+              placeholder="예) 가격이 비싸다는 불만이 많은데, 원인과 해결책을 제안해줘&#10;예) 최근 반응 기반으로 문제/해결책을 추천해줘"
             />
+            {!question?.trim() && (
+              <p className="mt-1 text-xs text-gray-500">질문을 입력해주세요.</p>
+            )}
           </label>
 
           <div className="flex items-center gap-4">
@@ -121,14 +126,14 @@ const StrategyPage = () => {
                 type="number"
                 value={topK}
                 min={1}
-                max={20}
+                max={5}
                 onChange={(e) => setTopK(e.target.value)}
                 className="ml-2 w-24 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
               />
             </label>
 
             <div className="text-xs text-gray-500">
-              근거 검색 개수. 보통 5~8 권장.
+              근거 검색 개수. 보통 3~5 권장.
             </div>
           </div>
         </div>
@@ -145,7 +150,7 @@ const StrategyPage = () => {
           <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
             <div className="text-sm font-medium text-gray-700">분석 중...</div>
             <div className="text-xs text-gray-500 mt-1">
-              보통 1~3분 소요 예정. (LLM 생성 단계가 병목)
+              보통 1~3분 소요 예정.
             </div>
           </div>
         )}

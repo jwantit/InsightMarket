@@ -37,8 +37,12 @@ public class TraceIdFilter extends OncePerRequestFilter {
             traceId = "t-" + UUID.randomUUID().toString().replace("-", "").substring(0, 12);
         }
 
+        // MDC에 저장 (로그 추적용)
         MDC.put(MDC_KEY, traceId);
+        // 응답 헤더에 설정
         response.setHeader(HEADER, traceId);
+        // 요청 attribute에 저장 (Controller에서 읽기 위해)
+        request.setAttribute(HEADER, traceId);
 
         long start = System.currentTimeMillis();
         log.info("[TraceIdFilter] start traceId={} {} {}", traceId, request.getMethod(), request.getRequestURI());

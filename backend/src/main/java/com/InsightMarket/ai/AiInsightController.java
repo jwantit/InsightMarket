@@ -1,6 +1,7 @@
 package com.InsightMarket.ai;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +19,13 @@ public class AiInsightController {
     public ResponseEntity<JsonNode> ask(
             @PathVariable Long brandId,
             @RequestBody AiAskRequestDTO req,
-            @RequestHeader(value = "X-Trace-Id", required = false) String traceId
+            HttpServletRequest httpRequest
     ) {
-        if (traceId == null || traceId.isBlank()) traceId = "unknown"; // null 방지
+        // TraceIdFilter에서 설정한 attribute에서 traceId 읽기
+        String traceId = (String) httpRequest.getAttribute("X-Trace-Id");
+        if (traceId == null || traceId.isBlank()) {
+            traceId = "unknown"; // fallback
+        }
 
         // ✅ 1) URL brandId를 DTO에 주입
         req.setBrandId(brandId);

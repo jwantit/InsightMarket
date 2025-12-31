@@ -12,7 +12,8 @@ import requests
 from fastapi import APIRouter
 
 # ✅ rag.py에 있는 싱글톤 embed_model 로더를 재사용 (중복 로딩 방지)
-from app.api.routes.rag import get_embed_model, OLLAMA_URL, OLLAMA_MODEL
+from app.api.routes.rag import get_embed_model
+from app.config.settings import settings
 
 router = APIRouter(prefix="/internal", tags=["internal"])
 
@@ -34,7 +35,7 @@ def warmup():
     # - 옵션은 최소 출력만(모델/환경 따라 무시될 수 있음)
     t2 = time.perf_counter()
     payload = {
-        "model": OLLAMA_MODEL,
+        "model": settings.ollama_model,
         "prompt": "ping",
         "stream": False,
         "options": {
@@ -43,7 +44,7 @@ def warmup():
     }
 
     try:
-        r = requests.post(OLLAMA_URL, json=payload, timeout=30)
+        r = requests.post(settings.ollama_url, json=payload, timeout=30)
         detail["ollama_status"] = r.status_code
         detail["ollama_sec"] = round(time.perf_counter() - t2, 3)
 

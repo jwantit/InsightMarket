@@ -13,8 +13,9 @@ from app.api.routes.health import router as health_router
 from app.api.routes.rag import router as rag_router
 from app.api.routes.warmup import router as warmup_router
 
-# ✅ rag 라우트의 싱글톤 embed_model 로더 및 Ollama 설정 재사용
-from app.api.routes.rag import get_embed_model, OLLAMA_URL, OLLAMA_MODEL
+# ✅ rag 라우트의 싱글톤 embed_model 로더 재사용
+from app.api.routes.rag import get_embed_model
+from app.config.settings import settings
 
 class TraceIdFilter(logging.Filter):
     """로그 포맷에 traceId가 항상 들어가도록 보정"""
@@ -71,7 +72,7 @@ def startup_warmup():
     # 2) Ollama warm-up (짧게 1회)
     t2 = time.perf_counter()
     payload = {
-        "model": OLLAMA_MODEL,
+        "model": settings.ollama_model,
         "prompt": "ping",
         "stream": False,
         "options": {
@@ -80,7 +81,7 @@ def startup_warmup():
     }
 
     try:
-        r = requests.post(OLLAMA_URL, json=payload, timeout=120)
+        r = requests.post(settings.ollama_url, json=payload, timeout=120)
         detail["ollama_status"] = r.status_code
         detail["ollama_sec"] = round(time.perf_counter() - t2, 3)
         detail["ollama_resp_len"] = len(r.text or "")

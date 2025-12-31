@@ -9,11 +9,21 @@ import json
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
+from qdrant_client import QdrantClient
 from sentence_transformers import SentenceTransformer
 
 from app.rag.retriever import retrieve
 from app.rag.prompt import build_prompt
 from app.rag.generator import generate_with_ollama
+from app.rag.validators import validate_and_fix_response
+
+# ============================================================
+# [테스트용] indexer 임시 연결
+# TODO: 테스트 완료 후 삭제 예정
+# - 브랜드별 원천 파일 로드 → 전처리 → infer_source 파일 생성
+# - infer_source 파일 → Qdrant 인덱싱
+# ============================================================
+from app.batch.indexer import process_brand_data, ingest_infer_source_to_qdrant
 
 
 def _now():
@@ -65,6 +75,40 @@ def run_rag(
     """
     t0 = time.perf_counter()
     _log("run start", trace)
+    
+    # ============================================================
+    # [테스트용] 브랜드별 인덱싱 자동 실행
+    # TODO: 테스트 완료 후 삭제 예정
+    # - brand_{id}.jsonl → 전처리 → infer_source_{id}.jsonl 생성
+    # - infer_source 파일 → Qdrant 인덱싱
+    # ============================================================
+    try:
+        _log(f"[TEST] checking brand_id={brand_id} indexing", trace)
+        
+        # 1) 브랜드 데이터 전처리 (원천 파일 → infer_source 파일)
+        from pathlib import Path
+        infer_source_path = Path("dummy_data/infer_source") / f"infer_source_{brand_id}.jsonl"
+        
+        if not infer_source_path.exists():
+            _log(f"[TEST] infer_source file not found, processing brand data...", trace)
+            process_brand_data(brand_id)
+        else:
+            _log(f"[TEST] infer_source file exists: {infer_source_path.name}", trace)
+        
+        # 2) Qdrant 인덱싱 (infer_source 파일 → Qdrant)
+        _log(f"[TEST] indexing to Qdrant for brand_id={brand_id}", trace)
+        qdrant_client = QdrantClient(url=qdrant_url)
+        index_result = ingest_infer_source_to_qdrant(
+            brand_id=brand_id,
+            embed_model=embed_model,
+            qdrant_client=qdrant_client,
+        )
+        _log(f"[TEST] indexing complete: indexed={index_result.get('indexed', 0)} errors={len(index_result.get('errors', []))}", trace)
+        
+    except Exception as e:
+        # 테스트용이므로 에러가 나도 RAG 파이프라인은 계속 진행
+        _log(f"[TEST] indexing error (ignored): {str(e)}", trace)
+    # ============================================================
 
     # 1) query embed
     t_embed0 = time.perf_counter()
@@ -112,6 +156,9 @@ def run_rag(
 
     # sources는 우리가 준 걸로 고정(LLM이 멋대로 바꾸는 것 방지)
     parsed["sources"] = sources
+    
+    # JSON 스키마 검증 및 보정
+    parsed = validate_and_fix_response(parsed)
 
     _log(f"run end total_sec={(time.perf_counter() - t0):.3f}", trace)
     return {
