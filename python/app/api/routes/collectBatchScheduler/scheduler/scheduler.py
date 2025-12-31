@@ -129,7 +129,7 @@ async def call_youtube_api(keyword: str, keywordtype: str, brandId: int, project
                 "comments": comments,          # 불용어가 제거된 댓글 리스트
                 "brandId": brandId,            # Spring에서 넘겨준 값 그대로 전달
                 "projectKeywordId": projectId, # Spring에서 넘겨준 값 그대로 전달
-                "type": keywordtype            # "BRAND" 또는 "PROJECT"
+                "type": keywordtype,            # "BRAND" 또는 "PROJECT"
                 "publishedAt": v_published_at  # 생성시간
             }
             refined_results.append(video_data)

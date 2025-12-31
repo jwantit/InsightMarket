@@ -16,7 +16,7 @@ from app.api.routes.warmup import router as warmup_router
 
 
 # ✅ rag 라우트의 싱글톤 embed_model 로더 및 Ollama 설정 재사용
-from app.api.routes.rag import get_embed_model, OLLAMA_URL, OLLAMA_MODEL
+from app.api.routes.rag import get_embed_model, settings
 from app.api.routes.collectBatchScheduler.scheduler.scheduler import api_router as post_scheduler
 
 
