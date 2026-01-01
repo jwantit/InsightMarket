@@ -11,8 +11,8 @@ from fastapi.responses import JSONResponse
 from sentence_transformers import SentenceTransformer
 
 from app.config.settings import settings
-from app.rag.pipeline import run_rag
-from app.rag.validators import validate_and_fix_response
+from app.services.rag.pipeline import run_rag
+from app.services.rag.validators import validate_and_fix_response
 from app.schemas.rag_request import RagAskRequest
 
 router = APIRouter(prefix="/rag", tags=["rag"])

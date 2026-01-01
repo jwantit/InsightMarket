@@ -24,8 +24,8 @@ const ProjectModalComponent = ({ project, onClose, onSave }) => {
       startDate: form.startDate,
       endDate: form.endDate,
       keywords: (form.keywords || []).map((k) => ({
-        keywordId: k.keywordId ?? null,
-        text: k.keywordId ? null : (k.text ?? k.keyword), //신규 키워드만 text에 넣음
+        projectKeywordId: k.projectKeywordId ?? null,
+        text: k.keyword, // 키워드 텍스트
         enabled: k.enabled ?? true,
       })),
     };

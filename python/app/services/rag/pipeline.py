@@ -12,18 +12,17 @@ from typing import Any, Dict, List, Optional, Tuple
 from qdrant_client import QdrantClient
 from sentence_transformers import SentenceTransformer
 
-from app.rag.retriever import retrieve
-from app.rag.prompt import build_prompt
-from app.rag.generator import generate_with_ollama
-from app.rag.validators import validate_and_fix_response
+from app.services.rag.retriever import retrieve
+from app.services.rag.prompt import build_prompt
+from app.services.rag.generator import generate_with_ollama
+from app.services.rag.validators import validate_and_fix_response
 
 # ============================================================
 # [테스트용] indexer 임시 연결
 # TODO: 테스트 완료 후 삭제 예정
-# - 브랜드별 원천 파일 로드 → 전처리 → infer_source 파일 생성
-# - infer_source 파일 → Qdrant 인덱싱
+# - brand_{id}.jsonl 원천 파일 직접 Qdrant 인덱싱
 # ============================================================
-from app.batch.indexer import process_brand_data, ingest_infer_source_to_qdrant
+from app.services.rag.indexer import ingest_brand_jsonl_to_qdrant
 
 
 def _now():
@@ -79,26 +78,12 @@ def run_rag(
     # ============================================================
     # [테스트용] 브랜드별 인덱싱 자동 실행
     # TODO: 테스트 완료 후 삭제 예정
-    # - brand_{id}.jsonl → 전처리 → infer_source_{id}.jsonl 생성
-    # - infer_source 파일 → Qdrant 인덱싱
+    # - brand_{id}.jsonl 원천 파일 직접 Qdrant 인덱싱
     # ============================================================
     try:
-        _log(f"[TEST] checking brand_id={brand_id} indexing", trace)
-        
-        # 1) 브랜드 데이터 전처리 (원천 파일 → infer_source 파일)
-        from pathlib import Path
-        infer_source_path = Path("dummy_data/infer_source") / f"infer_source_{brand_id}.jsonl"
-        
-        if not infer_source_path.exists():
-            _log(f"[TEST] infer_source file not found, processing brand data...", trace)
-            process_brand_data(brand_id)
-        else:
-            _log(f"[TEST] infer_source file exists: {infer_source_path.name}", trace)
-        
-        # 2) Qdrant 인덱싱 (infer_source 파일 → Qdrant)
-        _log(f"[TEST] indexing to Qdrant for brand_id={brand_id}", trace)
+        _log(f"[TEST] indexing brand_id={brand_id} from raw JSONL", trace)
         qdrant_client = QdrantClient(url=qdrant_url)
-        index_result = ingest_infer_source_to_qdrant(
+        index_result = ingest_brand_jsonl_to_qdrant(
             brand_id=brand_id,
             embed_model=embed_model,
             qdrant_client=qdrant_client,

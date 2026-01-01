@@ -1,22 +1,14 @@
 
 # app/main.py
-# ✅ FastAPI 엔트리: 라우터 등록 + 로깅 + TraceId 미들웨어 + (자동) Warmup
+# ✅ FastAPI 엔트리: 라우터 등록 + 로깅 + TraceId 미들웨어
 
 import logging
 import uuid
-import time
-import requests
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes.health import router as health_router
 from app.api.routes.rag import router as rag_router
-from app.api.routes.warmup import router as warmup_router
-
-
-# ✅ rag 라우트의 싱글톤 embed_model 로더 및 Ollama 설정 재사용
-from app.api.routes.rag import get_embed_model, settings
 from app.api.routes.collectBatchScheduler.scheduler.scheduler import api_router as post_scheduler
 
 
@@ -56,47 +48,6 @@ app.add_middleware(
 
 
 # ============================================================
-# [기능] 서버 시작 시 자동 warmup
-# - embed_model preload
-# - Ollama 짧게 1회 호출해서 cold-start 제거
-# ============================================================
-@app.on_event("startup")
-def startup_warmup():
-    t0 = time.perf_counter()
-    log.info("[startup][warmup] start")
-
-    detail = {}
-
-    # 1) embed_model preload
-    t1 = time.perf_counter()
-    _ = get_embed_model()
-    detail["embed_model_sec"] = round(time.perf_counter() - t1, 3)
-
-    # 2) Ollama warm-up (짧게 1회)
-    t2 = time.perf_counter()
-    payload = {
-        "model": settings.ollama_model,
-        "prompt": "ping",
-        "stream": False,
-        "options": {
-            "num_predict": 8
-        }
-    }
-
-    try:
-        r = requests.post(settings.ollama_url, json=payload, timeout=120)
-        detail["ollama_status"] = r.status_code
-        detail["ollama_sec"] = round(time.perf_counter() - t2, 3)
-        detail["ollama_resp_len"] = len(r.text or "")
-    except Exception as e:
-        detail["ollama_error"] = str(e)
-        detail["ollama_sec"] = round(time.perf_counter() - t2, 3)
-
-    elapsed = round(time.perf_counter() - t0, 3)
-    log.info("[startup][warmup] end elapsed_sec=%s detail=%s", elapsed, detail)
-
-
-# ============================================================
 # [기능] TraceId 미들웨어
 # - 요청 헤더 X-Trace-Id 우선
 # - 없으면 생성
@@ -118,8 +69,6 @@ async def trace_id_middleware(request: Request, call_next):
 # ============================================================
 # [기능] 라우터 등록
 # ============================================================
-app.include_router(health_router, tags=["health"])
 app.include_router(rag_router, tags=["rag"])
-app.include_router(warmup_router, tags=["internal"])
 app.include_router(post_scheduler, tags=["api"])
 

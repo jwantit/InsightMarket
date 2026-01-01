@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProjectKeywordIdNameDTO {
-    private Long projectKeywordId;
-    private String projectKeywordName;
+public class CompetitorIdNameDTO {
+    private Long competitorId;
+    private String competitorName;
     private Long brandId;
-    private String brandName;
 }
+

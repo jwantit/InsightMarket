@@ -1,6 +1,5 @@
 package com.InsightMarket.ai;
 
-import com.InsightMarket.ai.scheduling.ProjectKeywordIdNameDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,19 +60,32 @@ public class PythonRagClient {
     }
 
 
-    //스케줄러 ~~ 프로젝트 키워드 -------------------------------------------------------
-    public void collect(String type, Long id, String keyword) {
+    //스케줄러 - 데이터 수집 요청 -------------------------------------------------------
+    public void collect(String type, Long id, String keyword, Long brandId, String brandName) {
         Map<String, Object> body = new HashMap<>();
-        body.put("type", type);      // "BRAND" 또는 "KEYWORD"
-        body.put("keyword", keyword);    // 유튜브에 검색할 실제 텍스트
+        body.put("type", type);      // "BRAND", "PROJECT", "COMPETITOR"
+        
+        String searchKeyword = keyword; // 검색에 사용할 키워드
 
         if ("BRAND".equals(type)) {
             body.put("brandId", id);
+            body.put("brandName", keyword); // 브랜드명
+            searchKeyword = keyword; // 브랜드명 그대로 사용
         } else if ("PROJECT".equals(type)) {
             body.put("projectKeywordId", id);
+            body.put("brandId", brandId);
+            body.put("brandName", brandName);
+            // 브랜드명 + 프로젝트 키워드 조합
+            searchKeyword = brandName + " " + keyword;
+        } else if ("COMPETITOR".equals(type)) {
+            body.put("competitorId", id);
+            body.put("brandId", brandId);
+            searchKeyword = keyword; // 경쟁사명 그대로 사용
         }
+        
+        body.put("keyword", searchKeyword); // 실제 검색에 사용할 키워드
 
-        log.info("[PythonRagClient] 수집 요청 전송 -> 분류: {}, ID: {}, 검색어: {}", type, id, keyword);
+        log.info("[PythonRagClient] 수집 요청 전송 -> 분류: {}, ID: {}, 검색어: {}", type, id, searchKeyword);
 
         webClientBuilder
                 .baseUrl(pythonBaseUrl)

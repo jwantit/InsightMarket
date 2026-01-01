@@ -11,9 +11,7 @@ const ProjectKeywordBoxComponent = ({ form, setForm }) => {
 
     // 중복 방지 (기존 + 신규)
     const exists = keywords.some(
-      (k) =>
-        (k.keyword && k.keyword.toLowerCase() === text.toLowerCase()) ||
-        (k.text && k.text.toLowerCase() === text.toLowerCase())
+      (k) => k.keyword && k.keyword.toLowerCase() === text.toLowerCase()
     );
     if (exists) {
       setInput("");
@@ -25,9 +23,8 @@ const ProjectKeywordBoxComponent = ({ form, setForm }) => {
       keywords: [
         ...(prev.keywords || []),
         {
-          keywordId: null,  // 신규 생성 트리거
-          text,             // 백엔드 생성용
-          keyword: text,    // UI 표시용
+          projectKeywordId: null,  // 신규 생성 트리거
+          keyword: text,            // UI 표시용 및 백엔드 전송용
           enabled: true,
         },
       ],
@@ -37,12 +34,12 @@ const ProjectKeywordBoxComponent = ({ form, setForm }) => {
   };
 
   // enabled 토글
-  const toggle = (keywordId, text) => {
+  const toggle = (projectKeywordId, keyword) => {
     setForm((prev) => ({
       ...prev,
       keywords: prev.keywords.map((k) =>
-        (k.keywordId === keywordId && keywordId != null) ||
-        (k.keywordId == null && k.text === text)
+        (k.projectKeywordId === projectKeywordId && projectKeywordId != null) ||
+        (k.projectKeywordId == null && k.keyword === keyword)
           ? { ...k, enabled: !k.enabled }
           : k
       ),
@@ -50,14 +47,14 @@ const ProjectKeywordBoxComponent = ({ form, setForm }) => {
   };
 
   // 키워드 제거
-  const remove = (keywordId, text) => {
+  const remove = (projectKeywordId, keyword) => {
     setForm((prev) => ({
       ...prev,
       keywords: prev.keywords.filter(
         (k) =>
           !(
-            (k.keywordId === keywordId && keywordId != null) ||
-            (k.keywordId == null && k.text === text)
+            (k.projectKeywordId === projectKeywordId && projectKeywordId != null) ||
+            (k.projectKeywordId == null && k.keyword === keyword)
           )
       ),
     }));
@@ -91,7 +88,7 @@ const ProjectKeywordBoxComponent = ({ form, setForm }) => {
         <div className="flex flex-wrap gap-2">
           {keywords.map((k) => (
             <div
-              key={k.keywordId ?? `new-${k.text}`}
+              key={k.projectKeywordId ?? `new-${k.keyword}`}
               className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-semibold
                 ${
                   k.enabled
@@ -101,7 +98,7 @@ const ProjectKeywordBoxComponent = ({ form, setForm }) => {
             >
               <button
                 type="button"
-                onClick={() => toggle(k.keywordId, k.text)}
+                onClick={() => toggle(k.projectKeywordId, k.keyword)}
                 className="flex items-center gap-2"
               >
                 <span
@@ -114,7 +111,7 @@ const ProjectKeywordBoxComponent = ({ form, setForm }) => {
 
               <button
                 type="button"
-                onClick={() => remove(k.keywordId, k.text)}
+                onClick={() => remove(k.projectKeywordId, k.keyword)}
                 className="text-gray-400 hover:text-gray-600"
               >
                 ✕

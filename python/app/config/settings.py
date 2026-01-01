@@ -34,10 +34,16 @@ class Settings(BaseSettings):
     # Spring API 설정 (indexer에서 사용)
     spring_api_base_url: Optional[str] = None  # 예: "http://localhost:8080"
     
+    # API 키 설정 (데이터 수집용)
+    youtube_api_key: Optional[str] = None
+    naver_client_id: Optional[str] = None
+    naver_client_secret: Optional[str] = None
+    
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
         case_sensitive = False
+        extra = "ignore"  # 정의되지 않은 필드는 무시
 
 
 # 싱글톤 인스턴스

@@ -3,7 +3,6 @@ package com.InsightMarket.domain.brand;
 import com.InsightMarket.domain.common.BaseEntity;
 import com.InsightMarket.domain.company.Company;
 import com.InsightMarket.domain.company.Competitor;
-import com.InsightMarket.domain.keyword.BrandKeyword;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -42,9 +41,6 @@ public class Brand extends BaseEntity {
 
     @OneToMany(mappedBy = "brand", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Competitor> competitors = new ArrayList<>();
-
-    @OneToMany(mappedBy = "brand", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BrandKeyword> brandKeywords = new ArrayList<>();
 
     public void changeName(String name) {
         this.name = name;

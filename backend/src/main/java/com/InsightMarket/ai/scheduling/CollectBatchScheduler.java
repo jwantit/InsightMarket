@@ -2,6 +2,7 @@ package com.InsightMarket.ai.scheduling;
 
 import com.InsightMarket.ai.PythonRagClient;
 import com.InsightMarket.repository.brand.BrandRepository;
+import com.InsightMarket.repository.competitor.CompetitorRepository;
 import com.InsightMarket.repository.keyword.ProjectKeywordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,7 @@ public class CollectBatchScheduler {
 
     private final BrandRepository brandRepository;
     private final ProjectKeywordRepository projectKeywordRepository;
+    private final CompetitorRepository competitorRepository;
     private final PythonRagClient pythonRagClient;
 
     // 12초마다 실행 (테스트용)
@@ -29,15 +31,34 @@ public class CollectBatchScheduler {
             List<BrandIdNameDTO> allBrands = brandRepository.findAllBrandIdAndName();
             for (BrandIdNameDTO brand : allBrands) {
                 // "BRAND" 타입으로 파이썬에 명령 하달
-                pythonRagClient.collect("BRAND", brand.getBrandId(), brand.getBrandName());
+                pythonRagClient.collect("BRAND", brand.getBrandId(), brand.getBrandName(), brand.getBrandId(), brand.getBrandName());
                 Thread.sleep(1000); // 1초 간격 (유튜브 API 할당량 및 서버 부하 고려)
             }
 
             List<ProjectKeywordIdNameDTO> allProjectKeyword = projectKeywordRepository.findAllProjectKeywordIdAndKeywordName();
             for (ProjectKeywordIdNameDTO projectKeyword : allProjectKeyword) {
-                // 내부적으로 body.put("projectKeywordId", id) 가 작동하여 파이썬 DB 적재가 쉬워짐
-                pythonRagClient.collect("PROJECT", projectKeyword.getProjectKeywordId(), projectKeyword.getProjectKeywordName());
+                // 브랜드명과 프로젝트 키워드를 함께 전달하여 Python에서 조합
+                pythonRagClient.collect(
+                        "PROJECT",
+                        projectKeyword.getProjectKeywordId(),
+                        projectKeyword.getProjectKeywordName(),
+                        projectKeyword.getBrandId(),
+                        projectKeyword.getBrandName()
+                );
                 // 파이썬 서버 및 유튜브 API 할당량을 위해 약간의 간격 유지
+                Thread.sleep(500);
+            }
+
+            // 경쟁사 수집 (활성화된 경쟁사만)
+            List<CompetitorIdNameDTO> allCompetitors = competitorRepository.findAllCompetitorIdAndName();
+            for (CompetitorIdNameDTO competitor : allCompetitors) {
+                pythonRagClient.collect(
+                        "COMPETITOR",
+                        competitor.getCompetitorId(),
+                        competitor.getCompetitorName(),
+                        competitor.getBrandId(),
+                        null // 경쟁사는 브랜드명 불필요
+                );
                 Thread.sleep(500);
             }
 
