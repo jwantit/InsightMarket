@@ -50,13 +50,21 @@ public class MemberServiceImpl implements MemberService {
         SystemRole role;
 
         if (dto.getJoinType() == JoinType.NEW_COMPANY) {
+
             // 새로운 회사 생성
             company = Company.builder()
                     .name(dto.getCompanyName())
                     .businessNumber(dto.getBusinessNumber())
                     .build();
-            companyRepository.save(company);
 
+            //사업자번호 예외 (중복 유니크)-----------------------
+            try {
+                companyRepository.save(company);
+            }catch (DataIntegrityViolationException e){
+                throw new ApiException(ErrorCode.DUPLICATE_BUSINESS_NUMBER);
+            }//---------------------------------------------------
+            
+            
             // 새 회사 생성자는 COMPANY_ADMIN
             role = SystemRole.COMPANY_ADMIN;
 
@@ -98,6 +106,7 @@ public class MemberServiceImpl implements MemberService {
         //    private List<String> keywords; // 브랜드 키워드
         //    private List<CompetitorDTO> competitors; // 경쟁사 + 키워드
         try {
+            //회원가입시 브랜드 등록-------------------------------------------
             Member memberData = memberRepository.save(member);
             if (dto.getJoinType() == JoinType.NEW_COMPANY && dto.getBrands() != null){
 

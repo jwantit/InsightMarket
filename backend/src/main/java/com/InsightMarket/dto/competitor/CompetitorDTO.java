@@ -14,5 +14,5 @@ public class CompetitorDTO {
     private Long competitorId;
     private String name;
     private boolean enabled;          // 경쟁사만 토글
-    private List<String> keywords;    // 경쟁사 키워드
+    //키워드 삭제
 }

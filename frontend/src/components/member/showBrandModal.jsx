@@ -12,34 +12,13 @@ const BrandRegistrationModal = ({ show, onClose, onSave, brands = [], setBrands 
   };
 
   // 유효성 검사: 필수 필드 확인
-  const isAnyNameEmpty = brands.some(brand => !brand.brandName || brand.brandName.trim() === "");
-  const isAnyCompetitorNameEmpty = brands.some(brand => !brand.competitorName || brand.competitorName.trim() === "");
-  const isAnyCompetitorKeywordsEmpty = brands.some(brand => !brand.competitorKeywords || brand.competitorKeywords.trim() === "");
-  const isAnyFieldEmpty = isAnyNameEmpty || isAnyCompetitorNameEmpty || isAnyCompetitorKeywordsEmpty;
-
-  const addBrandField = () => {
-    if (isAnyFieldEmpty) return;
-    const filledBrands = brands.filter(brand => 
-      brand.brandName.trim() !== '' && 
-      brand.competitorName.trim() !== '' && 
-      brand.competitorKeywords.trim() !== ''
-    );
-    setBrands([...filledBrands, { brandName: "", brandDescription: "", competitorName: "", competitorKeywords: "" }]);
-  };
-
-  const removeBrandField = (index) => {
-    const newBrands = brands.filter((_, i) => i !== index);
-    setBrands(newBrands);
-  };
+  const isAnyFieldEmpty = !brands[0]?.brandName || brands[0]?.brandName.trim() === "";
 
   const handleSaveClick = () => {
-    // 필수 필드가 모두 입력된 브랜드만 필터링하여 부모에게 전달
-    const brandsToSave = brands.filter(brand => 
-      brand.brandName.trim() !== '' && 
-      brand.competitorName.trim() !== '' && 
-      brand.competitorKeywords.trim() !== ''
-    );
-    onSave(brandsToSave);
+    // 필수 필드가 입력되었는지 확인 후 부모에게 전달
+    if (brands[0]?.brandName?.trim() !== '') {
+      onSave(brands);
+    }
   };
 
   return (
@@ -48,28 +27,28 @@ const BrandRegistrationModal = ({ show, onClose, onSave, brands = [], setBrands 
         <h2 className="text-xl font-bold mb-4">브랜드 등록</h2>
 
         <div className="space-y-4 mb-6">
-          {brands.map((brand, index) => (
-            <div key={index} className="p-4 border rounded-lg bg-gray-50 relative">
+          {brands[0] && (
+            <div className="p-4 border rounded-lg bg-gray-50 relative">
               <div className="mb-3">
                 <label className="block text-xs font-semibold text-gray-500 mb-1">
-                  브랜드명 ({index + 1}) <span className="text-red-500">*필수</span>
+                  브랜드명 
                 </label>
                 <input
                   name="brandName"
-                  value={brand.brandName || ""}
-                  onChange={(e) => handleBrandFieldChange(index, e)}
+                  value={brands[0].brandName || ""}
+                  onChange={(e) => handleBrandFieldChange(0, e)}
                   className="w-full rounded border bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-200"
-                  placeholder="브랜드명"
+                  placeholder="브랜드 입력"
                 />
               </div>
               <div className="mb-3">
                 <label className="block text-xs font-semibold text-gray-500 mb-1">
-                  브랜드 설명 ({index + 1})
+                  브랜드 설명 
                 </label>
                 <textarea
                   name="brandDescription"
-                  value={brand.brandDescription || ""}
-                  onChange={(e) => handleBrandFieldChange(index, e)}
+                  value={brands[0].brandDescription || ""}
+                  onChange={(e) => handleBrandFieldChange(0, e)}
                   rows="2"
                   className="w-full rounded border bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-200"
                   placeholder="브랜드 설명"
@@ -77,53 +56,19 @@ const BrandRegistrationModal = ({ show, onClose, onSave, brands = [], setBrands 
               </div>
               <div className="mb-3">
                 <label className="block text-xs font-semibold text-gray-500 mb-1">
-                  경쟁사 이름 ({index + 1}) <span className="text-red-500">*필수</span>
+                  경쟁사
                 </label>
                 <input
                   name="competitorName"
-                  value={brand.competitorName || ""}
-                  onChange={(e) => handleBrandFieldChange(index, e)}
+                  value={brands[0].competitorName || ""}
+                  onChange={(e) => handleBrandFieldChange(0, e)}
                   className="w-full rounded border bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-200"
-                  placeholder="경쟁사 이름"
+                  placeholder="경쟁사 입력"
                 />
               </div>
-              <div className="mb-2">
-                <label className="block text-xs font-semibold text-gray-500 mb-1">
-                  경쟁사 키워드 ({index + 1}) <span className="text-red-500">*필수</span>
-                </label>
-                <input
-                  name="competitorKeywords"
-                  value={brand.competitorKeywords || ""}
-                  onChange={(e) => handleBrandFieldChange(index, e)}
-                  className="w-full rounded border bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-200"
-                  placeholder="경쟁사 키워드"
-                />
-              </div>
-              {brands.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeBrandField(index)}
-                  className="text-red-500 hover:text-red-700 text-xs font-medium"
-                >
-                  삭제하기
-                </button>
-              )}
             </div>
-          ))}
+          )}
         </div>
-
-        <button
-          type="button"
-          onClick={addBrandField}
-          disabled={isAnyFieldEmpty}
-          className={`w-full py-2.5 rounded-lg border-2 border-dashed text-sm font-bold transition ${
-            isAnyFieldEmpty 
-              ? "border-gray-200 text-gray-300 cursor-not-allowed" 
-              : "border-blue-400 text-blue-500 hover:bg-blue-50"
-          }`}
-        >
-          + 브랜드 추가
-        </button>
 
         <div className="mt-8 flex space-x-3">
           <button

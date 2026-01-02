@@ -27,10 +27,14 @@ const JoinComponent = () => {
 
   //브랜드 생성 부분--------------------------------------------------------
   const [showBrandModal, setShowBrandModal] = useState(false);
-  const [brands, setBrands] = useState([]);
-  //테스트
-  useEffect(() => {
+  const [brands, setBrands] = useState([{
+    brandName: '',
+    brandDescription: '',
+    competitorName: ''
+  }]);  //테스트
 
+
+  useEffect(() => {
     console.log("brands", brands);
   }, [brands]);
   //브랜드 생성 부분--------------------------------------------------------
@@ -39,16 +43,12 @@ const JoinComponent = () => {
 
   //수정추가 포인트
   //------------------------------------------------------
-  // 브랜드 생성 버튼 누를시 모달열기 + brands가 비어있으면 빈 브랜드 필드 하나 추가
+  // // 모달 열기: 기존 데이터가 있으면 유지, 없으면 빈 값
   const handleOpenBrandModal = () => {
-    if (brands.length === 0) {
-      setBrands([{ brandName: "", brandDescription: "", competitorName: "", competitorKeywords: "" }]);
-    }
-    setShowBrandModal(true); //모달 ON
+    setShowBrandModal(true); 
   };
  //모달을 닫을시 브랜드 상태 초기화
   const handleCloseBrandModal = () => {
-    setBrands([]); // 모달을 닫을 때 브랜드를 초기화
     setShowBrandModal(false);
   };
 //브랜드 적용하기 모달에 생성한 브랜드를 set
@@ -121,36 +121,29 @@ const JoinComponent = () => {
     
 
     //브랜드 부분 추가 포인트------------------------------------------------------
-    const hasValidBrand = brands.some(brand => 
-      brand.brandName.trim() !== '' && 
-      brand.competitorName.trim() !== '' && 
-      brand.competitorKeywords.trim() !== ''
-    );
+    const brand = brands[0];
+    const hasValidBrand = brand && brand.brandName && brand.brandName.trim() !== '';
+
     if (joinParam.joinType === "NEW_COMPANY" && !hasValidBrand) {
-        alert("하나 이상의 유효한 브랜드를 등록해주세요.");
+        alert("브랜드를 등록해주세요.");
         return;
     }
      //브랜드 가공 --------------------------------------------------------
 
-  const formattedBrands = brands
-  .filter(b => b.brandName.trim() !== '') // 유효한 브랜드만 필터링
-  .map(b => ({
-    name: b.brandName,          // BrandRequestDTO.name
-    description: b.brandDescription, // BrandRequestDTO.description
-    competitors: [              // BrandRequestDTO.competitors (List<CompetitorDTO>)
+  const formattedBrands = hasValidBrand ? [{
+    name: brand.brandName,           // 브랜드 이름
+    description: brand.brandDescription, // 브랜드 설명
+    competitors: [
       {
-        name: b.competitorName, // CompetitorDTO.name
-        // 콤마로 구분된 키워드를 배열로 변환: "애플, 삼성" -> ["애플", "삼성"]
-        keywords: b.competitorKeywords 
-          ? b.competitorKeywords.split(',').map(k => k.trim()).filter(k => k !== '') 
-          : []
+        name: brand.competitorName,  // 경쟁사 이름
       }
     ]
-  }));
+  }] : [];
+
  //브랜드 폼 
   const finalData = {
     ...joinParam,
-    brands: formattedBrands // 백엔드 DTO 필드명이 'brand' (List<BrandRequestDTO>)
+    brands: formattedBrands // 백엔드 DTO 필드명이 'brands' (List<BrandRequestDTO>)
   };
 
     //브랜드 부분 추가 포인트------------------------------------------------------

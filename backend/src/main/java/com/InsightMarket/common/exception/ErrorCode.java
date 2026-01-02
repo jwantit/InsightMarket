@@ -41,6 +41,7 @@ public enum ErrorCode {
     MEMBER_ALREADY_APPROVED(HttpStatus.BAD_REQUEST, "이미 승인된 회원입니다."),
     NO_APPROVAL_TARGET(HttpStatus.BAD_REQUEST, "승인할 대상이 없습니다."),
     INVALID_BUSINESS_NUMBER(HttpStatus.BAD_REQUEST, "사업자 등록 번호가 해당 기업 정보와 일치하지 않습니다."),
+    DUPLICATE_BUSINESS_NUMBER(HttpStatus.BAD_REQUEST, "이미 등록된 사업자 번호입니다."), // 새로 추가!
 
     // ===== Brand Member =====
     BRAND_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "브랜드 멤버가 아닙니다."),
