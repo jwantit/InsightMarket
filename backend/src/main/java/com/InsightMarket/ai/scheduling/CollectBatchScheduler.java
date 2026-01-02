@@ -21,7 +21,6 @@ public class CollectBatchScheduler {
     private final CompetitorRepository competitorRepository;
     private final PythonRagClient pythonRagClient;
 
-
     // Cron 표현식 설명
     // 0 0 0 * * ? = 초(0) 분(0) 시(0) 일() 월() 요일(?)
     // 매일 낮 12시에 실행

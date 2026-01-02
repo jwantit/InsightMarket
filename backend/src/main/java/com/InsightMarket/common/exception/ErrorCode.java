@@ -40,6 +40,7 @@ public enum ErrorCode {
     INVALID_JOIN_TYPE(HttpStatus.BAD_REQUEST, "올바르지 않은 가입 유형입니다."),
     MEMBER_ALREADY_APPROVED(HttpStatus.BAD_REQUEST, "이미 승인된 회원입니다."),
     NO_APPROVAL_TARGET(HttpStatus.BAD_REQUEST, "승인할 대상이 없습니다."),
+    INVALID_BUSINESS_NUMBER(HttpStatus.BAD_REQUEST, "사업자 등록 번호가 해당 기업 정보와 일치하지 않습니다."),
 
     // ===== Brand Member =====
     BRAND_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "브랜드 멤버가 아닙니다."),
