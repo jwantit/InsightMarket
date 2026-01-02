@@ -8,8 +8,9 @@ import statistics
 # analyzed_docs = [
 #   {
 #     "brand_id": int,
-#     "project_id": int,
-#     "keyword_id": int,
+#     "project_id": int | None,
+#     "keyword_id": int | None,
+#     "competitor_id": int | None,
 #     "stat_date": date,
 #     "sentiment": "POS" | "NEG" | "NEU",
 #     "tokens": [str, ...],
@@ -18,30 +19,33 @@ import statistics
 # ]
 # ==================================================
 
+#집계 함수 
+
 # --------------------------------------------------
 # 1️⃣ 언급량 (analytics_keyword_daily_stats)
 # --------------------------------------------------
 def aggregate_keyword_daily_stats(
     analyzed_docs: List[Dict]
-) -> List[Tuple[int, int, int, date, str, int]]:
+) -> List[Tuple[int, int | None, int | None, int | None, date, str, int]]:
     """
-    return: (brand_id, project_id, keyword_id, stat_date, source, mention_count)
+    return: (brand_id, project_id, keyword_id, competitor_id, stat_date, source, mention_count)
     """
     counter = defaultdict(int)
 
     for doc in analyzed_docs:
         key = (
             doc["brand_id"],
-            doc["project_id"],
-            doc["keyword_id"],
+            doc.get("project_id"),
+            doc.get("keyword_id"),
+            doc.get("competitor_id"),
             doc["stat_date"],
             doc.get("source", "UNKNOWN")
         )
         counter[key] += 1
 
     return [
-        (brand_id, project_id, keyword_id, stat_date, source, count)
-        for (brand_id, project_id, keyword_id, stat_date, source), count in counter.items()
+        (brand_id, project_id, keyword_id, competitor_id, stat_date, source, count)
+        for (brand_id, project_id, keyword_id, competitor_id, stat_date, source), count in counter.items()
     ]
 
 
@@ -50,29 +54,31 @@ def aggregate_keyword_daily_stats(
 # --------------------------------------------------
 def aggregate_keyword_sentiment_daily_stats(
     analyzed_docs: List[Dict]
-) -> List[Tuple[int, int, int, date, str, float, float, float]]:
+) -> List[Tuple[int, int | None, int | None, int | None, date, str, float, float, float]]:
     """
-    return: (brand_id, project_id, keyword_id, stat_date, source, positive_ratio, negative_ratio, neutral_ratio)
+    return: (brand_id, project_id, keyword_id, competitor_id, stat_date, source, positive_ratio, negative_ratio, neutral_ratio)
     """
     counter = defaultdict(lambda: {"POS": 0, "NEG": 0, "NEU": 0})
 
     for doc in analyzed_docs:
         key = (
             doc["brand_id"],
-            doc["project_id"],
-            doc["keyword_id"],
+            doc.get("project_id"),
+            doc.get("keyword_id"),
+            doc.get("competitor_id"),
             doc["stat_date"],
             doc.get("source", "UNKNOWN")
         )
         counter[key][doc["sentiment"]] += 1
 
     rows = []
-    for (brand_id, project_id, keyword_id, stat_date, source), counts in counter.items():
+    for (brand_id, project_id, keyword_id, competitor_id, stat_date, source), counts in counter.items():
         total = sum(counts.values())
         rows.append((
             brand_id,
             project_id,
             keyword_id,
+            competitor_id,
             stat_date,
             source,
             round(counts["POS"] / total * 100, 2),
@@ -88,9 +94,9 @@ def aggregate_keyword_sentiment_daily_stats(
 # --------------------------------------------------
 def aggregate_keyword_token_sentiment_stats(
     analyzed_docs: List[Dict]
-) -> List[Tuple[int, int, int, date, str, str, str, int]]:
+) -> List[Tuple[int, int | None, int | None, int | None, date, str, str, str, int]]:
     """
-    return: (brand_id, project_id, keyword_id, stat_date, source, token, sentiment, token_count)
+    return: (brand_id, project_id, keyword_id, competitor_id, stat_date, source, token, sentiment, token_count)
     """
     counter = defaultdict(int)
 
@@ -99,8 +105,9 @@ def aggregate_keyword_token_sentiment_stats(
         for token in doc["tokens"]:
             key = (
                 doc["brand_id"],
-                doc["project_id"],
-                doc["keyword_id"],
+                doc.get("project_id"),
+                doc.get("keyword_id"),
+                doc.get("competitor_id"),
                 doc["stat_date"],
                 source,
                 token,
@@ -109,8 +116,8 @@ def aggregate_keyword_token_sentiment_stats(
             counter[key] += 1
 
     return [
-        (brand_id, project_id, keyword_id, stat_date, source, token, sentiment, count)
-        for (brand_id, project_id, keyword_id, stat_date, source, token, sentiment), count in counter.items()
+        (brand_id, project_id, keyword_id, competitor_id, stat_date, source, token, sentiment, count)
+        for (brand_id, project_id, keyword_id, competitor_id, stat_date, source, token, sentiment), count in counter.items()
     ]
 
 
@@ -118,52 +125,27 @@ def aggregate_keyword_token_sentiment_stats(
 # 4️⃣ 기준선 / 이동 평균 (analytics_keyword_baseline_stats)
 # --------------------------------------------------
 def aggregate_keyword_baseline_stats(
-    daily_stats: List[Tuple[int, int, int, date, str, int]]
-) -> List[Tuple[int, int, int, str, int, int]]:
+    daily_stats: List[Tuple[int, int | None, int | None, int | None, date, str, int]]
+) -> List[Tuple[int, int | None, int | None, int | None, str, int, int]]:
     """
-    daily_stats = (brand_id, project_id, keyword_id, stat_date, source, mention_count)
-    return: (brand_id, project_id, keyword_id, source, avg_mention_count, stddev_mention_count)
+    daily_stats = (brand_id, project_id, keyword_id, competitor_id, stat_date, source, mention_count)
+    return: (brand_id, project_id, keyword_id, competitor_id, source, avg_mention_count, stddev_mention_count)
     """
     counter = defaultdict(list)
 
-    for brand_id, project_id, keyword_id, _, source, mention_count in daily_stats:
-        counter[(brand_id, project_id, keyword_id, source)].append(mention_count)
+    for brand_id, project_id, keyword_id, competitor_id, _, source, mention_count in daily_stats:
+        counter[(brand_id, project_id, keyword_id, competitor_id, source)].append(mention_count)
 
     rows = []
-    for (brand_id, project_id, keyword_id, source), counts in counter.items():
+    for (brand_id, project_id, keyword_id, competitor_id, source), counts in counter.items():
         rows.append((
             brand_id,
             project_id,
             keyword_id,
+            competitor_id,
             source,
             int(statistics.mean(counts)),
             int(statistics.pstdev(counts))
         ))
 
     return rows
-
-
-# --------------------------------------------------
-# 5️⃣ AI 인사이트 결과 row builder
-# --------------------------------------------------
-def build_keyword_insight_row(
-    brand_id: int,
-    project_id: int,
-    keyword_id: int,
-    stat_date: date,
-    source: str,
-    insight_text: str,
-    confidence_score: float
-) -> Tuple[int, int, int, date, str, str, float]:
-    """
-    return: (brand_id, project_id, keyword_id, stat_date, source, insight_text, confidence_score)
-    """
-    return (
-        brand_id,
-        project_id,
-        keyword_id,
-        stat_date,
-        source,
-        insight_text,
-        confidence_score
-    )

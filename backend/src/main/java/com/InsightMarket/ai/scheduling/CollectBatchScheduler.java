@@ -20,11 +20,13 @@ public class CollectBatchScheduler {
     private final ProjectKeywordRepository projectKeywordRepository;
     private final CompetitorRepository competitorRepository;
     private final PythonRagClient pythonRagClient;
+    private final AnalyticsProcessingService analyticsProcessingService;
 
     // Cron 표현식 설명
     // 0 0 0 * * ? = 초(0) 분(0) 시(0) 일() 월() 요일(?)
     // 매일 낮 12시에 실행
-    @Scheduled(cron = "0 30 14 * * ?")
+//    @Scheduled(cron = "0 30 14 * * ?")
+    @Scheduled(fixedRate = 20_000)
     public void runDailyCollectionBatch() {
         try {
             log.info("=== 배치 수집 스케줄러 시작 ===");
@@ -72,10 +74,34 @@ public class CollectBatchScheduler {
             // 모든 수집 요청이 처리될 시간을 고려하여 대기
             Thread.sleep(2000);
             
-            // 배치 완료
-            pythonRagClient.batchComplete();
+            // 배치 완료 및 파일 경로 받기
+            com.fasterxml.jackson.databind.JsonNode batchResponse = pythonRagClient.batchComplete();
+            String filePath = null;
+            if (batchResponse != null && batchResponse.has("file")) {
+                filePath = batchResponse.get("file").asText();
+                log.info("[배치 완료] 저장된 파일 경로: {}", filePath);
+            }
 
             log.info("=== 배치 수집 스케줄러 종료 ===");
+
+            // 수집 완료 후 분석 파이프라인 실행 (파일 경로가 있을 때만)
+            if (filePath != null && !filePath.isEmpty()) {
+                log.info("=== 분석 파이프라인 시작 ===");
+                try {
+                    String traceId = "scheduler-" + System.currentTimeMillis();
+                    // 수집 완료 응답에서 받은 파일 경로 사용
+                    analyticsProcessingService.processAnalysis(
+                            filePath, // 수집 완료 시 받은 파일 경로 사용
+                            null, // 전체 브랜드 분석
+                            traceId
+                    );
+                    log.info("=== 분석 파이프라인 완료 ===");
+                } catch (Exception e) {
+                    log.error("분석 파이프라인 실행 중 오류 발생: {}", e.getMessage(), e);
+                }
+            } else {
+                log.warn("파일 경로가 없어 분석 파이프라인을 실행하지 않습니다.");
+            }
 
         } catch (InterruptedException e) {
             log.error("스케줄러 작업 중 인터럽트 발생: {}", e.getMessage());

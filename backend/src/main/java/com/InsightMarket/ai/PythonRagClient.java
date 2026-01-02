@@ -1,11 +1,13 @@
 package com.InsightMarket.ai;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
@@ -26,6 +28,7 @@ public class PythonRagClient {
     // ============================================================
 
     private final WebClient.Builder webClientBuilder;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${python.rag.base-url:http://localhost:8000}")
     private String pythonBaseUrl;
@@ -60,6 +63,59 @@ public class PythonRagClient {
                 .block();
     }
 
+
+    //분석 파이프라인 요청 -------------------------------------------------------
+    public JsonNode analyze(String filePath, Long brandId, String traceId) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("file_path", filePath != null ? filePath : "raw_data/raw_data.json");
+        if (brandId != null) {
+            body.put("brand_id", brandId);
+        }
+
+        // 요청 body 크기 계산
+        try {
+            String requestBodyJson = objectMapper.writeValueAsString(body);
+            int requestSizeBytes = requestBodyJson.getBytes("UTF-8").length;
+            log.info("[PythonRagClient] call POST /api/analyze traceId={} baseUrl={} filePath={} brandId={} timeoutSec={} requestSize={} bytes ({} KB)",
+                    traceId, pythonBaseUrl, filePath, brandId, timeoutSec, requestSizeBytes, requestSizeBytes / 1024.0);
+        } catch (Exception e) {
+            log.warn("[PythonRagClient] 요청 body 크기 계산 실패: {}", e.getMessage());
+        }
+
+        // 큰 JSON 응답을 처리하기 위해 maxInMemorySize 설정 (10MB)
+        ExchangeStrategies strategies = ExchangeStrategies.builder()
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
+                .build();
+
+        JsonNode response = webClientBuilder
+                .baseUrl(pythonBaseUrl)
+                .exchangeStrategies(strategies)
+                .build()
+                .post()
+                .uri("/api/analyze")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("X-Trace-Id", traceId)
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .timeout(Duration.ofSeconds(timeoutSec))
+                .block();
+
+        // 응답 크기 계산
+        if (response != null) {
+            try {
+                String responseJson = objectMapper.writeValueAsString(response);
+                int responseSizeBytes = responseJson.getBytes("UTF-8").length;
+                log.info("[PythonRagClient] analyze 응답 수신 완료 traceId={} responseSize={} bytes ({} KB / {} MB)",
+                        traceId, responseSizeBytes, responseSizeBytes / 1024.0, responseSizeBytes / (1024.0 * 1024.0));
+            } catch (Exception e) {
+                log.warn("[PythonRagClient] 응답 크기 계산 실패: {}", e.getMessage());
+            }
+        }
+
+        return response;
+    }
 
     //스케줄러 - 데이터 수집 요청 -------------------------------------------------------
     public void collect(String type, Long id, String keyword, Long brandId, String brandName) {
@@ -126,9 +182,9 @@ public class PythonRagClient {
                 );
     }
     
-    public void batchComplete() {
+    public JsonNode batchComplete() {
         log.info("[PythonRagClient] 배치 완료 요청");
-        webClientBuilder
+        return webClientBuilder
                 .baseUrl(pythonBaseUrl)
                 .build()
                 .post()
@@ -137,10 +193,7 @@ public class PythonRagClient {
                 .retrieve()
                 .bodyToMono(JsonNode.class)
                 .timeout(Duration.ofSeconds(timeoutSec))
-                .subscribe(
-                        response -> log.info("[Python] 배치 완료 응답: {}", response),
-                        error -> log.error("[Python] 배치 완료 실패: {}", error.getMessage())
-                );
+                .block();
     }
     
     public void recollect(String type, Long id, String name, Long brandId, String brandName) {

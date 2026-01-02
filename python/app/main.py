@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes.rag import router as rag_router
 from app.api.routes.collectBatchScheduler.scheduler.scheduler import api_router as post_scheduler
+from app.api.routes.analyze import router as analyze_router
 
 
 class TraceIdFilter(logging.Filter):
@@ -71,4 +72,5 @@ async def trace_id_middleware(request: Request, call_next):
 # ============================================================
 app.include_router(rag_router, tags=["rag"])
 app.include_router(post_scheduler, tags=["api"])
+app.include_router(analyze_router, tags=["analyze"])
 

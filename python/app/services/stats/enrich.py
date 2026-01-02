@@ -1,5 +1,5 @@
 from typing import Dict, List
-from config.database import get_connection
+from app.config.database import get_connection
 
 def _fetch_map(sql: str, ids: List[int], key_col: str, val_col: str) -> Dict[int, str]:
     if not ids:
@@ -48,10 +48,10 @@ def enrich_spike_infos(spike_infos: List[Dict]) -> List[Dict]:
         val_col="name",
     )
     keyword_map = _fetch_map(
-        "SELECT keyword_id, text FROM keyword WHERE keyword_id IN ({placeholders})",
+        "SELECT project_keyword_id, keyword FROM project_keyword WHERE project_keyword_id IN ({placeholders})",
         keyword_ids,
-        key_col="keyword_id",
-        val_col="text",
+        key_col="project_keyword_id",
+        val_col="keyword",
     )
 
     enriched = []
