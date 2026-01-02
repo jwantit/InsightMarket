@@ -32,6 +32,7 @@ public class BrandController {
 
         Member member = memberRepository.findByEmail(memberDTO.getEmail()).orElseThrow();
         Company company = member.getCompany(); // 이미 가입된 회사 기준
+        log.info("company이다" + company.toString());
 
         return brandService.createBrand(request, member, company);
     }

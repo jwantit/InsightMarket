@@ -7,8 +7,10 @@ import java.util.Optional;
 import com.InsightMarket.common.exception.ApiException;
 import com.InsightMarket.common.exception.ErrorCode;
 import com.InsightMarket.domain.company.Company;
+import com.InsightMarket.dto.brand.BrandRequestDTO;
 import com.InsightMarket.dto.member.*;
 import com.InsightMarket.repository.company.CompanyRepository;
+import com.InsightMarket.service.brand.BrandService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -33,6 +35,7 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
+    private final BrandService brandService;
 
     @Transactional
     @Override
@@ -47,12 +50,21 @@ public class MemberServiceImpl implements MemberService {
         SystemRole role;
 
         if (dto.getJoinType() == JoinType.NEW_COMPANY) {
+
             // 새로운 회사 생성
             company = Company.builder()
                     .name(dto.getCompanyName())
+                    .businessNumber(dto.getBusinessNumber())
                     .build();
-            companyRepository.save(company);
 
+            //사업자번호 예외 (중복 유니크)-----------------------
+            try {
+                companyRepository.save(company);
+            }catch (DataIntegrityViolationException e){
+                throw new ApiException(ErrorCode.DUPLICATE_BUSINESS_NUMBER);
+            }//---------------------------------------------------
+            
+            
             // 새 회사 생성자는 COMPANY_ADMIN
             role = SystemRole.COMPANY_ADMIN;
 
@@ -60,6 +72,12 @@ public class MemberServiceImpl implements MemberService {
             // 기존 회사 가입
             company = companyRepository.findById(dto.getRequestedCompanyId())
                     .orElseThrow(() -> new ApiException(ErrorCode.COMPANY_NOT_FOUND));
+
+            if (!company.getBusinessNumber().equals(dto.getBusinessNumber())) {
+                // 번호가 다르면 가입 거부
+                throw new ApiException(ErrorCode.INVALID_BUSINESS_NUMBER);
+            }
+
 
             // 일반 회원은 USER
             role = SystemRole.USER;
@@ -80,8 +98,22 @@ public class MemberServiceImpl implements MemberService {
                 .isExpired(false)
                 .build();
 
+
+
+        //public class BrandRequestDTO {
+        //    private String name;
+        //    private String description;
+        //    private List<String> keywords; // 브랜드 키워드
+        //    private List<CompetitorDTO> competitors; // 경쟁사 + 키워드
         try {
-            memberRepository.save(member);
+            //회원가입시 브랜드 등록-------------------------------------------
+            Member memberData = memberRepository.save(member);
+            if (dto.getJoinType() == JoinType.NEW_COMPANY && dto.getBrands() != null){
+
+                for (BrandRequestDTO brandRequestDTO : dto.getBrands()){
+                    brandService.createBrand(brandRequestDTO, memberData, company);
+                }
+            }
         } catch (DataIntegrityViolationException e) {
             throw new ApiException(ErrorCode.MEMBER_EMAIL_DUPLICATED);
         }

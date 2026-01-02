@@ -1,0 +1,26 @@
+# FastAPI 및 웹 프레임워크
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# 데이터 검증 및 설정
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+
+# 벡터 DB
+qdrant-client>=1.7.0
+
+# 임베딩 모델
+sentence-transformers>=2.2.0
+
+# HTTP 요청
+requests>=2.31.0
+
+# 머신러닝 (감정 분석용)
+torch>=2.0.0
+transformers>=4.30.0
+
+# 수치 연산
+numpy>=1.24.0
+
+# CORS 미들웨어 (FastAPI에 포함되지만 명시)
+# fastapi의 CORSMiddleware 사용

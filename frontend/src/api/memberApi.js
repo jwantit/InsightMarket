@@ -28,6 +28,8 @@ export const modifyMember = async (member) => {
 
 //회원 가입
 export const joinMember = async (joinParam) => {
+
+  console.log("API Request Data:", joinParam);
   const res = await axios.post(`${host}/join`, joinParam);
   return res.data;
 };

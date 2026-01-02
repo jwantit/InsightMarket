@@ -88,12 +88,6 @@ const SideBar = ({ onNavigate }) => {
           onToggle={() => toggle("sns")}
         >
           <SideLink
-            to={`/app/${brandId}/sns/keywords`}
-            onNavigate={onNavigate}
-          >
-            키워드 관리
-          </SideLink>
-          <SideLink
             to={`/app/${brandId}/sns/sentiment`}
             onNavigate={onNavigate}
           >

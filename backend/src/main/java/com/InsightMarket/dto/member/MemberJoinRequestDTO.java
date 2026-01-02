@@ -1,7 +1,10 @@
 package com.InsightMarket.dto.member;
 
+import com.InsightMarket.dto.brand.BrandRequestDTO;
 import lombok.Getter;
 import lombok.ToString;
+
+import java.util.List;
 
 @Getter
 @ToString
@@ -15,4 +18,10 @@ public class MemberJoinRequestDTO {
 
     private Long requestedCompanyId;  // JOIN_COMPANY 시 필요
     private String companyName;       // NEW_COMPANY 시 필요
+
+    //회원가입시 브랜드 등록
+    private List<BrandRequestDTO> brands;
+
+    private String businessNumber;
+
 }
