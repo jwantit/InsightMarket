@@ -1,5 +1,6 @@
 package com.InsightMarket.service.project;
 
+import com.InsightMarket.ai.PythonRagClient;
 import com.InsightMarket.common.exception.ApiException;
 import com.InsightMarket.common.exception.ErrorCode;
 import com.InsightMarket.domain.brand.Brand;
@@ -31,6 +32,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final BrandRepository brandRepository;
     private final ProjectKeywordRepository projectKeywordRepository;
+    private final PythonRagClient pythonRagClient;
 
     @Override
     public Long create(Long brandId, ProjectRequestDTO req) {
@@ -49,7 +51,7 @@ public class ProjectServiceImpl implements ProjectService {
         Project saved = projectRepository.save(project);
 
         // 키워드까지 한꺼번에 반영
-        syncKeywords(saved, req.getKeywords());
+        syncKeywords(saved, req.getKeywords(), true);
 
         return saved.getId();
     }
@@ -104,7 +106,7 @@ public class ProjectServiceImpl implements ProjectService {
         p.changeInfo(req.getName(), req.getStartDate(), req.getEndDate());
 
         // 키워드까지 한꺼번에 반영
-        syncKeywords(p, req.getKeywords());
+        syncKeywords(p, req.getKeywords(), false);
     }
 
     @Override
@@ -117,7 +119,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     //키워드 전체 동기화
-    private void syncKeywords(Project project, List<ProjectKeywordItemDTO> items) {
+    private void syncKeywords(Project project, List<ProjectKeywordItemDTO> items, boolean isCreate) {
         Long projectId = project.getId();
         Brand brand = project.getBrand();
 
@@ -154,9 +156,10 @@ public class ProjectServiceImpl implements ProjectService {
 
             // upsert: 있으면 enabled 변경, 없으면 생성
             ProjectKeyword pk = byKeyword.get(normalized);
+            boolean isNew = (pk == null);
             if (pk == null) {
                 // 신규 생성
-                projectKeywordRepository.save(ProjectKeyword.builder()
+                pk = projectKeywordRepository.save(ProjectKeyword.builder()
                         .brand(brand)
                         .project(project)
                         .keyword(normalized)
@@ -165,6 +168,11 @@ public class ProjectServiceImpl implements ProjectService {
             } else {
                 // 기존 키워드의 enabled만 변경
                 pk.changeEnabled(enabled);
+            }
+            
+            // 프로젝트 키워드 생성 시에만 재수집 호출
+            if (isNew) {
+                pythonRagClient.recollect("PROJECT", pk.getId(), pk.getKeyword(), brand.getId(), brand.getName());
             }
         }
 

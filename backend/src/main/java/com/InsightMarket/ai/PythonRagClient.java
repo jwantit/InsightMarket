@@ -62,8 +62,13 @@ public class PythonRagClient {
 
     //스케줄러 - 데이터 수집 요청 -------------------------------------------------------
     public void collect(String type, Long id, String keyword, Long brandId, String brandName) {
+        collect(type, id, keyword, brandId, brandName, false);
+    }
+    
+    public void collect(String type, Long id, String keyword, Long brandId, String brandName, boolean isBatch) {
         Map<String, Object> body = new HashMap<>();
         body.put("type", type);      // "BRAND", "PROJECT", "COMPETITOR"
+        body.put("isBatch", isBatch); // 배치 모드 플래그
         
         String searchKeyword = keyword; // 검색에 사용할 키워드
 
@@ -85,7 +90,7 @@ public class PythonRagClient {
         
         body.put("keyword", searchKeyword); // 실제 검색에 사용할 키워드
 
-        log.info("[PythonRagClient] 수집 요청 전송 -> 분류: {}, ID: {}, 검색어: {}", type, id, searchKeyword);
+        log.info("[PythonRagClient] 수집 요청 전송 -> 분류: {}, ID: {}, 검색어: {}, isBatch: {}", type, id, searchKeyword, isBatch);
 
         webClientBuilder
                 .baseUrl(pythonBaseUrl)
@@ -100,6 +105,77 @@ public class PythonRagClient {
                 .subscribe(
                         response -> log.info("[Python] 수집 요청 응답 성공: {}", response),
                         error -> log.error("[Python] 수집 요청 실패: {}", error.getMessage())
+                );
+    }
+    
+    public void batchStart() {
+        log.info("[PythonRagClient] 배치 시작 요청");
+        webClientBuilder
+                .baseUrl(pythonBaseUrl)
+                .build()
+                .post()
+                .uri("api/collect/batch-start")
+                .contentType(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .timeout(Duration.ofSeconds(timeoutSec))
+                .subscribe(
+                        response -> log.info("[Python] 배치 시작 응답: {}", response),
+                        error -> log.error("[Python] 배치 시작 실패: {}", error.getMessage())
+                );
+    }
+    
+    public void batchComplete() {
+        log.info("[PythonRagClient] 배치 완료 요청");
+        webClientBuilder
+                .baseUrl(pythonBaseUrl)
+                .build()
+                .post()
+                .uri("api/collect/batch-complete")
+                .contentType(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .timeout(Duration.ofSeconds(timeoutSec))
+                .subscribe(
+                        response -> log.info("[Python] 배치 완료 응답: {}", response),
+                        error -> log.error("[Python] 배치 완료 실패: {}", error.getMessage())
+                );
+    }
+    
+    public void recollect(String type, Long id, String name, Long brandId, String brandName) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("type", type);
+        body.put("brandId", brandId);
+        body.put("brandName", brandName);
+        
+        if ("BRAND".equals(type)) {
+            // BRAND type: id and name are brandId and brandName
+            body.put("keyword", name);
+        } else if ("PROJECT".equals(type)) {
+            body.put("projectKeywordId", id);
+            body.put("projectKeywordName", name);
+            body.put("keyword", brandName + " " + name);
+        } else if ("COMPETITOR".equals(type)) {
+            body.put("competitorId", id);
+            body.put("competitorName", name);
+            body.put("keyword", name);
+        }
+        
+        log.info("[PythonRagClient] 재수집 요청 -> 분류: {}, ID: {}, 이름: {}", type, id, name);
+        
+        webClientBuilder
+                .baseUrl(pythonBaseUrl)
+                .build()
+                .post()
+                .uri("api/collect/recollect")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .timeout(Duration.ofSeconds(timeoutSec))
+                .subscribe(
+                        response -> log.info("[Python] 재수집 응답: {}", response),
+                        error -> log.error("[Python] 재수집 실패: {}", error.getMessage())
                 );
     }
     //-----------------------------

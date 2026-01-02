@@ -1,5 +1,6 @@
 package com.InsightMarket.service.brand;
 
+import com.InsightMarket.ai.PythonRagClient;
 import com.InsightMarket.common.exception.ApiException;
 import com.InsightMarket.common.exception.ErrorCode;
 import com.InsightMarket.domain.brand.Brand;
@@ -32,6 +33,7 @@ public class BrandServiceImpl implements BrandService {
     private final BrandRepository brandRepository;
     private final BrandMemberRepository brandMemberRepository;
     private final CompetitorRepository competitorRepository;
+    private final PythonRagClient pythonRagClient;
 
     //브랜드 생성 + 생성자 BRAND_ADMIN 매핑
     @Override
@@ -55,6 +57,9 @@ public class BrandServiceImpl implements BrandService {
                 .build();
 
         brandMemberRepository.save(brandMember);
+        
+        // 브랜드 생성 시 재수집 호출
+        pythonRagClient.recollect("BRAND", brand.getId(), brand.getName(), brand.getId(), brand.getName());
 
         return brand.getId();
     }
@@ -214,6 +219,7 @@ public class BrandServiceImpl implements BrandService {
         // 4) 요청 항목 처리: update or create
         for (CompetitorDTO dto : input) {
             Long id = dto.getCompetitorId();
+            boolean isNew = (id == null);
 
             Competitor competitor;
             if (id != null) {
@@ -233,6 +239,11 @@ public class BrandServiceImpl implements BrandService {
 
             competitor.changeName(dto.getName());
             competitor.changeEnabled(dto.isEnabled());
+            
+            // 신규 생성 시에만 재수집 호출
+            if (isNew) {
+                pythonRagClient.recollect("COMPETITOR", competitor.getId(), competitor.getName(), brand.getId(), brand.getName());
+            }
         }
     }
 }
