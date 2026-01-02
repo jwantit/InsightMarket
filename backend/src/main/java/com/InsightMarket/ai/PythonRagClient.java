@@ -10,6 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -179,4 +180,33 @@ public class PythonRagClient {
                 );
     }
     //-----------------------------
+    
+    // 전략 분석 요청 -------------------------------------------------------
+    public JsonNode askStrategy(String question, Long brandId, String brandName, List<Long> projectKeywordIds, Integer topK, String traceId) {
+        int topKValue = (topK == null) ? 5 : topK;
+        
+        Map<String, Object> body = new HashMap<>();
+        body.put("question", question);
+        body.put("brandId", brandId);
+        body.put("brandName", brandName);
+        body.put("projectKeywordIds", projectKeywordIds != null ? projectKeywordIds : List.of());
+        body.put("topK", topKValue);
+        
+        log.info("[PythonRagClient] call POST /rag/ask-strategy traceId={} baseUrl={} brandId={} brandName={} projectKeywordIds={} topK={} timeoutSec={}",
+                traceId, pythonBaseUrl, brandId, brandName, projectKeywordIds, topKValue, timeoutSec);
+        
+        return webClientBuilder
+                .baseUrl(pythonBaseUrl)
+                .build()
+                .post()
+                .uri("/rag/ask-strategy")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("X-Trace-Id", traceId)
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .timeout(Duration.ofSeconds(timeoutSec))
+                .block();
+    }
 }

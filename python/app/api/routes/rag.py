@@ -14,6 +14,9 @@ from app.config.settings import settings
 from app.services.rag.pipeline import run_rag
 from app.services.rag.validators import validate_and_fix_response
 from app.schemas.rag_request import RagAskRequest
+from app.schemas.strategy_request import StrategyAskRequest
+from app.services.strategy.strategy_pipeline import run_strategy_pipeline
+from pathlib import Path
 
 router = APIRouter(prefix="/rag", tags=["rag"])
 
@@ -78,6 +81,61 @@ def ask(req: RagAskRequest, request: Request):
             "reason": f"server_error: {error_msg}",
             "raw": None,
             "sources": [],
+        }
+        
+        return JSONResponse(
+            content=error_result,
+            media_type="application/json",
+            headers={"Content-Type": "application/json; charset=utf-8"},
+            status_code=500,
+        )
+
+
+@router.post("/ask-strategy")
+def ask_strategy(req: StrategyAskRequest, request: Request):
+    """
+    전략 분석 엔드포인트
+    - 당일 raw_data에서 브랜드명/프로젝트 키워드 데이터 필터링
+    - 템플릿 파일과 질문 유사도 계산
+    - 필터링된 raw_data와 매칭된 템플릿 반환
+    """
+    trace_id = request.headers.get("X-Trace-Id", "unknown")
+    
+    try:
+        print(f"[api][rag] /ask-strategy request traceId={trace_id} brandId={req.brandId} brandName={req.brandName} projectKeywordIds={req.projectKeywordIds} topK={req.topK} questionLen={len(req.question) if req.question else 0}")
+        
+        embed_model = get_embed_model()
+        
+        # 템플릿 파일 경로
+        template_path = Path("templates/strategy_templates.json")
+        
+        result = run_strategy_pipeline(
+            question=req.question,
+            brand_id=req.brandId,
+            brand_name=req.brandName,
+            project_keyword_ids=req.projectKeywordIds,
+            embed_model=embed_model,
+            template_path=template_path,
+            top_k=req.topK
+        )
+        
+        print(f"[api][rag] /ask-strategy response traceId={trace_id} ok={result.get('ok', False)}")
+        
+        return JSONResponse(
+            content=result,
+            media_type="application/json",
+            headers={"Content-Type": "application/json; charset=utf-8"},
+        )
+    except Exception as e:
+        error_msg = str(e)
+        error_trace = traceback.format_exc()
+        print(f"[api][rag] /ask-strategy ERROR traceId={trace_id}: {error_msg}")
+        print(f"[api][rag] /ask-strategy TRACEBACK traceId={trace_id}:\n{error_trace}")
+        
+        error_result = {
+            "ok": False,
+            "reason": f"server_error: {error_msg}",
+            "data": None,
         }
         
         return JSONResponse(

@@ -12,9 +12,11 @@ import com.InsightMarket.domain.analytics.PromptStatus;
 import com.InsightMarket.domain.brand.Brand;
 import com.InsightMarket.domain.member.Member;
 import com.InsightMarket.domain.project.Project;
+import com.InsightMarket.domain.keyword.ProjectKeyword;
 import com.InsightMarket.repository.analytics.AnalyticsAiAnswerRepository;
 import com.InsightMarket.repository.analytics.AnalyticsPromptRepository;
 import com.InsightMarket.repository.brand.BrandRepository;
+import com.InsightMarket.repository.keyword.ProjectKeywordRepository;
 import com.InsightMarket.repository.project.ProjectRepository;
 import com.InsightMarket.security.util.MemberUtil;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +42,7 @@ public class AiInsightServiceImpl implements AiInsightService {
     private final AnalyticsAiAnswerRepository answerRepository;
     private final BrandRepository brandRepository;
     private final ProjectRepository projectRepository;
+    private final ProjectKeywordRepository projectKeywordRepository;
     private final MemberUtil memberUtil;
 
     @Override
@@ -64,6 +67,14 @@ public class AiInsightServiceImpl implements AiInsightService {
             Project project = projects.get(0);
             log.info("[AiInsightServiceImpl] selected project projectId={} projectName={}",
                     project.getId(), project.getName());
+            
+            // 2-1) 프로젝트 키워드 조회
+            List<ProjectKeyword> projectKeywords = projectKeywordRepository.findByProjectId(project.getId());
+            List<Long> projectKeywordIds = projectKeywords.stream()
+                    .map(ProjectKeyword::getId)
+                    .toList();
+            log.info("[AiInsightServiceImpl] project keywords found projectKeywordIds={} count={}",
+                    projectKeywordIds, projectKeywordIds.size());
 
             // 3) Member 조회 (JWT에서, 없으면 null 허용)
             Member member = null;
@@ -79,8 +90,15 @@ public class AiInsightServiceImpl implements AiInsightService {
             log.info("[AiInsightServiceImpl] prompt saved/retrieved promptId={} status={}",
                     prompt.getId(), prompt.getStatus());
 
-            // 5) Python 호출
-            JsonNode pythonResponse = pythonRagClient.ask(req, traceId);
+            // 5) Python 호출 (전략 분석 파이프라인)
+            JsonNode pythonResponse = pythonRagClient.askStrategy(
+                    req.getQuestion(),
+                    brand.getId(),
+                    brand.getName(),
+                    projectKeywordIds,
+                    req.getTopK(),
+                    traceId
+            );
             long elapsedMs = System.currentTimeMillis() - start;
             double elapsedSec = round3(elapsedMs / 1000.0);
 
