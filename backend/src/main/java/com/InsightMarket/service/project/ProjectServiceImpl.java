@@ -172,7 +172,7 @@ public class ProjectServiceImpl implements ProjectService {
             
             // 프로젝트 키워드 생성 시에만 재수집 호출
             if (isNew) {
-                pythonRagClient.recollect("PROJECT", pk.getId(), pk.getKeyword(), brand.getId(), brand.getName());
+                pythonRagClient.recollect("PROJECT", pk.getId(), pk.getKeyword(), brand.getId(), brand.getName(), projectId);
             }
         }
 

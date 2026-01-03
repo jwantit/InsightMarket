@@ -37,6 +37,7 @@ def collect_naver_blog(
     keyword: str,
     brand_id: int,
     project_keyword_id: Optional[int] = None,
+    project_id: Optional[int] = None,
     competitor_id: Optional[int] = None,
     keyword_type: str = "BRAND",  # "BRAND", "PROJECT", "COMPETITOR"
     max_results: int = 5,
@@ -152,6 +153,7 @@ def collect_naver_blog(
                         "collectedAt": collected_at,  # 수집한 날짜
                         "brandId": brand_id,
                         "projectKeywordId": project_keyword_id,
+                        "projectId": project_id,
                         "competitorId": competitor_id,
                         "type": keyword_type
                     })

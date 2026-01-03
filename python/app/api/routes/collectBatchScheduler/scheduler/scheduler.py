@@ -102,18 +102,22 @@ def find_or_create_brand(data: Dict[str, Any], brand_id: int, brand_name: str) -
     data["brands"] = brands
     return new_brand
 
-def find_or_create_project_keyword(brand: Dict[str, Any], project_keyword_id: int, keyword: str) -> Dict[str, Any]:
+def find_or_create_project_keyword(brand: Dict[str, Any], project_keyword_id: int, keyword: str, project_id: Optional[int] = None) -> Dict[str, Any]:
     """프로젝트 키워드 찾기 또는 생성"""
     project_keywords = brand.get("projectKeywords", [])
     
     # 기존 프로젝트 키워드 찾기
     for pk in project_keywords:
         if pk.get("projectKeywordId") == project_keyword_id:
+            # projectId가 없으면 업데이트
+            if project_id is not None and pk.get("projectId") is None:
+                pk["projectId"] = project_id
             return pk
     
     # 새 프로젝트 키워드 생성
     new_pk = {
         "projectKeywordId": project_keyword_id,
+        "projectId": project_id,  # projectId 추가
         "keyword": keyword,  # 브랜드명 제거된 순수 키워드
         "data": []
     }
@@ -199,7 +203,8 @@ async def collect(request: Request):
         keyword = body.get("keyword", "")  # 검색 키워드 (이미 조합된 상태)
         brandId = body.get("brandId")
         brandName = body.get("brandName", "")
-        projectId = body.get("projectKeywordId")
+        projectKeywordId = body.get("projectKeywordId")
+        projectId = body.get("projectId")  # 실제 projectId
         competitorId = body.get("competitorId")
         sources = body.get("sources", ["YOUTUBE", "NAVER"])  # 기본값은 둘 다 선택
         is_batch = body.get("isBatch", False)  # 배치 모드 여부
@@ -210,7 +215,7 @@ async def collect(request: Request):
         print(f"타입: {keywordtype}")
         print(f"검색 키워드: {keyword}")
         print(f"brandId: {brandId}, brandName: {brandName}")
-        print(f"projectKeywordId: {projectId}, competitorId: {competitorId}")
+        print(f"projectKeywordId: {projectKeywordId}, projectId: {projectId}, competitorId: {competitorId}")
         print(f"sources: {sources}")
         print(f"--------------------------")
 
@@ -218,7 +223,8 @@ async def collect(request: Request):
         collected_list = collect_data(
             keyword=keyword,
             brand_id=brandId or 0,
-            project_keyword_id=projectId,
+            project_keyword_id=projectKeywordId,
+            project_id=projectId,
             competitor_id=competitorId,
             keyword_type=keywordtype,
             sources=sources,
@@ -252,7 +258,7 @@ async def collect(request: Request):
             brand["brandData"].extend(collected_list)
             
         elif keywordtype == "PROJECT":
-            if not projectId:
+            if not projectKeywordId:
                 return {"status": "error", "message": "projectKeywordId가 필요합니다."}
             
             # 프로젝트 키워드에서 브랜드명 제거 (저장 시에는 순수 키워드만)
@@ -260,7 +266,8 @@ async def collect(request: Request):
             if brandName and keyword.startswith(brandName + " "):
                 pure_keyword = keyword[len(brandName) + 1:].strip()
             
-            project_keyword = find_or_create_project_keyword(brand, projectId, pure_keyword)
+            # projectId도 함께 전달
+            project_keyword = find_or_create_project_keyword(brand, projectKeywordId, pure_keyword, projectId)
             project_keyword["data"].extend(collected_list)
             
         elif keywordtype == "COMPETITOR":
@@ -298,7 +305,8 @@ async def recollect(request: Request):
         keywordtype = body.get("type", "")  # "BRAND", "PROJECT", "COMPETITOR"
         brandId = body.get("brandId")
         brandName = body.get("brandName", "")
-        projectId = body.get("projectKeywordId")
+        projectKeywordId = body.get("projectKeywordId")
+        projectId = body.get("projectId")  # 실제 projectId
         competitorId = body.get("competitorId")
         sources = body.get("sources", ["YOUTUBE", "NAVER"])
         max_results = 5
@@ -313,7 +321,7 @@ async def recollect(request: Request):
             if keywordtype == "BRAND":
                 keyword = brandName
             elif keywordtype == "PROJECT":
-                if not projectId:
+                if not projectKeywordId:
                     return {"status": "error", "message": "projectKeywordId가 필요합니다."}
                 keyword = brandName + " " + body.get("projectKeywordName", "")
             elif keywordtype == "COMPETITOR":
@@ -329,7 +337,8 @@ async def recollect(request: Request):
         collected_list = collect_data(
             keyword=keyword,
             brand_id=brandId,
-            project_keyword_id=projectId,
+            project_keyword_id=projectKeywordId,
+            project_id=projectId,
             competitor_id=competitorId,
             keyword_type=keywordtype,
             sources=sources,
@@ -363,7 +372,12 @@ async def recollect(request: Request):
             # 브랜드 데이터를 새로 수집한 데이터로 교체 (기존 데이터 제거 후 추가)
             brand["brandData"] = collected_list
         elif keywordtype == "PROJECT":
-            project_keyword = find_or_create_project_keyword(brand, projectId, body.get("projectKeywordName", ""))
+            project_keyword_id = body.get("projectKeywordId")
+            project_id = body.get("projectId")
+            project_keyword_name = body.get("projectKeywordName", "")
+            if not project_keyword_id:
+                return {"status": "error", "message": "projectKeywordId가 필요합니다."}
+            project_keyword = find_or_create_project_keyword(brand, project_keyword_id, project_keyword_name, project_id)
             project_keyword["data"] = collected_list
         elif keywordtype == "COMPETITOR":
             competitor = find_or_create_competitor(brand, competitorId, keyword)

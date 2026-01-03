@@ -15,9 +15,10 @@ public interface ProjectKeywordRepository extends JpaRepository<ProjectKeyword, 
     Optional<ProjectKeyword> findByProjectIdAndKeyword(Long projectId, String keyword);
 
     //스케줄러 (활성화된 키워드만)
-    @Query("SELECT new com.InsightMarket.ai.scheduling.ProjectKeywordIdNameDTO(pk.id, pk.keyword, pk.brand.id, pk.brand.name) " +
+    @Query("SELECT new com.InsightMarket.ai.scheduling.ProjectKeywordIdNameDTO(pk.id, pk.keyword, pk.brand.id, pk.brand.name, pk.project.id) " +
             "FROM ProjectKeyword pk " +
             "JOIN pk.brand " +
+            "JOIN pk.project " +
             "WHERE pk.enabled = true")
     List<ProjectKeywordIdNameDTO> findAllProjectKeywordIdAndKeywordName();
 }

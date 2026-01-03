@@ -12,4 +12,5 @@ public class ProjectKeywordIdNameDTO {
     private String projectKeywordName;
     private Long brandId;
     private String brandName;
+    private Long projectId;
 }

@@ -69,6 +69,7 @@ def collect_youtube_comments(
     keyword: str,
     brand_id: int,
     project_keyword_id: Optional[int] = None,
+    project_id: Optional[int] = None,
     competitor_id: Optional[int] = None,
     keyword_type: str = "BRAND",  # "BRAND", "PROJECT", "COMPETITOR"
     max_videos: int = 5,
@@ -160,6 +161,7 @@ def collect_youtube_comments(
                 "collectedAt": collected_at,  # 수집한 날짜
                 "brandId": brand_id,
                 "projectKeywordId": project_keyword_id,
+                "projectId": project_id,
                 "competitorId": competitor_id,
                 "type": keyword_type,
                 # YouTube 특화 필드

@@ -8,6 +8,7 @@ import com.InsightMarket.repository.keyword.ProjectKeywordRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -277,7 +278,14 @@ public class AnalyticsProcessingService {
         }
 
         for (AnalyticsKeywordInsightResult entity : entities) {
-            insightResultRepository.save(entity);
+            try {
+                insightResultRepository.save(entity);
+            } catch (DataIntegrityViolationException e) {
+                log.error("[AnalyticsProcessingService] insights UNIQUE 제약 위반: brandId={}, projectId={}, keywordId={}, statDate={}, source={}", 
+                        entity.getBrandId(), entity.getProjectId(), entity.getKeywordId(), entity.getStatDate(), entity.getSource(), e);
+            } catch (Exception e) {
+                log.error("[AnalyticsProcessingService] insights 저장 실패: {}", e.getMessage(), e);
+            }
         }
         log.info("[AnalyticsProcessingService] insights 저장 완료: {}개", entities.size());
     }

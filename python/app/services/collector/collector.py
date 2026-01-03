@@ -11,6 +11,7 @@ def collect_data(
     keyword: str,
     brand_id: int,
     project_keyword_id: Optional[int] = None,
+    project_id: Optional[int] = None,
     competitor_id: Optional[int] = None,
     keyword_type: str = "BRAND",  # "BRAND", "PROJECT", "COMPETITOR"
     sources: List[str] = None,  # 기본값은 YOUTUBE, NAVER 둘 다
@@ -49,6 +50,7 @@ def collect_data(
                 keyword=keyword,
                 brand_id=brand_id,
                 project_keyword_id=project_keyword_id,
+                project_id=project_id,
                 competitor_id=competitor_id,
                 keyword_type=keyword_type,
                 max_videos=max_youtube_videos,
@@ -68,6 +70,7 @@ def collect_data(
                 keyword=keyword,
                 brand_id=brand_id,
                 project_keyword_id=project_keyword_id,
+                project_id=project_id,
                 competitor_id=competitor_id,
                 keyword_type=keyword_type,
                 max_results=max_naver_results,

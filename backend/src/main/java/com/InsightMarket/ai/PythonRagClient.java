@@ -119,10 +119,14 @@ public class PythonRagClient {
 
     //스케줄러 - 데이터 수집 요청 -------------------------------------------------------
     public void collect(String type, Long id, String keyword, Long brandId, String brandName) {
-        collect(type, id, keyword, brandId, brandName, false);
+        collect(type, id, keyword, brandId, brandName, null, false);
     }
     
     public void collect(String type, Long id, String keyword, Long brandId, String brandName, boolean isBatch) {
+        collect(type, id, keyword, brandId, brandName, null, isBatch);
+    }
+    
+    public void collect(String type, Long id, String keyword, Long brandId, String brandName, Long projectId, boolean isBatch) {
         Map<String, Object> body = new HashMap<>();
         body.put("type", type);      // "BRAND", "PROJECT", "COMPETITOR"
         body.put("isBatch", isBatch); // 배치 모드 플래그
@@ -137,6 +141,9 @@ public class PythonRagClient {
             body.put("projectKeywordId", id);
             body.put("brandId", brandId);
             body.put("brandName", brandName);
+            if (projectId != null) {
+                body.put("projectId", projectId);
+            }
             // 브랜드명 + 프로젝트 키워드 조합
             searchKeyword = brandName + " " + keyword;
         } else if ("COMPETITOR".equals(type)) {
@@ -147,7 +154,7 @@ public class PythonRagClient {
         
         body.put("keyword", searchKeyword); // 실제 검색에 사용할 키워드
 
-        log.info("[PythonRagClient] 수집 요청 전송 -> 분류: {}, ID: {}, 검색어: {}, isBatch: {}", type, id, searchKeyword, isBatch);
+        log.info("[PythonRagClient] 수집 요청 전송 -> 분류: {}, ID: {}, 검색어: {}, projectId: {}, isBatch: {}", type, id, searchKeyword, projectId, isBatch);
 
         webClientBuilder
                 .baseUrl(pythonBaseUrl)
@@ -197,6 +204,10 @@ public class PythonRagClient {
     }
     
     public void recollect(String type, Long id, String name, Long brandId, String brandName) {
+        recollect(type, id, name, brandId, brandName, null);
+    }
+    
+    public void recollect(String type, Long id, String name, Long brandId, String brandName, Long projectId) {
         Map<String, Object> body = new HashMap<>();
         body.put("type", type);
         body.put("brandId", brandId);
@@ -208,6 +219,9 @@ public class PythonRagClient {
         } else if ("PROJECT".equals(type)) {
             body.put("projectKeywordId", id);
             body.put("projectKeywordName", name);
+            if (projectId != null) {
+                body.put("projectId", projectId);
+            }
             body.put("keyword", brandName + " " + name);
         } else if ("COMPETITOR".equals(type)) {
             body.put("competitorId", id);
@@ -215,7 +229,7 @@ public class PythonRagClient {
             body.put("keyword", name);
         }
         
-        log.info("[PythonRagClient] 재수집 요청 -> 분류: {}, ID: {}, 이름: {}", type, id, name);
+        log.info("[PythonRagClient] 재수집 요청 -> 분류: {}, ID: {}, 이름: {}, projectId: {}", type, id, name, projectId);
         
         webClientBuilder
                 .baseUrl(pythonBaseUrl)
