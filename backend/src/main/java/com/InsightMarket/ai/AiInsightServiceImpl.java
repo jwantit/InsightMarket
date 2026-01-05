@@ -1,5 +1,13 @@
 package com.InsightMarket.ai;
 
+import com.InsightMarket.repository.solution.SolutionRepository;
+import com.InsightMarket.repository.strategy.StrategyRepository;
+import com.InsightMarket.dto.ai.SaveReportRequestDTO;
+import com.InsightMarket.domain.solution.Solution;
+import com.InsightMarket.domain.strategy.Strategy;
+import com.InsightMarket.domain.order.Orders;
+import com.InsightMarket.domain.order.OrderItem;
+import com.InsightMarket.domain.order.OrderStatus;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
@@ -18,6 +26,7 @@ import com.InsightMarket.repository.analytics.AnalyticsPromptRepository;
 import com.InsightMarket.repository.brand.BrandRepository;
 import com.InsightMarket.repository.keyword.ProjectKeywordRepository;
 import com.InsightMarket.repository.project.ProjectRepository;
+import com.InsightMarket.repository.payment.PaymentRepository;
 import com.InsightMarket.security.util.MemberUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,172 +52,10 @@ public class AiInsightServiceImpl implements AiInsightService {
     private final BrandRepository brandRepository;
     private final ProjectRepository projectRepository;
     private final ProjectKeywordRepository projectKeywordRepository;
+    private final SolutionRepository solutionRepository;
+    private final StrategyRepository strategyRepository;
+    private final PaymentRepository paymentRepository;
     private final MemberUtil memberUtil;
-
-    @Override
-    @Transactional
-    public JsonNode ask(AiAskRequestDTO req, String traceId) {
-        long start = System.currentTimeMillis();
-        AnalyticsPrompt prompt = null;
-
-        try {
-            log.info("[AiInsightServiceImpl] ask start traceId={} brandId={} questionLen={}",
-                    traceId, req.getBrandId(), req.getQuestion() != null ? req.getQuestion().length() : 0);
-
-            // 1) Brand 조회
-            Brand brand = brandRepository.findById(req.getBrandId())
-                    .orElseThrow(() -> new ApiException(ErrorCode.BRAND_NOT_FOUND));
-
-            // 2) Project 조회 (brandId로 가장 최근 프로젝트 사용)
-            List<Project> projects = projectRepository.findByBrandIdOrderByStartDateDesc(req.getBrandId());
-            if (projects.isEmpty()) {
-                throw new ApiException(ErrorCode.PROJECT_NOT_FOUND);
-            }
-            Project project = projects.get(0);
-            log.info("[AiInsightServiceImpl] selected project projectId={} projectName={}",
-                    project.getId(), project.getName());
-            
-            // 2-1) 프로젝트 키워드 조회
-            List<ProjectKeyword> projectKeywords = projectKeywordRepository.findByProjectId(project.getId());
-            List<Long> projectKeywordIds = projectKeywords.stream()
-                    .map(ProjectKeyword::getId)
-                    .toList();
-            log.info("[AiInsightServiceImpl] project keywords found projectKeywordIds={} count={}",
-                    projectKeywordIds, projectKeywordIds.size());
-
-            // 3) Member 조회 (JWT에서, 없으면 null 허용)
-            Member member = null;
-            try {
-                member = memberUtil.getCurrentMember();
-                log.info("[AiInsightServiceImpl] current member memberId={}", member != null ? member.getId() : null);
-            } catch (Exception e) {
-                log.warn("[AiInsightServiceImpl] member not found or not authenticated, continuing without member", e);
-            }
-
-            // 4) analytics_prompt 저장 (UNIQUE 충돌 시 기존 레코드 재사용)
-            prompt = findOrCreatePrompt(brand, project, member, req.getQuestion(), req.getTopK());
-            log.info("[AiInsightServiceImpl] prompt saved/retrieved promptId={} status={}",
-                    prompt.getId(), prompt.getStatus());
-
-            // 5) Python 호출 (전략 분석 파이프라인)
-            JsonNode pythonResponse = pythonRagClient.askStrategy(
-                    req.getQuestion(),
-                    brand.getId(),
-                    brand.getName(),
-                    projectKeywordIds,
-                    req.getTopK(),
-                    traceId
-            );
-            long elapsedMs = System.currentTimeMillis() - start;
-            double elapsedSec = round3(elapsedMs / 1000.0);
-
-            boolean isOk = pythonResponse != null && pythonResponse.has("ok") && pythonResponse.get("ok").asBoolean();
-
-            // 6) analytics_ai_answer 저장 (UNIQUE 충돌 시 update)
-            saveOrUpdateAnswer(prompt, brand, project, isOk, elapsedSec, pythonResponse);
-
-            // 7) prompt status 업데이트
-            prompt = updatePromptStatus(prompt, isOk ? PromptStatus.SUCCESS : PromptStatus.FAILED);
-
-            log.info("[AiInsightServiceImpl] ask end traceId={} promptId={} ok={} elapsedSec={}",
-                    traceId, prompt.getId(), isOk, elapsedSec);
-
-            return pythonResponse;
-
-        } catch (ApiException e) {
-            // ApiException은 그대로 전파
-            throw e;
-        } catch (Exception e) {
-            long elapsedMs = System.currentTimeMillis() - start;
-            String reason = summarizeReason(e);
-
-            log.error("[AiInsightServiceImpl] ask fail traceId={} elapsedMs={} reason={} ex={}",
-                    traceId, elapsedMs, reason, e.toString(), e);
-
-            // prompt가 생성되었으면 status를 FAILED로 업데이트
-            if (prompt != null) {
-                try {
-                    updatePromptStatus(prompt, PromptStatus.FAILED);
-                } catch (Exception updateEx) {
-                    log.error("[AiInsightServiceImpl] failed to update prompt status", updateEx);
-                }
-            }
-
-            // 기존 계약 유지: ok=false 형태로 반환
-            return buildFailResponse(traceId, elapsedMs, reason);
-        }
-    }
-
-    /**
-     * UNIQUE(project_id, member_id, question) 충돌 시 기존 레코드 재사용
-     * 없으면 새로 생성 (status=REQUESTED)
-     */
-    private AnalyticsPrompt findOrCreatePrompt(Brand brand, Project project, Member member,
-                                               String question, Integer topK) {
-        return promptRepository.findByProjectAndMemberAndQuestion(project, member, question)
-                .orElseGet(() -> {
-                    AnalyticsPrompt newPrompt = AnalyticsPrompt.builder()
-                            .brand(brand)
-                            .project(project)
-                            .member(member)
-                            .question(question)
-                            .topK(topK != null ? topK : 5)
-                            .status(PromptStatus.REQUESTED)
-                            .build();
-                    return promptRepository.save(newPrompt);
-                });
-    }
-
-    /**
-     * UNIQUE(prompt_id) 충돌 시 기존 레코드 update
-     */
-    private void saveOrUpdateAnswer(AnalyticsPrompt prompt, Brand brand, Project project,
-                                    boolean ok, double elapsedSec, JsonNode responseJson) {
-        AnalyticsAiAnswer existing = answerRepository.findByPrompt(prompt).orElse(null);
-
-        String jsonString = responseJson != null ? responseJson.toString() : "{}";
-
-        if (existing != null) {
-            // 기존 레코드 업데이트
-            existing = AnalyticsAiAnswer.builder()
-                    .id(existing.getId())
-                    .prompt(prompt)
-                    .brand(brand)
-                    .project(project)
-                    .ok(ok)
-                    .elapsedSec(elapsedSec)
-                    .responseJson(jsonString)
-                    .build();
-            answerRepository.save(existing);
-            log.info("[AiInsightServiceImpl] answer updated answerId={}", existing.getId());
-        } else {
-            // 새 레코드 생성
-            AnalyticsAiAnswer answer = AnalyticsAiAnswer.builder()
-                    .prompt(prompt)
-                    .brand(brand)
-                    .project(project)
-                    .ok(ok)
-                    .elapsedSec(elapsedSec)
-                    .responseJson(jsonString)
-                    .build();
-            answerRepository.save(answer);
-            log.info("[AiInsightServiceImpl] answer saved answerId={}", answer.getId());
-        }
-    }
-
-    private AnalyticsPrompt updatePromptStatus(AnalyticsPrompt prompt, PromptStatus status) {
-        // JPA 엔티티는 변경 감지로 자동 업데이트되지만, 명시적으로 새 객체로 교체
-        AnalyticsPrompt updated = AnalyticsPrompt.builder()
-                .id(prompt.getId())
-                .brand(prompt.getBrand())
-                .project(prompt.getProject())
-                .member(prompt.getMember())
-                .question(prompt.getQuestion())
-                .topK(prompt.getTopK())
-                .status(status)
-                .build();
-        return promptRepository.save(updated);
-    }
 
     private String summarizeReason(Exception e) {
         String msg = (e.getMessage() == null) ? "" : e.getMessage();
@@ -234,6 +81,116 @@ public class AiInsightServiceImpl implements AiInsightService {
 
     private double round3(double v) {
         return Math.round(v * 1000.0) / 1000.0;
+    }
+    
+    @Override
+    public JsonNode generateSolutionReport(SolutionReportRequestDTO req, String traceId) {
+        try {
+            log.info("[AiInsightServiceImpl] generateSolutionReport start traceId={} brandId={} solutionTitle={} reportType={}",
+                    traceId, req.getBrandId(), req.getSolutionTitle(), req.getReportType());
+            
+            // Python 호출
+            JsonNode pythonResponse = pythonRagClient.generateSolutionReport(req, traceId);
+            
+            log.info("[AiInsightServiceImpl] generateSolutionReport end traceId={} ok={}",
+                    traceId, pythonResponse != null && pythonResponse.has("ok") && pythonResponse.get("ok").asBoolean());
+            
+            return pythonResponse;
+        } catch (Exception e) {
+            log.error("[AiInsightServiceImpl] generateSolutionReport error traceId={}", traceId, e);
+            return buildFailResponse(traceId, 0, summarizeReason(e));
+        }
+    }
+    
+    @Override
+    @Transactional
+    public JsonNode saveReportAsSolution(SaveReportRequestDTO req, String traceId) {
+        try {
+            log.info("[AiInsightServiceImpl] saveReportAsSolution start traceId={} projectId={} solutionTitle={}",
+                    traceId, req.getProjectId(), req.getSolutionTitle());
+            
+            // 1. Project 조회
+            Project project = projectRepository.findById(req.getProjectId())
+                    .orElseThrow(() -> new ApiException(ErrorCode.PROJECT_NOT_FOUND));
+            
+            // 2. 무료 제공 횟수 체크 (사용자당 1개까지 무료)
+            Member currentMember = memberUtil.getCurrentMember();
+            long freeReportCount = paymentRepository.countFreeReportsByMemberId(currentMember.getId());
+            boolean isFree = freeReportCount < 1;
+            int price = isFree ? 0 : 10000; // 무료면 0원, 유료면 10000원
+            
+            log.info("[AiInsightServiceImpl] freeReportCount={} isFree={} price={}", 
+                    freeReportCount, isFree, price);
+            
+            // 3. Strategy 찾기 또는 생성 (솔루션 제목을 전략 제목으로 사용)
+            Strategy strategy = strategyRepository.findByTitle(req.getSolutionTitle())
+                    .orElseGet(() -> {
+                        Strategy newStrategy = Strategy.builder()
+                                .title(req.getSolutionTitle())
+                                .build();
+                        return strategyRepository.save(newStrategy);
+                    });
+            
+            // 4. Solution 생성 및 저장
+            // 무료 리포트는 isPurchased = true로 저장 (상품 목록에서 제외, 구매 내역에만 표시)
+            // 유료 리포트는 isPurchased = false로 저장 (상품 목록에 표시)
+            Solution solution = Solution.builder()
+                    .strategy(strategy)
+                    .project(project)
+                    .title(req.getSolutionTitle() + " 리포트")
+                    .price(price)
+                    .description(req.getReportContent())
+                    .isPurchased(isFree) // 무료면 true (상품 목록 제외), 유료면 false (상품 목록 표시)
+                    .build();
+            
+            Solution savedSolution = solutionRepository.save(solution);
+            
+            // 5. 무료 리포트인 경우 Orders 생성 (구매 내역에 표시되도록)
+            if (isFree) {
+                Orders freeOrder = Orders.builder()
+                        .buyMemberId(currentMember.getId())
+                        .projectId(project.getId())
+                        .paymentId("FREE-" + System.currentTimeMillis() + "-" + savedSolution.getId())
+                        .totalPrice(0)
+                        .status(OrderStatus.PAID) // 무료이지만 구매 완료 상태
+                        .build();
+                
+                OrderItem orderItem = OrderItem.builder()
+                        .solution(savedSolution)
+                        .solutionName(savedSolution.getTitle())
+                        .orderPrice(0)
+                        .build();
+                
+                freeOrder.addOrderItem(orderItem);
+                paymentRepository.save(freeOrder);
+                
+                log.info("[AiInsightServiceImpl] 무료 리포트 Orders 생성 orderId={} solutionId={}", 
+                        freeOrder.getId(), savedSolution.getId());
+            }
+            
+            log.info("[AiInsightServiceImpl] saveReportAsSolution end traceId={} solutionId={} isFree={}",
+                    traceId, savedSolution.getId(), isFree);
+            
+            // 6. 응답 생성
+            ObjectNode response = objectMapper.createObjectNode();
+            response.put("ok", true);
+            response.put("solutionId", savedSolution.getId());
+            response.put("isFree", isFree);
+            response.put("price", price);
+            response.put("message", isFree ? "리포트가 무료로 생성되었습니다." : "리포트가 생성되었습니다. 구매가 필요합니다.");
+            
+            return response;
+        } catch (Exception e) {
+            log.error("[AiInsightServiceImpl] saveReportAsSolution error traceId={}", traceId, e);
+            return buildFailResponse(traceId, 0, summarizeReason(e));
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long getFreeReportCount(Long memberId) {
+        log.info("[AiInsightServiceImpl] getFreeReportCount memberId={}", memberId);
+        return paymentRepository.countFreeReportsByMemberId(memberId);
     }
 }
 

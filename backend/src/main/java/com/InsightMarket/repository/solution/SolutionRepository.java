@@ -56,5 +56,9 @@ public interface SolutionRepository extends JpaRepository<Solution, Long> {
             @Param("solutionId") Long solutionId,
             @Param("projectId") Long projectId
     );
+    
+    // 프로젝트당 무료 제공된 리포트 개수 조회 (isPurchased = false인 것만)
+    @Query("SELECT COUNT(s) FROM Solution s WHERE s.project.id = :projectId AND s.isPurchased = false")
+    long countFreeReportsByProjectId(@Param("projectId") Long projectId);
 }
 

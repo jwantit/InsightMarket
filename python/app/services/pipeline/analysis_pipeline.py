@@ -2,7 +2,9 @@
 분석 파이프라인 오케스트레이터
 전체 분석 파이프라인을 순차적으로 실행
 """
+import json
 from datetime import date
+from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 
 from app.services.parser.raw_data_parser import parse_raw_data
@@ -39,6 +41,112 @@ def get_kobert_model():
         print("[파이프라인] KoBERT 모델 로딩 중...")
         _kobert_tokenizer, _kobert_model = load_kobert()
     return _kobert_tokenizer, _kobert_model
+
+
+def update_raw_data_with_sentiment(
+    raw_data_file_path: str,
+    analyzed_docs: List[Dict]
+) -> None:
+    """
+    감정분석 결과(sentiment)를 raw_data 파일에 추가
+    
+    [입력]
+    - raw_data_file_path: raw_data.json 파일 경로
+    - analyzed_docs: 감정분석된 문서 리스트
+        [
+          {
+            "brand_id": int,
+            "project_id": int | None,
+            "keyword_id": int | None,
+            "text": str,  # title + text + comments 병합된 텍스트
+            "sentiment": str,  # "POS", "NEG", "NEU"
+            ...
+          }
+        ]
+    """
+    try:
+        # 1. raw_data 파일 로드
+        file_path = Path(raw_data_file_path)
+        if not file_path.exists():
+            print(f"[파이프라인] raw_data 파일이 없습니다: {raw_data_file_path}")
+            return
+        
+        with open(file_path, 'r', encoding='utf-8') as f:
+            raw_data = json.load(f)
+        
+        # 2. analyzed_docs를 매핑용 딕셔너리로 변환
+        # key: (brand_id, project_id, keyword_id, text_normalized)
+        sentiment_map = {}
+        for doc in analyzed_docs:
+            text = doc.get("text", "").strip()
+            if not text:
+                continue
+            
+            # 텍스트 정규화 (공백 정리)
+            text_normalized = " ".join(text.split())
+            
+            key = (
+                doc.get("brand_id"),
+                doc.get("project_id"),
+                doc.get("keyword_id"),
+                text_normalized
+            )
+            sentiment_map[key] = doc.get("sentiment", "NEU")
+        
+        # 3. raw_data의 각 아이템에 sentiment 추가
+        updated_count = 0
+        brands = raw_data.get("brands", [])
+        
+        for brand in brands:
+            brand_id = brand.get("brandId")
+            
+            # PROJECT 타입 데이터 처리
+            project_keywords = brand.get("projectKeywords", [])
+            for pk in project_keywords:
+                project_id = pk.get("projectId")
+                project_keyword_id = pk.get("projectKeywordId")
+                data_list = pk.get("data", [])
+                
+                for item in data_list:
+                    if item.get("type") != "PROJECT":
+                        continue
+                    
+                    # text 생성 (title + text + comments 병합) - raw_data_parser와 동일한 방식
+                    text_parts = []
+                    if item.get("title"):
+                        text_parts.append(item["title"])
+                    if item.get("text"):
+                        text_parts.append(item["text"])
+                    if item.get("comments"):
+                        comments = item.get("comments", [])
+                        if isinstance(comments, list):
+                            text_parts.extend(comments)
+                    
+                    merged_text = " ".join(text_parts)
+                    if not merged_text.strip():
+                        continue
+                    
+                    # 텍스트 정규화
+                    text_normalized = " ".join(merged_text.split())
+                    
+                    # 매칭
+                    key = (brand_id, project_id, project_keyword_id, text_normalized)
+                    sentiment = sentiment_map.get(key)
+                    
+                    if sentiment:
+                        item["sentiment"] = sentiment
+                        updated_count += 1
+        
+        # 4. raw_data 파일 저장
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(raw_data, f, ensure_ascii=False, indent=2)
+        
+        print(f"[파이프라인] raw_data 파일 업데이트 완료: {updated_count}개 아이템에 sentiment 추가")
+        
+    except Exception as e:
+        print(f"[파이프라인] raw_data 업데이트 중 오류: {e}")
+        import traceback
+        traceback.print_exc()
 
 
 def run_analysis_pipeline(
@@ -148,6 +256,14 @@ def run_analysis_pipeline(
               f"token_stats={len(spring_token_stats)}, "
               f"baseline_stats={len(spring_baseline_stats)}, "
               f"insights={len(spring_insights)}")
+        
+        # 7. raw_data 파일에 sentiment 업데이트
+        try:
+            print("[파이프라인] 7단계: raw_data 파일 업데이트")
+            update_raw_data_with_sentiment(file_path, analyzed_docs)
+        except Exception as e:
+            print(f"[파이프라인] raw_data 업데이트 실패 (계속 진행): {e}")
+            # 업데이트 실패해도 분석 결과는 반환
         
         return {
             "status": "success",

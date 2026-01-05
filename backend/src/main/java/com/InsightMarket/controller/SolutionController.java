@@ -5,6 +5,7 @@ import com.InsightMarket.dto.PageRequestDTO;
 import com.InsightMarket.dto.PageResponseDTO;
 import com.InsightMarket.dto.solution.SolutionDTO;
 import com.InsightMarket.service.solution.SolutionService;
+import com.InsightMarket.security.util.MemberUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,7 @@ import java.util.Map;
 public class SolutionController {
 
     private final SolutionService solutionService;
+    private final MemberUtil memberUtil;
 
     //프로젝트 단위 조회
     @GetMapping("/list")
@@ -54,6 +56,15 @@ public class SolutionController {
         log.info("SolutionController 진입 삭제");
         solutionService.deleteSolutionProduct(solutionid);
      return Map.of("RESULT", "SUCCESS");
+    }
+
+    //구매한 솔루션 상세 조회
+    @GetMapping("/purchased/{solutionId}")
+    public SolutionDTO getPurchasedSolutionDetail(
+            @PathVariable("solutionId") Long solutionId) {
+        log.info("SolutionController 진입 구매한 솔루션 상세 조회 solutionId={}", solutionId);
+        Long memberId = memberUtil.getCurrentMember().getId();
+        return solutionService.getPurchasedSolutionDetail(solutionId, memberId);
     }
 }
 

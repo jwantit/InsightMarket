@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     ollama_model: str = "qwen3:1.7b"
     ollama_timeout_sec: int = 600
     
+    # OpenAI 설정
+    openai_api_key: Optional[str] = None
+    openai_model: str = "gpt-4o-mini"
+    openai_timeout_sec: int = 300
+    
     # Embedding 모델 설정
     embed_model_name: str = "nlpai-lab/KoE5"
     

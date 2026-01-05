@@ -20,13 +20,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PythonRagClient {
 
-    // ============================================================
-    // [기능] Python(FastAPI) /rag/ask 호출
-    // - traceId는 Header(X-Trace-Id)로만 전파 (Python 미들웨어가 처리)
-    // - body는 Python RagAskRequest 계약(question, brandId, topK)만 전송
-    // - timeout은 Python Ollama timeout(600s)에 맞춰 650s 권장
-    // ============================================================
-
     private final WebClient.Builder webClientBuilder;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -35,33 +28,6 @@ public class PythonRagClient {
 
     @Value("${python.rag.timeout-sec:650}")
     private long timeoutSec;
-
-    public JsonNode ask(AiAskRequestDTO req, String traceId) {
-        int topK = (req.getTopK() == null) ? 5 : req.getTopK();
-
-        // ✅ Python 계약에 맞는 body만 전송
-        Map<String, Object> body = new HashMap<>();
-        body.put("brandId", req.getBrandId());
-        body.put("question", req.getQuestion());
-        body.put("topK", topK);
-
-        log.info("[PythonRagClient] call POST /rag/ask traceId={} baseUrl={} brandId={} topK={} timeoutSec={}",
-                traceId, pythonBaseUrl, req.getBrandId(), topK, timeoutSec);
-
-        return webClientBuilder
-                .baseUrl(pythonBaseUrl)
-                .build()
-                .post()
-                .uri("/rag/ask")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("X-Trace-Id", traceId) // ✅ 여기로만 전파
-                .bodyValue(body)
-                .retrieve()
-                .bodyToMono(JsonNode.class)
-                .timeout(Duration.ofSeconds(timeoutSec))
-                .block();
-    }
 
 
     //분석 파이프라인 요청 -------------------------------------------------------
@@ -248,25 +214,59 @@ public class PythonRagClient {
     }
     //-----------------------------
     
-    // 전략 분석 요청 -------------------------------------------------------
-    public JsonNode askStrategy(String question, Long brandId, String brandName, List<Long> projectKeywordIds, Integer topK, String traceId) {
-        int topKValue = (topK == null) ? 5 : topK;
+    // 전략 분석 요청 (Query Engineering 방식) -------------------------------------------------------
+    public JsonNode askStrategy(String question, Long brandId, String brandName, Long projectId, List<Long> projectKeywordIds, Integer topK, String traceId) {
+        int topKValue = (topK == null) ? 3 : topK;
         
         Map<String, Object> body = new HashMap<>();
         body.put("question", question);
         body.put("brandId", brandId);
         body.put("brandName", brandName);
+        body.put("projectId", projectId); // 프로젝트 ID 추가
         body.put("projectKeywordIds", projectKeywordIds != null ? projectKeywordIds : List.of());
         body.put("topK", topKValue);
         
-        log.info("[PythonRagClient] call POST /rag/ask-strategy traceId={} baseUrl={} brandId={} brandName={} projectKeywordIds={} topK={} timeoutSec={}",
-                traceId, pythonBaseUrl, brandId, brandName, projectKeywordIds, topKValue, timeoutSec);
+        log.info("[PythonRagClient] call POST /api/strategy/ask-strategy traceId={} baseUrl={} brandId={} projectId={} brandName={} projectKeywordIds={} topK={} timeoutSec={}",
+                traceId, pythonBaseUrl, brandId, projectId, brandName, projectKeywordIds, topKValue, timeoutSec);
         
         return webClientBuilder
                 .baseUrl(pythonBaseUrl)
                 .build()
                 .post()
-                .uri("/rag/ask-strategy")
+                .uri("/api/strategy/ask-strategy")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("X-Trace-Id", traceId)
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .timeout(Duration.ofSeconds(timeoutSec))
+                .block();
+    }
+    
+    // 솔루션별 리포트 생성 요청 -------------------------------------------------------
+    public JsonNode generateSolutionReport(SolutionReportRequestDTO req, String traceId) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("brandId", req.getBrandId());
+        body.put("brandName", req.getBrandName());
+        body.put("projectId", req.getProjectId());
+        body.put("projectName", req.getProjectName() != null ? req.getProjectName() : "");
+        body.put("question", req.getQuestion());
+        body.put("solutionTitle", req.getSolutionTitle());
+        body.put("solutionDescription", req.getSolutionDescription() != null ? req.getSolutionDescription() : "");
+        body.put("relatedProblems", req.getRelatedProblems() != null ? req.getRelatedProblems() : List.of());
+        body.put("relatedInsights", req.getRelatedInsights() != null ? req.getRelatedInsights() : List.of());
+        body.put("keywordStatsSummary", req.getKeywordStatsSummary() != null ? req.getKeywordStatsSummary() : "");
+        body.put("reportType", req.getReportType() != null ? req.getReportType() : "marketing");
+        
+        log.info("[PythonRagClient] call POST /api/strategy/generate-solution-report traceId={} baseUrl={} brandId={} projectId={} solutionTitle={} reportType={} timeoutSec={}",
+                traceId, pythonBaseUrl, req.getBrandId(), req.getProjectId(), req.getSolutionTitle(), req.getReportType(), timeoutSec);
+        
+        return webClientBuilder
+                .baseUrl(pythonBaseUrl)
+                .build()
+                .post()
+                .uri("/api/strategy/generate-solution-report")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .header("X-Trace-Id", traceId)
