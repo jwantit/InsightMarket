@@ -1,5 +1,6 @@
 import React from "react";
 import { Outlet, useNavigate, useSearchParams } from "react-router-dom";
+import { MessageSquare, Plus, List } from "lucide-react";
 import useBoardRouteParams from "../../hooks/common/useBoardRouteParams";
 
 const BoardLayout = () => {
@@ -15,20 +16,34 @@ const BoardLayout = () => {
   const goAdd = () => navigate(`/app/${brandId}/board/discussion/add`);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between pb-4 border-b">
-        <h2 className="text-2xl font-semibold text-gray-800">브랜드 커뮤니티</h2>
-        <div className="flex gap-2">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
+            <MessageSquare size={24} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+              브랜드 커뮤니티
+            </h1>
+            <p className="text-sm text-slate-500">
+              브랜드 내부 커뮤니케이션과 토론을 위한 게시판입니다.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
           <button
             onClick={goList}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 rounded-xl transition-all border border-slate-200"
           >
+            <List size={18} />
             목록
           </button>
           <button
             onClick={goAdd}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow-md active:scale-95"
           >
+            <Plus size={18} />
             글쓰기
           </button>
         </div>

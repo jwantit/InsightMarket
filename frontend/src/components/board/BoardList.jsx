@@ -1,124 +1,131 @@
 import React from "react";
 import { formatDateTime } from "../../util/dateUtil";
 import { API_SERVER_HOST } from "../../api/memberApi";
+import { FileText, MessageCircle, Paperclip } from "lucide-react";
 
 const BoardList = ({ items = [], onClickItem }) => {
   const handleFileDownload = (e, fileId) => {
-    e.stopPropagation(); // 행 클릭 이벤트 방지
+    e.stopPropagation();
     window.open(`${API_SERVER_HOST}/api/files/${fileId}`, "_blank");
   };
 
   if (!items.length) {
     return (
-      <div className="py-12 text-center text-gray-500">
-        게시글이 없습니다.
+      <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center">
+            <FileText size={32} className="text-slate-400" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-slate-600 mb-1">
+              등록된 게시글이 없습니다.
+            </p>
+            <p className="text-xs text-slate-400">
+              첫 번째 게시글을 작성해보세요.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
+
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full border-collapse">
-        <thead>
-          <tr className="bg-gray-50 border-b border-gray-200">
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider w-20">
-              ID
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-              제목
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider w-24">
-              썸네일
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider w-32">
-              작성자
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider w-40">
-              등록일
-            </th>
-            <th className="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider w-20">
-              첨부
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {items.map((item) => (
-            <tr
-              key={item.id}
-              onClick={() => onClickItem?.(item.id)}
-              className="hover:bg-gray-50 cursor-pointer transition-colors"
-            >
-              <td className="px-4 py-3 text-sm text-gray-600">{item.id}</td>
-              <td className="px-4 py-3 text-sm text-gray-900">
-                <div className="flex items-center gap-2">
-                  <span>{item.title}</span>
-                  {item.commentCount !== undefined && item.commentCount > 0 && (
-                    <span className="text-xs text-blue-600 font-medium">
-                      [{item.commentCount}]
-                    </span>
-                  )}
-                </div>
-              </td>
-              <td className="px-4 py-3">
-                {(() => {
-                  // 첫 번째 이미지 파일 찾기 (hasThumbnail이 true인 파일만)
-                  const firstImageFile = item.files?.find(f => f.hasThumbnail === true);
-                  
-                  if (firstImageFile) {
-                    return (
-                      <div className="flex items-center gap-2">
+    <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="min-w-full">
+          <thead>
+            <tr className="bg-slate-50 border-b border-slate-200">
+              <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-20">
+                번호
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-24">
+                썸네일
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider">
+                제목
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-32">
+                작성자
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-40">
+                등록일
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-slate-600 uppercase tracking-wider w-20">
+                첨부
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-slate-100">
+            {items.map((item) => {
+              const firstImageFile = item.files?.find(f => f.hasThumbnail === true);
+              
+              return (
+                <tr
+                  key={item.id}
+                  onClick={() => onClickItem?.(item.id)}
+                  className="hover:bg-blue-50/30 cursor-pointer transition-colors group"
+                >
+                  <td className="px-6 py-4 text-sm font-medium text-slate-600">
+                    {item.id}
+                  </td>
+                  <td className="px-6 py-4">
+                    {firstImageFile ? (
+                      <div className="flex items-center">
                         <img
-                          key={firstImageFile.id}
                           src={`${API_SERVER_HOST}/api/files/${firstImageFile.id}/thumbnail`}
                           alt="썸네일"
-                          className="w-16 h-16 object-cover rounded border border-gray-200"
+                          className="w-16 h-16 object-cover rounded-xl border border-slate-200"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleFileDownload(e, firstImageFile.id);
                           }}
                           onError={(e) => {
-                            console.error('썸네일 로드 실패:', firstImageFile.id, firstImageFile);
                             e.target.style.display = 'none';
                           }}
                           style={{ cursor: 'pointer' }}
                         />
                       </div>
-                    );
-                  }
-                  
-                  return <span className="text-gray-400 text-xs">-</span>;
-                })()}
-              </td>
-              <td className="px-4 py-3 text-sm text-gray-600">
-                {item.writerName}
-              </td>
-              <td className="px-4 py-3 text-sm text-gray-500">
-                {formatDateTime(item.createdAt)}
-              </td>
-              <td className="px-4 py-3 text-sm text-gray-500">
-                {item.files && item.files.length > 0 ? (
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs text-gray-600">
-                      📎 {item.files.length}
-                    </span>
-                    {item.files.map((file) => (
-                      <button
-                        key={file.id}
-                        onClick={(e) => handleFileDownload(e, file.id)}
-                        className="text-blue-600 hover:text-blue-800 text-xs"
-                        title={file.originalName}
-                      >
-                        첨부
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <span className="text-gray-400">-</span>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                    ) : (
+                      <span className="text-slate-300 text-xs">-</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                        {item.title}
+                      </span>
+                      {item.commentCount !== undefined && item.commentCount > 0 && (
+                        <div className="flex items-center gap-1 text-xs font-bold text-blue-600">
+                          <MessageCircle size={14} />
+                          <span>{item.commentCount}</span>
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-slate-600 font-medium">
+                    {item.writerName}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-slate-500">
+                    {formatDateTime(item.createdAt)}
+                  </td>
+                  <td className="px-6 py-4">
+                    {item.files && item.files.length > 0 ? (
+                      <div className="flex items-center gap-1">
+                        <Paperclip size={14} className="text-slate-400" />
+                        <span className="text-xs font-bold text-slate-600">
+                          {item.files.length}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-slate-300 text-xs">-</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
