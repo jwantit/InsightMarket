@@ -96,20 +96,21 @@ const BrandPermissionsComponent = () => {
   if (!brandId) return null;
 
   return (
-    <div className="p-4 sm:p-6">
-      <div className="max-w-5xl">
-        <BrandMemberAddComponent
-          onAdd={handleAdd} adding={adding} existingMemberIds={members.map((m) => m.memberId)} />
+    <div className="space-y-6">
+      <BrandMemberAddComponent
+        onAdd={handleAdd}
+        adding={adding}
+        existingMemberIds={members.map((m) => m.memberId)}
+      />
 
-        <BrandMemberListComponent
-          loading={loading}
-          members={sortedMembers}
-          busyId={busyId}
-          onRefresh={reload}
-          onChangeRole={handleRoleChange}
-          onRemove={handleRemove}
-        />
-      </div>
+      <BrandMemberListComponent
+        loading={loading}
+        members={sortedMembers}
+        busyId={busyId}
+        onRefresh={reload}
+        onChangeRole={handleRoleChange}
+        onRemove={handleRemove}
+      />
     </div>
   );
 };

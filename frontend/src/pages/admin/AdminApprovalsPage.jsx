@@ -1,19 +1,26 @@
+import { ShieldCheck } from "lucide-react";
 import PendingMembersComponent from "../../components/admin/approvals/PendingMembersComponent";
 
 const AdminApprovalsPage = () => {
   return (
-    <div className="p-4 sm:p-6">
-      <div className="max-w-4xl">
-        <div className="mb-4 sm:mb-6">
-          <h1 className="text-2xl font-extrabold tracking-tight text-gray-900">
-            가입 승인
-          </h1>
-        </div>
-
-        <div className="bg-white border rounded-2xl shadow-sm p-4 sm:p-6">
-          <PendingMembersComponent />
+    <div className="space-y-6">
+      <div className="flex items-center justify-between bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
+            <ShieldCheck size={24} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+              가입 승인
+            </h1>
+            <p className="text-sm text-slate-500">
+              대기 중인 회원 가입 요청을 승인합니다.
+            </p>
+          </div>
         </div>
       </div>
+
+      <PendingMembersComponent />
     </div>
   );
 };

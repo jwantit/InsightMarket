@@ -47,45 +47,48 @@ const MemberSearchModal = ({
       />
 
       {/* panel */}
-      <div className="absolute left-1/2 top-1/2 w-[92vw] max-w-2xl -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white shadow-xl border overflow-hidden">
-        <div className="px-5 py-4 border-b flex items-center justify-between">
+      <div className="absolute left-1/2 top-1/2 w-[92vw] max-w-2xl -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
+        <div className="px-6 py-5 border-b border-slate-100 bg-slate-50">
           <div>
-            <h3 className="text-base font-bold">회사 멤버 검색</h3>
-            <p className="text-xs text-gray-500 mt-1">
+            <h3 className="text-lg font-bold text-slate-900">회사 멤버 검색</h3>
+            <p className="text-xs text-slate-500 mt-1">
               이름 또는 이메일로 검색해서 멤버를 선택하세요.
             </p>
           </div>
         </div>
 
-        <div className="p-5">
-          <div className="flex gap-2 mb-4">
+        <div className="p-6">
+          <div className="flex gap-3 mb-4">
             <input
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               placeholder="이름 또는 이메일"
-              className="flex-1 rounded-lg border bg-gray-50 px-3 py-2 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-blue-200"
+              className="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all text-sm font-medium"
               onKeyDown={(e) => {
                 if (e.key === "Enter") load();
               }}
             />
             <button
               onClick={load}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-all shadow-md shadow-blue-200 active:scale-95"
             >
               검색
             </button>
           </div>
 
           {loading ? (
-            <div className="rounded-xl border p-4 text-sm text-gray-500">
-              로딩 중...
+            <div className="rounded-xl border border-slate-200 p-6 text-center">
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-8 h-8 bg-slate-100 rounded-xl animate-pulse" />
+                <p className="text-sm text-slate-500">로딩 중...</p>
+              </div>
             </div>
           ) : members.length === 0 ? (
-            <div className="rounded-xl border p-4 text-sm text-gray-500">
-              검색 결과가 없습니다.
+            <div className="rounded-xl border border-slate-200 p-6 text-center">
+              <p className="text-sm text-slate-500">검색 결과가 없습니다.</p>
             </div>
           ) : (
-            <div className="divide-y rounded-xl border">
+            <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 overflow-hidden">
               {members.map((m) => {
                 const already = excludeSet.has(m.memberId);
                 const disabled = already || m.isExpired;
@@ -93,27 +96,27 @@ const MemberSearchModal = ({
                 return (
                   <div
                     key={m.memberId}
-                    className="flex items-center justify-between p-4"
+                    className="flex items-center justify-between p-4 hover:bg-blue-50/30 transition-colors"
                   >
-                    <div className="min-w-0">
-                      <div className="font-semibold text-gray-900 flex items-center gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-bold text-slate-900 flex items-center gap-2 mb-1">
                         <span className="truncate">{m.name}</span>
                         {m.isExpired && (
-                          <span className="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-50 text-red-600 font-bold uppercase">
                             탈퇴
                           </span>
                         )}
                         {already && (
-                          <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-bold uppercase">
                             이미 추가됨
                           </span>
                         )}
                       </div>
-                      <div className="text-sm text-gray-500 truncate">
+                      <div className="text-sm text-slate-600 truncate">
                         {m.email}
                       </div>
-                      <div className="text-xs text-gray-400 mt-1">
-                        권한 : {m.role}
+                      <div className="text-xs text-slate-400 mt-1">
+                        권한: {m.role}
                       </div>
                     </div>
 
@@ -121,10 +124,10 @@ const MemberSearchModal = ({
                       disabled={disabled}
                       onClick={() => onSelect(m)}
                       className={cx(
-                        "rounded-lg px-3 py-2 text-sm font-semibold",
+                        "px-4 py-2 rounded-xl text-sm font-bold transition-all",
                         disabled
-                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                          : "bg-gray-900 text-white hover:bg-black"
+                          ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                          : "bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200 active:scale-95"
                       )}
                     >
                       선택
@@ -136,10 +139,10 @@ const MemberSearchModal = ({
           )}
         </div>
 
-        <div className="px-5 py-4 border-t flex justify-end">
+        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end">
           <button
             onClick={onClose}
-            className="rounded-lg px-4 py-2 text-sm border hover:bg-gray-50"
+            className="px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition-all border border-slate-200"
           >
             닫기
           </button>
