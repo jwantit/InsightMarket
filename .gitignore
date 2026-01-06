@@ -71,6 +71,10 @@ htmlcov/
 .mypy_cache/
 .ruff_cache/
 .ipynb_checkpoints/
+# env files
+python/.env
+python/.env.local
+*.env
 
 # Python ML caches (optional)
 **/.cache/huggingface/
