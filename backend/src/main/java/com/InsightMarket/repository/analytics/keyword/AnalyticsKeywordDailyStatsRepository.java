@@ -23,7 +23,23 @@ public interface AnalyticsKeywordDailyStatsRepository extends JpaRepository<Anal
             @Param("brandId") Long brandId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
-            @Param("sources") List<String> sources
+            @Param("sources") List<String> sources);
+    
+    @Query("SELECT s FROM AnalyticsKeywordDailyStats s " +
+           "WHERE s.brandId = :brandId " +
+           "AND (:projectId IS NULL OR s.projectId = :projectId) " +
+           "AND (:keywordId IS NULL OR s.keywordId = :keywordId) " +
+           "AND (:source IS NULL OR s.source = :source) " +
+           "AND (:startDate IS NULL OR s.statDate >= :startDate) " +
+           "AND (:endDate IS NULL OR s.statDate <= :endDate) " +
+           "ORDER BY s.statDate ASC")
+    List<AnalyticsKeywordDailyStats> findByFilters(
+            @Param("brandId") Long brandId,
+            @Param("projectId") Long projectId,
+            @Param("keywordId") Long keywordId,
+            @Param("source") String source,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDat
     );
 }
 
