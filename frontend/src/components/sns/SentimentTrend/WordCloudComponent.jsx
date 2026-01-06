@@ -11,8 +11,6 @@ const WordCloudComponent = ({
   wordCloudMeta,
   wordView,
   setWordView,
-  wordSearch,
-  setWordSearch,
   activeSentiments,
   toggleSentiment,
   selectedToken,
@@ -26,23 +24,24 @@ const WordCloudComponent = ({
           <h3 className="text-lg font-bold text-gray-900 mb-1">
             긍·부정 원인 키워드
           </h3>
-          <p className="text-xs text-gray-500">
-            크기=언급량 / 색=감성. 클릭하면 선택(하이라이트)됩니다.
-          </p>
         </div>
 
         <div className="flex items-center gap-2">
           {/* Search */}
           <div className="relative">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
-            <input
-              value={wordSearch}
-              onChange={(e) => setWordSearch(e.target.value)}
-              placeholder="키워드 검색"
-              className="w-44 md:w-56 pl-10 pr-4 py-2.5 text-sm border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 hover:border-indigo-300 shadow-sm hover:shadow-md"
-            />
           </div>
           {/* Tabs */}
           <div className="flex p-1 rounded-xl border-2 border-gray-200 bg-white/80 backdrop-blur-sm shadow-sm">
@@ -78,12 +77,28 @@ const WordCloudComponent = ({
           const active = activeSentiments.includes(s);
           const b = badgeStyle(s);
           const colorMap = {
-            POS: { gradient: "from-green-500 to-emerald-500", bg: "bg-green-50", border: "border-green-300" },
-            NEG: { gradient: "from-red-500 to-rose-500", bg: "bg-red-50", border: "border-red-300" },
-            NEU: { gradient: "from-yellow-500 to-amber-500", bg: "bg-yellow-50", border: "border-yellow-300" },
+            POS: {
+              gradient: "from-green-500 to-emerald-500",
+              bg: "bg-green-50",
+              border: "border-green-300",
+            },
+            NEG: {
+              gradient: "from-red-500 to-rose-500",
+              bg: "bg-red-50",
+              border: "border-red-300",
+            },
+            NEU: {
+              gradient: "from-yellow-500 to-amber-500",
+              bg: "bg-yellow-50",
+              border: "border-yellow-300",
+            },
           };
-          const colors = colorMap[s] || { gradient: "from-gray-500 to-gray-600", bg: "bg-gray-50", border: "border-gray-300" };
-          
+          const colors = colorMap[s] || {
+            gradient: "from-gray-500 to-gray-600",
+            bg: "bg-gray-50",
+            border: "border-gray-300",
+          };
+
           return (
             <button
               key={s}
@@ -99,7 +114,9 @@ const WordCloudComponent = ({
               <span
                 className={cx(
                   "inline-block w-3 h-3 rounded-full shadow-sm",
-                  active ? `bg-gradient-to-br ${colors.gradient}` : "bg-gray-300"
+                  active
+                    ? `bg-gradient-to-br ${colors.gradient}`
+                    : "bg-gray-300"
                 )}
               />
               <span>{sentimentLabel(s)}</span>
@@ -118,16 +135,17 @@ const WordCloudComponent = ({
       </div>
 
       {/* Content */}
-      {wordCloudData.length === 0 ? (
+      {!wordCloudData || wordCloudData.length === 0 ? (
         <div className="py-14 text-center text-gray-500">
           <p className="font-medium">표시할 키워드가 없습니다.</p>
           <p className="text-xs text-gray-400 mt-2">
-            토큰 통계 데이터: {tokenStats.length}개 / 필터 조건을 확인하세요.
+            토큰 통계 데이터: {tokenStats?.length || 0}개 / 필터 조건을
+            확인하세요.
           </p>
         </div>
       ) : wordView === "cloud" ? (
         <WordCloudChart
-          wordCloudData={wordCloudData}
+          wordCloudData={wordCloudData || []}
           selectedToken={selectedToken}
           setSelectedToken={setSelectedToken}
         />
@@ -148,7 +166,7 @@ const WordCloudComponent = ({
               </tr>
             </thead>
             <tbody>
-              {wordCloudData.map((w, idx) => {
+              {(wordCloudData || []).map((w, idx) => {
                 const b = badgeStyle(w.sentiment);
                 const isSelected = selectedToken === w.text;
                 return (
@@ -212,9 +230,12 @@ const WordCloudChart = ({ wordCloudData, selectedToken, setSelectedToken }) => {
     if (!chartRef.current) return;
 
     // Create chart (애니메이션 테마 제거)
-    const chart = am4core.create(chartRef.current, am4plugins_wordCloud.WordCloud);
+    const chart = am4core.create(
+      chartRef.current,
+      am4plugins_wordCloud.WordCloud
+    );
     chartInstanceRef.current = chart;
-    
+
     // 애니메이션 완전 비활성화
     chart.animationDuration = 0;
     if (chart.animationOptions) {
@@ -222,8 +243,10 @@ const WordCloudChart = ({ wordCloudData, selectedToken, setSelectedToken }) => {
     }
 
     // Create series
-    const series = chart.series.push(new am4plugins_wordCloud.WordCloudSeries());
-    
+    const series = chart.series.push(
+      new am4plugins_wordCloud.WordCloudSeries()
+    );
+
     // Set data fields
     series.dataFields.word = "word";
     series.dataFields.value = "value";
@@ -231,18 +254,18 @@ const WordCloudChart = ({ wordCloudData, selectedToken, setSelectedToken }) => {
     // Configure font sizes - value에 따라 자동으로 크기 조정
     series.minFontSize = am4core.percent(12);
     series.maxFontSize = am4core.percent(50);
-    
+
     // value 범위를 명시적으로 설정하여 크기 비율 유지
-    const values = wordCloudData.map(w => w.value);
+    const values = wordCloudData.map((w) => w.value);
     const minValue = Math.min(...values);
     const maxValue = Math.max(...values);
-    
+
     // value 범위 설정
     if (minValue !== maxValue) {
       series.minValue = minValue;
       series.maxValue = maxValue;
     }
-    
+
     // 레이아웃 고정 - 워드클라우드가 움직이지 않도록
     if (series.step !== undefined) {
       series.step = 0; // 레이아웃 단계 비활성화
@@ -256,24 +279,36 @@ const WordCloudChart = ({ wordCloudData, selectedToken, setSelectedToken }) => {
     if (series.rotationThreshold !== undefined) {
       series.rotationThreshold = 0; // 회전 임계값 제거
     }
-    
+
     // 레이아웃 알고리즘 완전 비활성화 (layout이 객체인 경우에만)
-    if (series.layout && typeof series.layout === "object" && series.layout !== null) {
+    if (
+      series.layout &&
+      typeof series.layout === "object" &&
+      series.layout !== null
+    ) {
       if (series.layout.disabled !== undefined) {
         series.layout.disabled = true;
       }
     }
-    
+
     // 레이아웃 업데이트 비활성화 (layoutAlgorithm이 객체인 경우에만)
-    if (series.layoutAlgorithm && typeof series.layoutAlgorithm === "object" && series.layoutAlgorithm !== null) {
+    if (
+      series.layoutAlgorithm &&
+      typeof series.layoutAlgorithm === "object" &&
+      series.layoutAlgorithm !== null
+    ) {
       if (series.layoutAlgorithm.disabled !== undefined) {
         series.layoutAlgorithm.disabled = true;
       }
     }
-    
+
     // 애니메이션 완전 제거
     series.animationDuration = 0;
-    if (series.animationOptions && typeof series.animationOptions === "object" && series.animationOptions !== null) {
+    if (
+      series.animationOptions &&
+      typeof series.animationOptions === "object" &&
+      series.animationOptions !== null
+    ) {
       if (series.animationOptions.disabled !== undefined) {
         series.animationOptions.disabled = true;
       }
@@ -336,21 +371,32 @@ const WordCloudChart = ({ wordCloudData, selectedToken, setSelectedToken }) => {
       .sort((a, b) => b.value - a.value); // value 큰 순서대로 정렬
 
     series.data = chartData;
-    
+
     // 레이아웃이 완료된 후 완전히 고정
     series.events.on("ready", () => {
       // 레이아웃 완료 후 모든 애니메이션 및 업데이트 비활성화
-      if (series.layout && typeof series.layout === "object" && series.layout !== null) {
+      if (
+        series.layout &&
+        typeof series.layout === "object" &&
+        series.layout !== null
+      ) {
         if (series.layout.disabled !== undefined) {
           series.layout.disabled = true;
         }
       }
       // 레이아웃 업데이트 중지
-      if (chart.invalidateLayout && typeof chart.invalidateLayout === "function") {
+      if (
+        chart.invalidateLayout &&
+        typeof chart.invalidateLayout === "function"
+      ) {
         chart.invalidateLayout = () => {}; // 빈 함수로 대체
       }
       // 레이아웃 알고리즘 완전 중지
-      if (series.layoutAlgorithm && typeof series.layoutAlgorithm === "object" && series.layoutAlgorithm !== null) {
+      if (
+        series.layoutAlgorithm &&
+        typeof series.layoutAlgorithm === "object" &&
+        series.layoutAlgorithm !== null
+      ) {
         if (series.layoutAlgorithm.disabled !== undefined) {
           series.layoutAlgorithm.disabled = true;
         }
@@ -377,4 +423,3 @@ const WordCloudChart = ({ wordCloudData, selectedToken, setSelectedToken }) => {
 };
 
 export default WordCloudComponent;
-

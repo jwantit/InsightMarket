@@ -115,8 +115,9 @@ def preprocess_data(
         List[Dict]: 전처리된 데이터 리스트 (메모리에 저장)
             각 항목은 {
                 'brand_id': int,
-                'project_id': int,
-                'keyword_id': int,
+                'project_id': int | None,
+                'keyword_id': int | None,
+                'competitor_id': int | None,
                 'stat_date': str,  # YYYY-MM-DD 형식
                 'text': str,  # 정제된 텍스트
                 'tokens': List[str],  # 토큰 리스트
@@ -164,8 +165,9 @@ def preprocess_data(
         # 5. 전처리된 데이터 생성
         preprocessed_item = {
             'brand_id': item['brand_id'],
-            'project_id': item['project_id'],
-            'keyword_id': item['keyword_id'],
+            'project_id': item.get('project_id'),
+            'keyword_id': item.get('keyword_id'),
+            'competitor_id': item.get('competitor_id'),
             'stat_date': stat_date,
             'text': cleaned_text,
             'tokens': tokens,

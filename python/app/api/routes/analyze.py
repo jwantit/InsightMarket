@@ -26,7 +26,9 @@ async def analyze(request: Request, body: AnalyzeRequest):
     """
     try:
         trace_id = getattr(request.state, 'trace_id', 'unknown')
+        print(f"[analyze] ========== POST /api/analyze 시작 ==========")
         print(f"[analyze] POST /api/analyze traceId={trace_id} file_path={body.file_path} brand_id={body.brand_id}")
+        print(f"[analyze] 요청 수신 확인: body={body}")
         
         # 파일 경로 처리
         file_path = body.file_path

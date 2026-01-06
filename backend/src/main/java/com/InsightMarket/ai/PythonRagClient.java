@@ -53,50 +53,62 @@ public class PythonRagClient {
                 .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
                 .build();
 
-        JsonNode response = webClientBuilder
-                .baseUrl(pythonBaseUrl)
-                .exchangeStrategies(strategies)
-                .build()
-                .post()
-                .uri("/api/analyze")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .header("X-Trace-Id", traceId)
-                .bodyValue(body)
-                .retrieve()
-                .bodyToMono(JsonNode.class)
-                .timeout(Duration.ofSeconds(timeoutSec))
-                .block();
+        try {
+            JsonNode response = webClientBuilder
+                    .baseUrl(pythonBaseUrl)
+                    .exchangeStrategies(strategies)
+                    .build()
+                    .post()
+                    .uri("/api/analyze")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header("X-Trace-Id", traceId)
+                    .bodyValue(body)
+                    .retrieve()
+                    .bodyToMono(JsonNode.class)
+                    .timeout(Duration.ofSeconds(timeoutSec))
+                    .block();
 
-        // 응답 크기 계산
-        if (response != null) {
-            try {
-                String responseJson = objectMapper.writeValueAsString(response);
-                int responseSizeBytes = responseJson.getBytes("UTF-8").length;
-                log.info("[PythonRagClient] analyze 응답 수신 완료 traceId={} responseSize={} bytes ({} KB / {} MB)",
-                        traceId, responseSizeBytes, responseSizeBytes / 1024.0, responseSizeBytes / (1024.0 * 1024.0));
-            } catch (Exception e) {
-                log.warn("[PythonRagClient] 응답 크기 계산 실패: {}", e.getMessage());
+            // 응답 크기 계산
+            if (response != null) {
+                try {
+                    String responseJson = objectMapper.writeValueAsString(response);
+                    int responseSizeBytes = responseJson.getBytes("UTF-8").length;
+                    log.info("[PythonRagClient] analyze 응답 수신 완료 traceId={} responseSize={} bytes ({} KB / {} MB)",
+                            traceId, responseSizeBytes, responseSizeBytes / 1024.0, responseSizeBytes / (1024.0 * 1024.0));
+                } catch (Exception e) {
+                    log.warn("[PythonRagClient] 응답 크기 계산 실패: {}", e.getMessage());
+                }
+            } else {
+                log.warn("[PythonRagClient] analyze 응답이 null입니다. traceId={}", traceId);
             }
-        }
 
-        return response;
+            return response;
+        } catch (org.springframework.web.reactive.function.client.WebClientException e) {
+            log.error("[PythonRagClient] analyze 요청 실패 traceId={} baseUrl={} error={}",
+                    traceId, pythonBaseUrl, e.getMessage(), e);
+            throw new RuntimeException("Python 서버 연결 실패: " + e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("[PythonRagClient] analyze 요청 중 예외 발생 traceId={} baseUrl={} error={}",
+                    traceId, pythonBaseUrl, e.getMessage(), e);
+            throw new RuntimeException("Python 서버 호출 중 오류: " + e.getMessage(), e);
+        }
     }
 
     //스케줄러 - 데이터 수집 요청 -------------------------------------------------------
     public void collect(String type, Long id, String keyword, Long brandId, String brandName) {
         collect(type, id, keyword, brandId, brandName, null, false);
     }
-    
+
     public void collect(String type, Long id, String keyword, Long brandId, String brandName, boolean isBatch) {
         collect(type, id, keyword, brandId, brandName, null, isBatch);
     }
-    
+
     public void collect(String type, Long id, String keyword, Long brandId, String brandName, Long projectId, boolean isBatch) {
         Map<String, Object> body = new HashMap<>();
         body.put("type", type);      // "BRAND", "PROJECT", "COMPETITOR"
         body.put("isBatch", isBatch); // 배치 모드 플래그
-        
+
         String searchKeyword = keyword; // 검색에 사용할 키워드
 
         if ("BRAND".equals(type)) {
@@ -117,7 +129,7 @@ public class PythonRagClient {
             body.put("brandId", brandId);
             searchKeyword = keyword; // 경쟁사명 그대로 사용
         }
-        
+
         body.put("keyword", searchKeyword); // 실제 검색에 사용할 키워드
 
         log.info("[PythonRagClient] 수집 요청 전송 -> 분류: {}, ID: {}, 검색어: {}, projectId: {}, isBatch: {}", type, id, searchKeyword, projectId, isBatch);
@@ -137,7 +149,7 @@ public class PythonRagClient {
                         error -> log.error("[Python] 수집 요청 실패: {}", error.getMessage())
                 );
     }
-    
+
     public void batchStart() {
         log.info("[PythonRagClient] 배치 시작 요청");
         webClientBuilder
@@ -154,7 +166,7 @@ public class PythonRagClient {
                         error -> log.error("[Python] 배치 시작 실패: {}", error.getMessage())
                 );
     }
-    
+
     public JsonNode batchComplete() {
         log.info("[PythonRagClient] 배치 완료 요청");
         return webClientBuilder
@@ -168,17 +180,17 @@ public class PythonRagClient {
                 .timeout(Duration.ofSeconds(timeoutSec))
                 .block();
     }
-    
+
     public void recollect(String type, Long id, String name, Long brandId, String brandName) {
         recollect(type, id, name, brandId, brandName, null);
     }
-    
+
     public void recollect(String type, Long id, String name, Long brandId, String brandName, Long projectId) {
         Map<String, Object> body = new HashMap<>();
         body.put("type", type);
         body.put("brandId", brandId);
         body.put("brandName", brandName);
-        
+
         if ("BRAND".equals(type)) {
             // BRAND type: id and name are brandId and brandName
             body.put("keyword", name);
@@ -194,9 +206,9 @@ public class PythonRagClient {
             body.put("competitorName", name);
             body.put("keyword", name);
         }
-        
+
         log.info("[PythonRagClient] 재수집 요청 -> 분류: {}, ID: {}, 이름: {}, projectId: {}", type, id, name, projectId);
-        
+
         webClientBuilder
                 .baseUrl(pythonBaseUrl)
                 .build()
@@ -213,11 +225,11 @@ public class PythonRagClient {
                 );
     }
     //-----------------------------
-    
+
     // 전략 분석 요청 (Query Engineering 방식) -------------------------------------------------------
     public JsonNode askStrategy(String question, Long brandId, String brandName, Long projectId, List<Long> projectKeywordIds, Integer topK, String traceId) {
         int topKValue = (topK == null) ? 3 : topK;
-        
+
         Map<String, Object> body = new HashMap<>();
         body.put("question", question);
         body.put("brandId", brandId);
@@ -225,10 +237,10 @@ public class PythonRagClient {
         body.put("projectId", projectId); // 프로젝트 ID 추가
         body.put("projectKeywordIds", projectKeywordIds != null ? projectKeywordIds : List.of());
         body.put("topK", topKValue);
-        
+
         log.info("[PythonRagClient] call POST /api/strategy/ask-strategy traceId={} baseUrl={} brandId={} projectId={} brandName={} projectKeywordIds={} topK={} timeoutSec={}",
                 traceId, pythonBaseUrl, brandId, projectId, brandName, projectKeywordIds, topKValue, timeoutSec);
-        
+
         return webClientBuilder
                 .baseUrl(pythonBaseUrl)
                 .build()
@@ -243,7 +255,7 @@ public class PythonRagClient {
                 .timeout(Duration.ofSeconds(timeoutSec))
                 .block();
     }
-    
+
     // 솔루션별 리포트 생성 요청 -------------------------------------------------------
     public JsonNode generateSolutionReport(SolutionReportRequestDTO req, String traceId) {
         Map<String, Object> body = new HashMap<>();
@@ -258,10 +270,10 @@ public class PythonRagClient {
         body.put("relatedInsights", req.getRelatedInsights() != null ? req.getRelatedInsights() : List.of());
         body.put("keywordStatsSummary", req.getKeywordStatsSummary() != null ? req.getKeywordStatsSummary() : "");
         body.put("reportType", req.getReportType() != null ? req.getReportType() : "marketing");
-        
+
         log.info("[PythonRagClient] call POST /api/strategy/generate-solution-report traceId={} baseUrl={} brandId={} projectId={} solutionTitle={} reportType={} timeoutSec={}",
                 traceId, pythonBaseUrl, req.getBrandId(), req.getProjectId(), req.getSolutionTitle(), req.getReportType(), timeoutSec);
-        
+
         return webClientBuilder
                 .baseUrl(pythonBaseUrl)
                 .build()

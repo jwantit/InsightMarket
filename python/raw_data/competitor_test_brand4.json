@@ -1,0 +1,251 @@
+{
+  "brands": [
+    {
+      "brandId": 4,
+      "brandName": "나이키",
+      "brandData": [],
+      "projectKeywords": [],
+      "competitors": [
+        {
+          "competitorId": 2,
+          "data": [
+            {
+              "source": "NAVER",
+              "title": "아디다스 신제품 런칭 후기",
+              "text": "아디다스의 새로운 운동화가 정말 좋네요. 디자인도 예쁘고 착화감도 편안합니다. 만족합니다.",
+              "url": "https://blog.naver.com/test/adidas1",
+              "publishedAt": "2026-01-01T00:00:00Z",
+              "collectedAt": "2026-01-01T12:00:00Z",
+              "brandId": 4,
+              "competitorId": 2,
+              "projectId": 7,
+              "type": "COMPETITOR"
+            },
+            {
+              "source": "NAVER",
+              "title": "아디다스 제품 리뷰",
+              "text": "아디다스 운동화를 구매했는데 품질이 좋고 가격 대비 만족합니다. 추천합니다.",
+              "url": "https://blog.naver.com/test/adidas2",
+              "publishedAt": "2026-01-01T00:00:00Z",
+              "collectedAt": "2026-01-01T12:00:00Z",
+              "brandId": 4,
+              "competitorId": 2,
+              "projectId": 7,
+              "type": "COMPETITOR"
+            },
+            {
+              "source": "NAVER",
+              "title": "아디다스 신상품 체험기",
+              "text": "아디다스 신제품을 사용해봤는데 디자인이 세련되고 기능도 훌륭합니다. 좋아합니다.",
+              "url": "https://blog.naver.com/test/adidas3",
+              "publishedAt": "2026-01-01T00:00:00Z",
+              "collectedAt": "2026-01-01T12:00:00Z",
+              "brandId": 4,
+              "competitorId": 2,
+              "projectId": 7,
+              "type": "COMPETITOR"
+            },
+            {
+              "source": "YOUTUBE",
+              "title": "아디다스 신제품 언박싱",
+              "text": "아디다스 신제품을 구매해서 언박싱해봤습니다. 정말 만족스럽습니다.",
+              "url": "https://www.youtube.com/watch?v=adidas1",
+              "publishedAt": "2026-01-01T00:00:00Z",
+              "collectedAt": "2026-01-01T12:00:00Z",
+              "brandId": 4,
+              "competitorId": 2,
+              "projectId": 7,
+              "type": "COMPETITOR",
+              "videoId": "adidas1",
+              "comments": [
+                "좋은 제품이네요",
+                "구매하고 싶어요",
+                "디자인이 예뻐요"
+              ]
+            },
+            {
+              "source": "YOUTUBE",
+              "title": "아디다스 제품 비교",
+              "text": "아디다스 제품들을 비교해봤는데 품질이 좋습니다.",
+              "url": "https://www.youtube.com/watch?v=adidas2",
+              "publishedAt": "2026-01-01T00:00:00Z",
+              "collectedAt": "2026-01-01T12:00:00Z",
+              "brandId": 4,
+              "competitorId": 2,
+              "projectId": 7,
+              "type": "COMPETITOR",
+              "videoId": "adidas2",
+              "comments": [
+                "유용한 정보 감사합니다",
+                "참고하겠습니다"
+              ]
+            },
+            {
+              "source": "NAVER",
+              "title": "아디다스 신제품 후기",
+              "text": "아디다스 신제품을 사용한 후기입니다. 만족스럽습니다.",
+              "url": "https://blog.naver.com/test/adidas4",
+              "publishedAt": "2026-01-02T00:00:00Z",
+              "collectedAt": "2026-01-02T12:00:00Z",
+              "brandId": 4,
+              "competitorId": 2,
+              "projectId": 7,
+              "type": "COMPETITOR"
+            },
+            {
+              "source": "NAVER",
+              "title": "아디다스 운동화 추천",
+              "text": "아디다스 운동화를 추천합니다. 편안하고 좋습니다.",
+              "url": "https://blog.naver.com/test/adidas5",
+              "publishedAt": "2026-01-02T00:00:00Z",
+              "collectedAt": "2026-01-02T12:00:00Z",
+              "brandId": 4,
+              "competitorId": 2,
+              "projectId": 7,
+              "type": "COMPETITOR"
+            },
+            {
+              "source": "YOUTUBE",
+              "title": "아디다스 제품 리뷰",
+              "text": "아디다스 제품을 리뷰했습니다. 좋은 제품입니다.",
+              "url": "https://www.youtube.com/watch?v=adidas3",
+              "publishedAt": "2026-01-02T00:00:00Z",
+              "collectedAt": "2026-01-02T12:00:00Z",
+              "brandId": 4,
+              "competitorId": 2,
+              "projectId": 7,
+              "type": "COMPETITOR",
+              "videoId": "adidas3",
+              "comments": [
+                "좋은 리뷰 감사합니다",
+                "도움이 됐어요"
+              ]
+            },
+            {
+              "source": "NAVER",
+              "title": "아디다스 신상품 체험",
+              "text": "아디다스 신상품을 체험했습니다. 만족합니다.",
+              "url": "https://blog.naver.com/test/adidas6",
+              "publishedAt": "2026-01-03T00:00:00Z",
+              "collectedAt": "2026-01-03T12:00:00Z",
+              "brandId": 4,
+              "competitorId": 2,
+              "projectId": 7,
+              "type": "COMPETITOR"
+            },
+            {
+              "source": "NAVER",
+              "title": "아디다스 제품 구매 후기",
+              "text": "아디다스 제품을 구매한 후기입니다. 품질이 좋고 만족합니다.",
+              "url": "https://blog.naver.com/test/adidas7",
+              "publishedAt": "2026-01-03T00:00:00Z",
+              "collectedAt": "2026-01-03T12:00:00Z",
+              "brandId": 4,
+              "competitorId": 2,
+              "projectId": 7,
+              "type": "COMPETITOR"
+            },
+            {
+              "source": "NAVER",
+              "title": "아디다스 운동화 사용기",
+              "text": "아디다스 운동화를 사용한 후기입니다. 편안하고 좋습니다.",
+              "url": "https://blog.naver.com/test/adidas8",
+              "publishedAt": "2026-01-03T00:00:00Z",
+              "collectedAt": "2026-01-03T12:00:00Z",
+              "brandId": 4,
+              "competitorId": 2,
+              "projectId": 7,
+              "type": "COMPETITOR"
+            },
+            {
+              "source": "YOUTUBE",
+              "title": "아디다스 신제품 언박싱",
+              "text": "아디다스 신제품 언박싱 영상입니다. 만족스럽습니다.",
+              "url": "https://www.youtube.com/watch?v=adidas4",
+              "publishedAt": "2026-01-03T00:00:00Z",
+              "collectedAt": "2026-01-03T12:00:00Z",
+              "brandId": 4,
+              "competitorId": 2,
+              "projectId": 7,
+              "type": "COMPETITOR",
+              "videoId": "adidas4",
+              "comments": [
+                "좋아요",
+                "구매하고 싶어요"
+              ]
+            },
+            {
+              "source": "YOUTUBE",
+              "title": "아디다스 제품 비교",
+              "text": "아디다스 제품들을 비교했습니다. 좋은 제품입니다.",
+              "url": "https://www.youtube.com/watch?v=adidas5",
+              "publishedAt": "2026-01-03T00:00:00Z",
+              "collectedAt": "2026-01-03T12:00:00Z",
+              "brandId": 4,
+              "competitorId": 2,
+              "projectId": 7,
+              "type": "COMPETITOR",
+              "videoId": "adidas5",
+              "comments": [
+                "유용한 정보입니다"
+              ]
+            },
+            {
+              "source": "NAVER",
+              "title": "아디다스 제품 가격 정보",
+              "text": "아디다스 제품 가격 정보입니다. 가격 대비 만족합니다.",
+              "url": "https://blog.naver.com/test/adidas9",
+              "publishedAt": "2026-01-04T00:00:00Z",
+              "collectedAt": "2026-01-04T12:00:00Z",
+              "brandId": 4,
+              "competitorId": 2,
+              "projectId": 7,
+              "type": "COMPETITOR"
+            },
+            {
+              "source": "NAVER",
+              "title": "아디다스 운동화 추천글",
+              "text": "아디다스 운동화를 추천하는 글입니다. 좋은 제품입니다.",
+              "url": "https://blog.naver.com/test/adidas10",
+              "publishedAt": "2026-01-04T00:00:00Z",
+              "collectedAt": "2026-01-04T12:00:00Z",
+              "brandId": 4,
+              "competitorId": 2,
+              "projectId": 7,
+              "type": "COMPETITOR"
+            },
+            {
+              "source": "NAVER",
+              "title": "아디다스 신제품 후기",
+              "text": "아디다스 신제품 후기입니다. 디자인이 좋고 만족합니다.",
+              "url": "https://blog.naver.com/test/adidas11",
+              "publishedAt": "2026-01-04T00:00:00Z",
+              "collectedAt": "2026-01-04T12:00:00Z",
+              "brandId": 4,
+              "competitorId": 2,
+              "projectId": 7,
+              "type": "COMPETITOR"
+            },
+            {
+              "source": "YOUTUBE",
+              "title": "아디다스 제품 리뷰",
+              "text": "아디다스 제품 리뷰 영상입니다. 만족스럽습니다.",
+              "url": "https://www.youtube.com/watch?v=adidas6",
+              "publishedAt": "2026-01-04T00:00:00Z",
+              "collectedAt": "2026-01-04T12:00:00Z",
+              "brandId": 4,
+              "competitorId": 2,
+              "projectId": 7,
+              "type": "COMPETITOR",
+              "videoId": "adidas6",
+              "comments": [
+                "좋은 리뷰입니다",
+                "참고하겠습니다"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -63,8 +63,20 @@ def generate_insight_text(info: Dict) -> str:
 
     # enrich로 붙인 문자열이 있으면 사용, 없으면 fallback
     brand = info.get("brand_name") or f"브랜드({info['brand_id']})"
-    project = info.get("project_name") or f"프로젝트({info['project_id']})"
-    keyword = info.get("keyword_text") or f"키워드({info['keyword_id']})"
+    
+    # project_id가 None인 경우 처리
+    project_id = info.get("project_id")
+    if project_id is not None:
+        project = info.get("project_name") or f"프로젝트({project_id})"
+    else:
+        project = info.get("project_name") or "프로젝트"
+    
+    # keyword_id가 None인 경우 처리
+    keyword_id = info.get("keyword_id")
+    if keyword_id is not None:
+        keyword = info.get("keyword_text") or f"키워드({keyword_id})"
+    else:
+        keyword = info.get("keyword_text") or "키워드"
 
     period = info.get("period", LOOKBACK_DAYS)
     ratio = info.get("spike_ratio", 0.0)

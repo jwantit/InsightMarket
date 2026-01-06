@@ -19,7 +19,7 @@ import {
   getTokenStats,
   getProjects,
   getProjectKeywords,
-} from "../../api/analyticsApi";
+} from "../../api/snsApi";
 
 // Components
 import InsightSummaryComponent from "../../components/sns/SentimentTrend/InsightSummaryComponent";
@@ -30,7 +30,12 @@ import SentimentTrendComponent from "../../components/sns/SentimentTrend/Sentime
 import SentimentRatioComponent from "../../components/sns/SentimentTrend/SentimentRatioComponent";
 
 // Utils
-import { TOKENS, sentimentLabel, sentimentColor, badgeStyle } from "../../components/sns/SentimentTrend/utils";
+import {
+  TOKENS,
+  sentimentLabel,
+  sentimentColor,
+  badgeStyle,
+} from "../../components/sns/SentimentTrend/utils";
 
 ChartJS.register(
   CategoryScale,
@@ -129,10 +134,46 @@ const SentimentTrend = () => {
             sentimentStatsDataList,
             tokenStatsDataList,
           ] = await Promise.all([
-            Promise.all(selectedSources.map(source => getInsights(brandId, selectedProjectId, selectedKeywordId, source))),
-            Promise.all(selectedSources.map(source => getDailyStats(brandId, selectedProjectId, selectedKeywordId, source))),
-            Promise.all(selectedSources.map(source => getSentimentStats(brandId, selectedProjectId, selectedKeywordId, source))),
-            Promise.all(selectedSources.map(source => getTokenStats(brandId, selectedProjectId, selectedKeywordId, source))),
+            Promise.all(
+              selectedSources.map((source) =>
+                getInsights(
+                  brandId,
+                  selectedProjectId,
+                  selectedKeywordId,
+                  source
+                )
+              )
+            ),
+            Promise.all(
+              selectedSources.map((source) =>
+                getDailyStats(
+                  brandId,
+                  selectedProjectId,
+                  selectedKeywordId,
+                  source
+                )
+              )
+            ),
+            Promise.all(
+              selectedSources.map((source) =>
+                getSentimentStats(
+                  brandId,
+                  selectedProjectId,
+                  selectedKeywordId,
+                  source
+                )
+              )
+            ),
+            Promise.all(
+              selectedSources.map((source) =>
+                getTokenStats(
+                  brandId,
+                  selectedProjectId,
+                  selectedKeywordId,
+                  source
+                )
+              )
+            ),
           ]);
 
           // 데이터 합치기
@@ -143,11 +184,13 @@ const SentimentTrend = () => {
 
           setInsights(Array.isArray(insightsData) ? insightsData : []);
           setDailyStats(Array.isArray(dailyStatsData) ? dailyStatsData : []);
-          setSentimentStats(Array.isArray(sentimentStatsData) ? sentimentStatsData : []);
+          setSentimentStats(
+            Array.isArray(sentimentStatsData) ? sentimentStatsData : []
+          );
           setTokenStats(Array.isArray(tokenStatsData) ? tokenStatsData : []);
           return;
         }
-        
+
         const [
           insightsData,
           dailyStatsData,
@@ -230,8 +273,9 @@ const SentimentTrend = () => {
 
     const datasets = [];
     // selectedSources가 있으면 선택된 소스만, 없으면 전체
-    const sourcesToShow = selectedSources.length > 0 ? selectedSources : Array.from(sources);
-    
+    const sourcesToShow =
+      selectedSources.length > 0 ? selectedSources : Array.from(sources);
+
     sourcesToShow.forEach((source, idx) => {
       const color = palette[idx % palette.length];
       datasets.push({
@@ -393,10 +437,15 @@ const SentimentTrend = () => {
     const result = Array.from(tokenMap.values())
       .sort((a, b) => b.value - a.value)
       .slice(0, 60);
-    
+
     console.log("[WordCloud] rawWordData 생성 완료:", result.length, "개");
-    console.log("[WordCloud] 상위 5개:", result.slice(0, 5).map(w => ({ text: w.text, value: w.value, sentiment: w.sentiment })));
-    
+    console.log(
+      "[WordCloud] 상위 5개:",
+      result
+        .slice(0, 5)
+        .map((w) => ({ text: w.text, value: w.value, sentiment: w.sentiment }))
+    );
+
     return result;
   }, [tokenStats]);
 
@@ -419,10 +468,19 @@ const SentimentTrend = () => {
     const filtered = rawWordData
       .filter((w) => activeSentiments.includes(w.sentiment))
       .filter((w) => (q ? w.text.toLowerCase().includes(q) : true));
-    
+
     // 디버깅: 데이터 개수 확인
-    console.log("[WordCloud] rawWordData:", rawWordData.length, "filtered:", filtered.length, "activeSentiments:", activeSentiments, "wordSearch:", wordSearch);
-    
+    console.log(
+      "[WordCloud] rawWordData:",
+      rawWordData.length,
+      "filtered:",
+      filtered.length,
+      "activeSentiments:",
+      activeSentiments,
+      "wordSearch:",
+      wordSearch
+    );
+
     return filtered;
   }, [rawWordData, activeSentiments, wordSearch]);
 
@@ -559,8 +617,18 @@ const SentimentTrend = () => {
         <div className="relative flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              <svg
+                className="w-8 h-8 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                />
               </svg>
             </div>
             <div>
@@ -568,7 +636,8 @@ const SentimentTrend = () => {
                 감성 / 트렌드 분석
               </h1>
               <p className="text-gray-600 font-medium">
-                키워드별 언급량 및 감성 분포를 확인하고, 원인 키워드로 빠르게 해석하세요.
+                키워드별 언급량 및 감성 분포를 확인하고, 원인 키워드로 빠르게
+                해석하세요.
               </p>
             </div>
           </div>
@@ -581,8 +650,18 @@ const SentimentTrend = () => {
         <div className="relative flex items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-md">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              <svg
+                className="w-5 h-5 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                />
               </svg>
             </div>
             <h2 className="text-xl font-bold text-gray-900">필터</h2>
@@ -642,7 +721,9 @@ const SentimentTrend = () => {
                 className="w-full p-3.5 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 hover:border-indigo-300 shadow-sm hover:shadow-md font-medium text-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <option value="">
-                  {selectedProjectId ? "전체 키워드" : "프로젝트를 먼저 선택하세요"}
+                  {selectedProjectId
+                    ? "전체 키워드"
+                    : "프로젝트를 먼저 선택하세요"}
                 </option>
                 {keywords.map((k) => (
                   <option key={k.keywordId} value={k.keywordId}>
@@ -660,29 +741,31 @@ const SentimentTrend = () => {
             </label>
             <div className="flex items-center gap-6 flex-wrap">
               {[
-                { 
-                  value: "NAVER", 
-                  label: "NAVER", 
-                  activeColor: "bg-green-500", 
+                {
+                  value: "NAVER",
+                  label: "NAVER",
+                  activeColor: "bg-green-500",
                   activeBorder: "border-green-500",
                   focusRing: "focus:ring-green-500",
-                  hoverColor: "hover:bg-green-400"
+                  hoverColor: "hover:bg-green-400",
                 },
-                { 
-                  value: "YOUTUBE", 
-                  label: "YOUTUBE", 
-                  activeColor: "bg-red-500", 
+                {
+                  value: "YOUTUBE",
+                  label: "YOUTUBE",
+                  activeColor: "bg-red-500",
                   activeBorder: "border-red-500",
                   focusRing: "focus:ring-red-500",
-                  hoverColor: "hover:bg-red-400"
+                  hoverColor: "hover:bg-red-400",
                 },
               ].map((source) => {
                 const isActive = selectedSources.includes(source.value);
                 return (
                   <div key={source.value} className="flex items-center gap-3">
-                    <span className={`text-sm font-semibold min-w-[90px] transition-colors ${
-                      isActive ? "text-gray-900" : "text-gray-600"
-                    }`}>
+                    <span
+                      className={`text-sm font-semibold min-w-[90px] transition-colors ${
+                        isActive ? "text-gray-900" : "text-gray-600"
+                      }`}
+                    >
                       {source.label}
                     </span>
                     <button
@@ -709,8 +792,8 @@ const SentimentTrend = () => {
                       />
                       <span
                         className={`absolute text-[10px] font-bold transition-opacity duration-200 ${
-                          isActive 
-                            ? "left-2 text-white opacity-100" 
+                          isActive
+                            ? "left-2 text-white opacity-100"
                             : "right-2 text-gray-600 opacity-100"
                         }`}
                       >
@@ -739,12 +822,24 @@ const SentimentTrend = () => {
         <div className="relative overflow-hidden bg-gradient-to-br from-red-50 to-pink-50 rounded-2xl shadow-lg border-2 border-red-200/50 p-6 backdrop-blur-sm">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
-              <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-6 h-6 text-red-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </div>
             <div>
-              <h3 className="font-bold text-red-900 mb-1">오류가 발생했습니다</h3>
+              <h3 className="font-bold text-red-900 mb-1">
+                오류가 발생했습니다
+              </h3>
               <p className="text-sm text-red-700">{error}</p>
             </div>
           </div>
@@ -759,7 +854,9 @@ const SentimentTrend = () => {
               <div className="absolute top-0 left-0 w-16 h-16 rounded-full border-4 border-transparent border-t-indigo-600 border-r-indigo-600 animate-spin"></div>
             </div>
             <div>
-              <p className="text-lg font-semibold text-gray-900 mb-1">데이터를 불러오는 중...</p>
+              <p className="text-lg font-semibold text-gray-900 mb-1">
+                데이터를 불러오는 중...
+              </p>
               <p className="text-sm text-gray-500">잠시만 기다려주세요</p>
             </div>
           </div>
@@ -784,19 +881,31 @@ const SentimentTrend = () => {
             {/* Decorative elements */}
             <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-400/10 to-pink-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-pink-400/10 to-purple-400/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-            
+
             <div className="relative mb-8">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                  <svg
+                    className="w-6 h-6 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
+                    />
                   </svg>
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     긍/부정 분석
                   </h2>
-                  <p className="text-xs text-gray-500 mt-0.5">감성 키워드 분석</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    감성 키워드 분석
+                  </p>
                 </div>
               </div>
             </div>

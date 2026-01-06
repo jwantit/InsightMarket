@@ -33,6 +33,7 @@ public interface AnalyticsKeywordTokenSentimentStatsRepository extends JpaReposi
            "WHERE t.brandId = :brandId " +
            "AND (:projectId IS NULL OR t.projectId = :projectId) " +
            "AND (:keywordId IS NULL OR t.keywordId = :keywordId) " +
+           "AND (:competitorId IS NULL OR t.competitorId = :competitorId) " +
            "AND (:source IS NULL OR t.source = :source) " +
            "AND (:startDate IS NULL OR t.statDate >= :startDate) " +
            "AND (:endDate IS NULL OR t.statDate <= :endDate) " +
@@ -41,6 +42,7 @@ public interface AnalyticsKeywordTokenSentimentStatsRepository extends JpaReposi
             @Param("brandId") Long brandId,
             @Param("projectId") Long projectId,
             @Param("keywordId") Long keywordId,
+            @Param("competitorId") Long competitorId,
             @Param("source") String source,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);

@@ -1,5 +1,5 @@
-// src/api/analyticsApi.js
-// 분석 데이터 조회 API 클라이언트
+// src/api/snsApi.js
+// SNS 분석 데이터 조회 API 클라이언트
 import jwtAxios from "../util/jwtUtil";
 import { API_SERVER_HOST } from "./memberApi";
 
@@ -13,14 +13,19 @@ jwtAxios.defaults.baseURL = API_SERVER_HOST;
  * @param {string|null} source - 소스 (선택: NAVER, YOUTUBE 등)
  * @returns {Promise<Array>} 인사이트 목록
  */
-export async function getInsights(brandId, projectId = null, keywordId = null, source = null) {
+export async function getInsights(
+  brandId,
+  projectId = null,
+  keywordId = null,
+  source = null
+) {
   const params = new URLSearchParams();
   if (projectId) params.append("projectId", projectId);
   if (keywordId) params.append("keywordId", keywordId);
   if (source) params.append("source", source);
 
   const res = await jwtAxios.get(
-    `/api/${brandId}/analytics/insights?${params.toString()}`
+    `/api/${brandId}/sns/insights?${params.toString()}`
   );
 
   return res.data;
@@ -40,6 +45,7 @@ export async function getDailyStats(
   brandId,
   projectId = null,
   keywordId = null,
+  competitorId = null,
   source = null,
   startDate = null,
   endDate = null
@@ -47,12 +53,13 @@ export async function getDailyStats(
   const params = new URLSearchParams();
   if (projectId) params.append("projectId", projectId);
   if (keywordId) params.append("keywordId", keywordId);
+  if (competitorId) params.append("competitorId", competitorId);
   if (source) params.append("source", source);
   if (startDate) params.append("startDate", startDate);
   if (endDate) params.append("endDate", endDate);
 
   const res = await jwtAxios.get(
-    `/api/${brandId}/analytics/daily-stats?${params.toString()}`
+    `/api/${brandId}/sns/daily-stats?${params.toString()}`
   );
 
   return res.data;
@@ -72,6 +79,7 @@ export async function getSentimentStats(
   brandId,
   projectId = null,
   keywordId = null,
+  competitorId = null,
   source = null,
   startDate = null,
   endDate = null
@@ -79,12 +87,13 @@ export async function getSentimentStats(
   const params = new URLSearchParams();
   if (projectId) params.append("projectId", projectId);
   if (keywordId) params.append("keywordId", keywordId);
+  if (competitorId) params.append("competitorId", competitorId);
   if (source) params.append("source", source);
   if (startDate) params.append("startDate", startDate);
   if (endDate) params.append("endDate", endDate);
 
   const res = await jwtAxios.get(
-    `/api/${brandId}/analytics/sentiment-stats?${params.toString()}`
+    `/api/${brandId}/sns/sentiment-stats?${params.toString()}`
   );
 
   return res.data;
@@ -96,7 +105,7 @@ export async function getSentimentStats(
  * @returns {Promise<Array>} 프로젝트 목록
  */
 export async function getProjects(brandId) {
-  const res = await jwtAxios.get(`/api/${brandId}/analytics/projects`);
+  const res = await jwtAxios.get(`/api/${brandId}/sns/projects`);
   return res.data;
 }
 
@@ -108,7 +117,7 @@ export async function getProjects(brandId) {
  */
 export async function getProjectKeywords(brandId, projectId) {
   const res = await jwtAxios.get(
-    `/api/${brandId}/analytics/projects/${projectId}/keywords`
+    `/api/${brandId}/sns/projects/${projectId}/keywords`
   );
   return res.data;
 }
@@ -127,6 +136,7 @@ export async function getTokenStats(
   brandId,
   projectId = null,
   keywordId = null,
+  competitorId = null,
   source = null,
   startDate = null,
   endDate = null
@@ -134,14 +144,24 @@ export async function getTokenStats(
   const params = new URLSearchParams();
   if (projectId) params.append("projectId", projectId);
   if (keywordId) params.append("keywordId", keywordId);
+  if (competitorId) params.append("competitorId", competitorId);
   if (source) params.append("source", source);
   if (startDate) params.append("startDate", startDate);
   if (endDate) params.append("endDate", endDate);
 
   const res = await jwtAxios.get(
-    `/api/${brandId}/analytics/token-stats?${params.toString()}`
+    `/api/${brandId}/sns/token-stats?${params.toString()}`
   );
 
   return res.data;
 }
 
+/**
+ * 경쟁사 목록 조회
+ * @param {number} brandId - 브랜드 ID
+ * @returns {Promise<Array>} 경쟁사 목록
+ */
+export async function getCompetitors(brandId) {
+  const res = await jwtAxios.get(`/api/${brandId}/sns/competitors`);
+  return res.data;
+}

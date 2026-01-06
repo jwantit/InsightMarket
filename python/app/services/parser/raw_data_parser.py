@@ -133,9 +133,12 @@ def parse_raw_data(file_path: str, brand_id: Optional[int] = None) -> List[Dict]
                 if not merged_text.strip():
                     continue
                 
+                # projectId가 있으면 사용 (경쟁사 데이터에도 projectId가 있을 수 있음)
+                project_id = item.get("projectId")
+                
                 parsed_data.append({
                     "brand_id": brand_id_from_data,
-                    "project_id": None,
+                    "project_id": project_id,  # None일 수 있음
                     "keyword_id": None,
                     "competitor_id": competitor_id,
                     "text": merged_text,

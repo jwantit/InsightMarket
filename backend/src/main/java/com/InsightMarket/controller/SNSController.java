@@ -11,8 +11,13 @@ import com.InsightMarket.repository.analytics.keyword.AnalyticsKeywordDailyStats
 import com.InsightMarket.repository.analytics.keyword.AnalyticsKeywordInsightResultRepository;
 import com.InsightMarket.repository.analytics.keyword.AnalyticsKeywordSentimentDailyStatsRepository;
 import com.InsightMarket.repository.analytics.keyword.AnalyticsKeywordTokenSentimentStatsRepository;
+import com.InsightMarket.repository.competitor.CompetitorRepository;
 import com.InsightMarket.repository.keyword.ProjectKeywordRepository;
 import com.InsightMarket.repository.project.ProjectRepository;
+import com.InsightMarket.repository.brand.BrandRepository;
+import com.InsightMarket.domain.company.Competitor;
+import com.InsightMarket.domain.brand.Brand;
+import com.InsightMarket.dto.competitor.CompetitorResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -26,8 +31,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/{brandId}/analytics")
-public class AnalyticsController {
+@RequestMapping("/api/{brandId}/sns")
+public class SNSController {
 
     private final AnalyticsKeywordInsightResultRepository insightResultRepository;
     private final AnalyticsKeywordDailyStatsRepository dailyStatsRepository;
@@ -35,6 +40,8 @@ public class AnalyticsController {
     private final AnalyticsKeywordTokenSentimentStatsRepository tokenStatsRepository;
     private final ProjectRepository projectRepository;
     private final ProjectKeywordRepository projectKeywordRepository;
+    private final CompetitorRepository competitorRepository;
+    private final BrandRepository brandRepository;
 
     @GetMapping("/insights")
     public ResponseEntity<List<InsightSummaryDTO>> getInsights(
@@ -43,7 +50,7 @@ public class AnalyticsController {
             @RequestParam(required = false) Long keywordId,
             @RequestParam(required = false) String source
     ) {
-        log.info("[AnalyticsController] GET /insights brandId={}, projectId={}, keywordId={}, source={}",
+        log.info("[SNSController] GET /insights brandId={}, projectId={}, keywordId={}, source={}",
                 brandId, projectId, keywordId, source);
 
         List<AnalyticsKeywordInsightResult> insights = insightResultRepository.findLatestInsights(
@@ -62,15 +69,16 @@ public class AnalyticsController {
             @PathVariable Long brandId,
             @RequestParam(required = false) Long projectId,
             @RequestParam(required = false) Long keywordId,
+            @RequestParam(required = false) Long competitorId,
             @RequestParam(required = false) String source,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
-        log.info("[AnalyticsController] GET /daily-stats brandId={}, projectId={}, keywordId={}, source={}, startDate={}, endDate={}",
-                brandId, projectId, keywordId, source, startDate, endDate);
+        log.info("[SNSController] GET /daily-stats brandId={}, projectId={}, keywordId={}, competitorId={}, source={}, startDate={}, endDate={}",
+                brandId, projectId, keywordId, competitorId, source, startDate, endDate);
 
         List<AnalyticsKeywordDailyStats> stats = dailyStatsRepository.findByFilters(
-                brandId, projectId, keywordId, source, startDate, endDate
+                brandId, projectId, keywordId, competitorId, source, startDate, endDate
         );
 
         List<DailyStatsDTO> dtos = stats.stream()
@@ -85,15 +93,16 @@ public class AnalyticsController {
             @PathVariable Long brandId,
             @RequestParam(required = false) Long projectId,
             @RequestParam(required = false) Long keywordId,
+            @RequestParam(required = false) Long competitorId,
             @RequestParam(required = false) String source,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
-        log.info("[AnalyticsController] GET /sentiment-stats brandId={}, projectId={}, keywordId={}, source={}, startDate={}, endDate={}",
-                brandId, projectId, keywordId, source, startDate, endDate);
+        log.info("[SNSController] GET /sentiment-stats brandId={}, projectId={}, keywordId={}, competitorId={}, source={}, startDate={}, endDate={}",
+                brandId, projectId, keywordId, competitorId, source, startDate, endDate);
 
         List<AnalyticsKeywordSentimentDailyStats> stats = sentimentStatsRepository.findByFilters(
-                brandId, projectId, keywordId, source, startDate, endDate
+                brandId, projectId, keywordId, competitorId, source, startDate, endDate
         );
 
         List<SentimentStatsDTO> dtos = stats.stream()
@@ -105,7 +114,7 @@ public class AnalyticsController {
 
     @GetMapping("/projects")
     public ResponseEntity<List<ProjectDTO>> getProjects(@PathVariable Long brandId) {
-        log.info("[AnalyticsController] GET /projects brandId={}", brandId);
+        log.info("[SNSController] GET /projects brandId={}", brandId);
 
         List<Project> projects = projectRepository.findByBrandIdOrderByStartDateDesc(brandId);
 
@@ -124,7 +133,7 @@ public class AnalyticsController {
             @PathVariable Long brandId,
             @PathVariable Long projectId
     ) {
-        log.info("[AnalyticsController] GET /projects/{}/keywords brandId={}", projectId, brandId);
+        log.info("[SNSController] GET /projects/{}/keywords brandId={}", projectId, brandId);
 
         // 프로젝트가 해당 브랜드에 속하는지 확인
         projectRepository.findByIdAndBrandId(projectId, brandId)
@@ -142,20 +151,43 @@ public class AnalyticsController {
         return ResponseEntity.ok(dtos);
     }
 
+    @GetMapping("/competitors")
+    public ResponseEntity<List<CompetitorResponseDTO>> getCompetitors(@PathVariable Long brandId) {
+        log.info("[SNSController] GET /competitors brandId={}", brandId);
+
+        // 브랜드 조회
+        Brand brand = brandRepository.findById(brandId)
+                .orElseThrow(() -> new IllegalArgumentException("Brand not found"));
+
+        List<Competitor> competitors = competitorRepository.findByBrand(brand);
+
+        List<CompetitorResponseDTO> dtos = competitors.stream()
+                .map(c -> CompetitorResponseDTO.builder()
+                        .competitorId(c.getId())
+                        .name(c.getName())
+                        .enabled(c.isEnabled())
+                        .keywords(List.of()) // 키워드 기능 제거됨
+                        .build())
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
+    }
+
     @GetMapping("/token-stats")
     public ResponseEntity<List<TokenStatsDTO>> getTokenStats(
             @PathVariable Long brandId,
             @RequestParam(required = false) Long projectId,
             @RequestParam(required = false) Long keywordId,
+            @RequestParam(required = false) Long competitorId,
             @RequestParam(required = false) String source,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
-        log.info("[AnalyticsController] GET /token-stats brandId={}, projectId={}, keywordId={}, source={}, startDate={}, endDate={}",
-                brandId, projectId, keywordId, source, startDate, endDate);
+        log.info("[SNSController] GET /token-stats brandId={}, projectId={}, keywordId={}, competitorId={}, source={}, startDate={}, endDate={}",
+                brandId, projectId, keywordId, competitorId, source, startDate, endDate);
 
         List<AnalyticsKeywordTokenSentimentStats> stats = tokenStatsRepository.findByFilters(
-                brandId, projectId, keywordId, source, startDate, endDate
+                brandId, projectId, keywordId, competitorId, source, startDate, endDate
         );
 
         List<TokenStatsDTO> dtos = stats.stream()

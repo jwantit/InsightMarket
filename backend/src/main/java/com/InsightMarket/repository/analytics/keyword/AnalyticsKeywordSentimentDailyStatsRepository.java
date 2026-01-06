@@ -38,6 +38,7 @@ public interface AnalyticsKeywordSentimentDailyStatsRepository extends JpaReposi
             @Param("brandId") Long brandId,
             @Param("projectId") Long projectId,
             @Param("keywordId") Long keywordId,
+            @Param("competitorId") Long competitorId,
             @Param("source") String source,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate

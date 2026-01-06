@@ -29,13 +29,28 @@ public class AnalyticsProcessingController {
         log.info("[AnalyticsProcessingController] POST /api/analytics/process traceId={} filePath={} brandId={}",
                 traceId, request.getFilePath(), request.getBrandId());
 
-        JsonNode result = analyticsProcessingService.processAnalysis(
-                request.getFilePath(),
-                request.getBrandId(),
-                traceId
-        );
+        try {
+            JsonNode result = analyticsProcessingService.processAnalysis(
+                    request.getFilePath(),
+                    request.getBrandId(),
+                    traceId
+            );
 
-        return ResponseEntity.ok(result);
+            log.info("[AnalyticsProcessingController] POST /api/analytics/process 성공 traceId={}", traceId);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("[AnalyticsProcessingController] POST /api/analytics/process 실패 traceId={} error={}", 
+                    traceId, e.getMessage(), e);
+            
+            // 에러 응답 생성
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            com.fasterxml.jackson.databind.node.ObjectNode errorResponse = mapper.createObjectNode();
+            errorResponse.put("status", "error");
+            errorResponse.put("message", e.getMessage());
+            errorResponse.put("traceId", traceId);
+            
+            return ResponseEntity.status(500).body(errorResponse);
+        }
     }
 }
 
