@@ -34,6 +34,90 @@ import {
   badgeStyle,
 } from "../../components/sns/SentimentTrend/utils";
 
+// 대시보드와 동일한 아이콘
+const Icons = {
+  Shield: () => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  ),
+  Smile: () => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+      <line x1="9" y1="9" x2="9.01" y2="9" />
+      <line x1="15" y1="9" x2="15.01" y2="9" />
+    </svg>
+  ),
+  Zap: () => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+    </svg>
+  ),
+  TrendingUp: () => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+      <polyline points="17 6 23 6 23 12" />
+    </svg>
+  ),
+  TrendingDown: () => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
+      <polyline points="17 18 23 18 23 12" />
+    </svg>
+  ),
+};
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -734,27 +818,30 @@ const Comparison = () => {
         legend: {
           position: "top",
           labels: {
-            color: TOKENS.color.subtext,
-            boxWidth: 10,
+            color: "#64748b",
+            boxWidth: 8,
+            font: { size: 11 },
+            padding: 8,
           },
         },
         tooltip: {
-          backgroundColor: "rgba(0, 0, 0, 0.8)",
-          padding: 12,
-          titleFont: { size: 14 },
-          bodyFont: { size: 13 },
+          backgroundColor: "rgba(0, 0, 0, 0.85)",
+          padding: 10,
+          titleFont: { size: 11 },
+          bodyFont: { size: 10 },
+          borderColor: "rgba(255,255,255,0.1)",
+          borderWidth: 1,
         },
       },
       scales: {
         x: {
-          grid: { color: TOKENS.color.border },
-          ticks: { color: TOKENS.color.subtext },
+          grid: { color: "#f1f5f9", drawBorder: false },
+          ticks: { color: "#94a3b8", font: { size: 10 } },
         },
         y: {
-          grid: { color: TOKENS.color.border },
-          ticks: { color: TOKENS.color.subtext },
+          grid: { color: "#f1f5f9", drawBorder: false },
+          ticks: { color: "#94a3b8", font: { size: 10 } },
           beginAtZero: true,
-          max: 100,
         },
       },
     };
@@ -824,158 +911,103 @@ const Comparison = () => {
   );
 
   return (
-    <div className="space-y-6 p-6 bg-gradient-to-br from-gray-50 via-blue-50/20 to-purple-50/20 min-h-screen">
-      {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-white via-indigo-50/30 to-purple-50/20 rounded-2xl shadow-xl border border-indigo-100/50 p-8 backdrop-blur-sm">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="relative flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-              <svg
-                className="w-8 h-8 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-                경쟁사 비교
-              </h1>
-              <p className="text-gray-600 font-medium">
-                브랜드와 경쟁사의 감성 트렌드를 비교 분석하세요.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="flex flex-col gap-4">
+      <h3 className="text-lg font-extrabold text-gray-800 tracking-tight">
+        경쟁사 비교
+      </h3>
 
       {/* Filters */}
-      <div className="relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 p-6">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-purple-50/20" />
-        <div className="relative">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-md">
-              <svg
-                className="w-5 h-5 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                />
-              </svg>
-            </div>
-            <h2 className="text-xl font-bold text-gray-900">필터</h2>
+      <div className="sticky top-8 z-50 w-full flex justify-center pointer-events-none transition-all duration-500 mb-4">
+        <div className="inline-flex items-center bg-white/10 backdrop-blur-md px-5 py-2 rounded-full shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] border border-white/20 gap-4 pointer-events-auto transition-all duration-300 hover:bg-white/90 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] group flex-wrap">
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+            <span className="text-[10px] font-black text-gray-400 group-hover:text-gray-500 uppercase tracking-widest transition-colors">
+              Filter
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="group">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                경쟁사 선택
-              </label>
-              <div className="relative">
-                <select
-                  value={selectedCompetitorId || ""}
-                  onChange={(e) =>
-                    setSelectedCompetitorId(
-                      e.target.value ? Number(e.target.value) : null
-                    )
-                  }
-                  className="w-full p-3.5 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 hover:border-indigo-300 shadow-sm hover:shadow-md font-medium text-gray-900"
-                >
-                  <option value="">경쟁사를 선택하세요</option>
-                  {competitors.map((c) => (
-                    <option key={c.competitorId} value={c.competitorId}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+          {/* Competitor */}
+          <div className="flex items-center gap-2 border-l border-gray-200/30 group-hover:border-gray-200 pl-4">
+            <select
+              value={selectedCompetitorId || ""}
+              onChange={(e) =>
+                setSelectedCompetitorId(
+                  e.target.value ? Number(e.target.value) : null
+                )
+              }
+              className="text-[11px] font-bold text-gray-500 group-hover:text-gray-700 bg-transparent border-none focus:outline-none cursor-pointer"
+            >
+              <option value="">경쟁사 선택</option>
+              {competitors.map((c) => (
+                <option key={c.competitorId} value={c.competitorId}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            <div className="group">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                데이터 소스
-              </label>
-              <div className="flex items-center gap-4">
-                {/* NAVER Toggle */}
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-700 min-w-[60px]">
-                    NAVER
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setSelectedSources((prev) => ({
-                        ...prev,
-                        naver: !prev.naver,
-                      }))
-                    }
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
-                      selectedSources.naver ? "bg-green-500" : "bg-gray-300"
-                    }`}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        selectedSources.naver
-                          ? "translate-x-6"
-                          : "translate-x-1"
-                      }`}
-                    />
-                  </button>
-                </div>
+          {/* Source Toggles */}
+          <div className="flex items-center gap-2.5 border-l border-gray-200/30 group-hover:border-gray-200 pl-4">
+            <span className="text-[11px] font-bold text-gray-500 group-hover:text-gray-700">
+              NAVER
+            </span>
+            <button
+              onClick={() =>
+                setSelectedSources((prev) => ({
+                  ...prev,
+                  naver: !prev.naver,
+                }))
+              }
+              className={`relative inline-flex h-4 w-8 items-center rounded-full transition-all ${
+                selectedSources.naver
+                  ? "bg-green-500/60 group-hover:bg-green-500"
+                  : "bg-gray-200/40 group-hover:bg-gray-200"
+              }`}
+            >
+              <span
+                className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-sm transition-transform ${
+                  selectedSources.naver ? "translate-x-4.5" : "translate-x-0.5"
+                }`}
+              />
+            </button>
+          </div>
 
-                {/* YOUTUBE Toggle */}
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-700 min-w-[70px]">
-                    YOUTUBE
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setSelectedSources((prev) => ({
-                        ...prev,
-                        youtube: !prev.youtube,
-                      }))
-                    }
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
-                      selectedSources.youtube ? "bg-red-500" : "bg-gray-300"
-                    }`}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        selectedSources.youtube
-                          ? "translate-x-6"
-                          : "translate-x-1"
-                      }`}
-                    />
-                  </button>
-                </div>
-              </div>
-            </div>
+          <div className="flex items-center gap-2.5 border-l border-gray-200/30 group-hover:border-gray-200 pl-4">
+            <span className="text-[11px] font-bold text-gray-500 group-hover:text-gray-700">
+              YOUTUBE
+            </span>
+            <button
+              onClick={() =>
+                setSelectedSources((prev) => ({
+                  ...prev,
+                  youtube: !prev.youtube,
+                }))
+              }
+              className={`relative inline-flex h-4 w-8 items-center rounded-full transition-all ${
+                selectedSources.youtube
+                  ? "bg-red-500/60 group-hover:bg-red-500"
+                  : "bg-gray-200/40 group-hover:bg-gray-200"
+              }`}
+            >
+              <span
+                className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-sm transition-transform ${
+                  selectedSources.youtube
+                    ? "translate-x-4.5"
+                    : "translate-x-0.5"
+                }`}
+              />
+            </button>
           </div>
         </div>
       </div>
 
       {/* Error & Loading */}
       {error && (
-        <div className="relative overflow-hidden bg-gradient-to-br from-red-50 to-pink-50 rounded-2xl shadow-lg border-2 border-red-200/50 p-6 backdrop-blur-sm">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
+        <div className="w-full bg-white border border-red-200 rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center">
               <svg
-                className="w-6 h-6 text-red-600"
+                className="w-4 h-4 text-red-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -989,27 +1021,24 @@ const Comparison = () => {
               </svg>
             </div>
             <div>
-              <h3 className="font-bold text-red-900 mb-1">
+              <h3 className="text-sm font-bold text-red-900 mb-0.5">
                 오류가 발생했습니다
               </h3>
-              <p className="text-sm text-red-700">{error}</p>
+              <p className="text-xs text-red-700">{error}</p>
             </div>
           </div>
         </div>
       )}
 
       {loading && (
-        <div className="relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 p-12 text-center">
-          <div className="inline-flex flex-col items-center gap-4">
-            <div className="relative">
-              <div className="w-16 h-16 rounded-full border-4 border-indigo-100"></div>
-              <div className="absolute top-0 left-0 w-16 h-16 rounded-full border-4 border-transparent border-t-indigo-600 border-r-indigo-600 animate-spin"></div>
-            </div>
+        <div className="w-full bg-white border border-gray-200 rounded-xl p-10 text-center">
+          <div className="inline-flex flex-col items-center gap-3">
+            <div className="w-6 h-6 border-2 border-blue-100 border-t-blue-500 rounded-full animate-spin" />
             <div>
-              <p className="text-lg font-semibold text-gray-900 mb-1">
+              <p className="text-sm font-semibold text-gray-900 mb-0.5">
                 데이터를 불러오는 중...
               </p>
-              <p className="text-sm text-gray-500">잠시만 기다려주세요</p>
+              <p className="text-xs text-gray-500">잠시만 기다려주세요</p>
             </div>
           </div>
         </div>
@@ -1018,107 +1047,122 @@ const Comparison = () => {
       {!loading && !error && selectedCompetitorId && (
         <>
           {/* 섹션 1: 언급량 비교 분석 */}
-          <div className="relative overflow-hidden bg-gradient-to-br from-white via-emerald-50/30 to-teal-50/20 rounded-2xl shadow-lg border border-emerald-100/50 p-8 backdrop-blur-sm mb-6">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-emerald-400/10 to-teal-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-            <div className="relative">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-2">
-                  언급량 비교 분석
-                </h2>
-                <p className="text-xs text-gray-500">
-                  브랜드 vs 경쟁사 언급량 추이 비교
-                </p>
-              </div>
-
+          <div className="w-full bg-white flex flex-col border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+            <div className="px-4 py-3 border-b border-gray-100 bg-white">
+              <h2 className="text-sm font-bold text-gray-800">
+                언급량 비교 분석
+              </h2>
+            </div>
+            <div className="p-4">
               {/* 요약 카드 */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200/50 p-4 backdrop-blur-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md">
-                      <span className="text-white font-bold text-lg">
-                        {brandName.charAt(0)}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="group bg-gradient-to-br from-indigo-50/50 to-white p-5 rounded-2xl border border-indigo-100 hover:shadow-md transition-all relative overflow-hidden">
+                  <div className="absolute right-[-10px] top-[-10px] scale-[3] opacity-[0.03] group-hover:opacity-[0.08] transition-opacity text-indigo-600">
+                    <Icons.Shield />
+                  </div>
+                  <div className="relative z-10">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-[10px] font-bold text-indigo-500 bg-indigo-100/50 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        Brand
                       </span>
+                      <div className="text-indigo-500">
+                        <Icons.Shield />
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-600 mb-1">{brandName}</p>
-                      <p className="text-xs text-gray-500 mb-1">분석 기간</p>
-                      <p className="text-lg font-bold text-gray-900">
-                        {brandDailyStats.length > 0 &&
-                        competitorDailyStats.length > 0
-                          ? `${brandDailyStats[0]?.statDate || ""} - ${
-                              brandDailyStats[brandDailyStats.length - 1]
-                                ?.statDate || ""
-                            }`
-                          : "-"}
-                      </p>
+                    <p className="text-[11px] text-gray-400 font-medium mb-1">
+                      {brandDailyStats.length > 0 &&
+                      competitorDailyStats.length > 0
+                        ? `${brandDailyStats[0]?.statDate || ""} ~ ${
+                            brandDailyStats[brandDailyStats.length - 1]
+                              ?.statDate || ""
+                          }`
+                        : "분석 기간"}
+                    </p>
+                    <p className="text-[13px] text-gray-600 font-bold mb-1">
+                      브랜드 분석 대상
+                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-2xl font-black text-gray-800">
+                        {brandName}
+                      </span>
                     </div>
                   </div>
                 </div>
-                <div className="relative overflow-hidden bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200/50 p-4 backdrop-blur-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-md">
-                      <span className="text-white font-bold text-lg">
-                        {selectedCompetitor?.name?.charAt(0) || "경"}
+                <div className="group bg-gradient-to-br from-blue-50/50 to-white p-5 rounded-2xl border border-blue-100 hover:shadow-md transition-all relative overflow-hidden">
+                  <div className="absolute right-[-10px] top-[-10px] scale-[3] opacity-[0.03] group-hover:opacity-[0.08] transition-opacity text-blue-600">
+                    <Icons.Shield />
+                  </div>
+                  <div className="relative z-10">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-[10px] font-bold text-blue-500 bg-blue-100/50 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        Competitor
                       </span>
+                      <div className="text-blue-500">
+                        <Icons.Shield />
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-600 mb-1">
+                    <p className="text-[11px] text-gray-400 font-medium mb-1">
+                      {brandDailyStats.length > 0 &&
+                      competitorDailyStats.length > 0
+                        ? `${competitorDailyStats[0]?.statDate || ""} ~ ${
+                            competitorDailyStats[
+                              competitorDailyStats.length - 1
+                            ]?.statDate || ""
+                          }`
+                        : "분석 기간"}
+                    </p>
+                    <p className="text-[13px] text-gray-600 font-bold mb-1">
+                      경쟁사 분석 대상
+                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-2xl font-black text-gray-800">
                         {selectedCompetitor?.name || "경쟁사"}
-                      </p>
-                      <p className="text-xs text-gray-500 mb-1">분석 기간</p>
-                      <p className="text-lg font-bold text-gray-900">
-                        {brandDailyStats.length > 0 &&
-                        competitorDailyStats.length > 0
-                          ? `${competitorDailyStats[0]?.statDate || ""} - ${
-                              competitorDailyStats[
-                                competitorDailyStats.length - 1
-                              ]?.statDate || ""
-                            }`
-                          : "-"}
-                      </p>
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* 언급량 추이 비교 차트 */}
-              <div className="relative w-full">
+              <div className="w-full bg-white border border-gray-200 rounded-xl p-6 min-h-[300px]">
                 {mentionComparisonChartData ? (
-                  <div className="relative rounded-xl bg-white/60 backdrop-blur-sm border border-gray-200/50 p-6 shadow-inner w-full">
-                    <div className="h-[400px]">
-                      <Line
-                        data={mentionComparisonChartData}
-                        options={{
-                          ...baseChartOptions,
-                          plugins: {
-                            ...baseChartOptions.plugins,
-                            legend: {
-                              display: true,
-                              position: "bottom",
-                              labels: {
-                                usePointStyle: true,
-                                padding: 15,
-                                font: { size: 12, weight: "500" },
-                              },
+                  <div className="h-[300px]">
+                    <Line
+                      data={mentionComparisonChartData}
+                      options={{
+                        ...baseChartOptions,
+                        plugins: {
+                          ...baseChartOptions.plugins,
+                          legend: {
+                            display: true,
+                            position: "top",
+                            labels: {
+                              usePointStyle: true,
+                              padding: 10,
+                              font: { size: 11, weight: "500" },
                             },
                           },
-                          scales: {
-                            ...baseChartOptions.scales,
-                            y: {
-                              beginAtZero: true,
-                              ticks: {
-                                callback: function (value) {
-                                  return value.toLocaleString();
-                                },
+                        },
+                        scales: {
+                          ...baseChartOptions.scales,
+                          y: {
+                            beginAtZero: true,
+                            ticks: {
+                              callback: function (value) {
+                                return value.toLocaleString();
                               },
+                              font: { size: 10 },
                             },
                           },
-                        }}
-                      />
-                    </div>
+                          x: {
+                            ticks: { font: { size: 10 } },
+                          },
+                        },
+                      }}
+                    />
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center h-[400px] text-gray-400">
+                  <div className="flex items-center justify-center h-[300px] text-gray-400 text-sm">
                     데이터가 없습니다
                   </div>
                 )}
@@ -1127,46 +1171,40 @@ const Comparison = () => {
           </div>
 
           {/* 섹션 2: 긍부정 비교 분석 */}
-          <div className="relative overflow-hidden bg-gradient-to-br from-white via-purple-50/30 to-pink-50/20 rounded-2xl shadow-lg border border-purple-100/50 p-8 backdrop-blur-sm">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-400/10 to-pink-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-            <div className="relative">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-                  긍·부정 비교 분석
-                </h2>
-                <p className="text-xs text-gray-500">
-                  브랜드 vs 경쟁사 감성 분석 비교
-                </p>
-              </div>
-
+          <div className="w-full bg-white flex flex-col border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+            <div className="px-4 py-3 border-b border-gray-100 bg-white">
+              <h2 className="text-sm font-bold text-gray-800">
+                긍·부정 비교 분석
+              </h2>
+            </div>
+            <div className="p-4">
               {/* 요약 카드 */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-2 gap-4 mb-4">
                 {/* 브랜드 긍정 최고 */}
                 {brandSentimentAverages.pos > 0 && (
-                  <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200/50 p-4 backdrop-blur-sm">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md">
-                        <svg
-                          className="w-6 h-6 text-white"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
-                          />
-                        </svg>
+                  <div className="group bg-gradient-to-br from-blue-50/50 to-white p-5 rounded-2xl border border-blue-100 hover:shadow-md transition-all relative overflow-hidden">
+                    <div className="absolute right-[-10px] top-[-10px] scale-[3] opacity-[0.03] group-hover:opacity-[0.08] transition-opacity text-blue-600">
+                      <Icons.TrendingUp />
+                    </div>
+                    <div className="relative z-10">
+                      <div className="flex justify-between items-center mb-4">
+                        <span className="text-[10px] font-bold text-blue-500 bg-blue-100/50 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                          Brand Positive
+                        </span>
+                        <div className="text-blue-500">
+                          <Icons.TrendingUp />
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-gray-600 mb-1">
-                          긍정 감성이 가장 높은 분석 단어
-                        </p>
-                        <p className="text-2xl font-bold text-blue-700">
+                      <p className="text-[11px] text-gray-400 font-medium mb-1">
+                        긍정 감성이 가장 높은 브랜드
+                      </p>
+                      <p className="text-[13px] text-gray-600 font-bold mb-1">
+                        브랜드 평균 긍정도
+                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-2xl font-black text-gray-800">
                           {brandName} {brandPositiveRatioText}
-                        </p>
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1174,31 +1212,30 @@ const Comparison = () => {
 
                 {/* 경쟁사 부정 최고 */}
                 {competitorSentimentAverages.neg > 0 && (
-                  <div className="relative overflow-hidden bg-gradient-to-br from-red-50 to-rose-50 rounded-xl border border-red-200/50 p-4 backdrop-blur-sm">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center shadow-md">
-                        <svg
-                          className="w-6 h-6 text-white"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"
-                          />
-                        </svg>
+                  <div className="group bg-gradient-to-br from-rose-50/50 to-white p-5 rounded-2xl border border-rose-100 hover:shadow-md transition-all relative overflow-hidden">
+                    <div className="absolute right-[-10px] top-[-10px] scale-[3] opacity-[0.03] group-hover:opacity-[0.08] transition-opacity text-rose-600">
+                      <Icons.TrendingDown />
+                    </div>
+                    <div className="relative z-10">
+                      <div className="flex justify-between items-center mb-4">
+                        <span className="text-[10px] font-bold text-rose-500 bg-rose-100/50 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                          Competitor Negative
+                        </span>
+                        <div className="text-rose-500">
+                          <Icons.TrendingDown />
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-gray-600 mb-1">
-                          부정 감성이 가장 높은 분석 단어
-                        </p>
-                        <p className="text-2xl font-bold text-red-700">
+                      <p className="text-[11px] text-gray-400 font-medium mb-1">
+                        부정 감성이 가장 높은 경쟁사
+                      </p>
+                      <p className="text-[13px] text-gray-600 font-bold mb-1">
+                        경쟁사 평균 부정도
+                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-2xl font-black text-gray-800">
                           {selectedCompetitor?.name || "경쟁사"}{" "}
                           {competitorSentimentAverages.neg.toFixed(1)}%
-                        </p>
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1207,11 +1244,11 @@ const Comparison = () => {
                 {/* 브랜드 부정 최고 (경쟁사 부정이 없을 때) */}
                 {competitorSentimentAverages.neg === 0 &&
                   brandSentimentAverages.neg > 0 && (
-                    <div className="relative overflow-hidden bg-gradient-to-br from-red-50 to-rose-50 rounded-xl border border-red-200/50 p-4 backdrop-blur-sm">
+                    <div className="group bg-gradient-to-br from-red-50/50 to-white p-4 rounded-xl border border-red-100 hover:shadow-md transition-all">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center shadow-md">
+                        <div className="w-10 h-10 rounded-lg bg-red-500 flex items-center justify-center">
                           <svg
-                            className="w-6 h-6 text-white"
+                            className="w-5 h-5 text-white"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -1225,10 +1262,10 @@ const Comparison = () => {
                           </svg>
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm text-gray-600 mb-1">
+                          <p className="text-xs text-gray-600 mb-0.5">
                             부정 감성이 가장 높은 분석 단어
                           </p>
-                          <p className="text-2xl font-bold text-red-700">
+                          <p className="text-lg font-bold text-red-700">
                             {brandName} {brandSentimentAverages.neg.toFixed(1)}%
                           </p>
                         </div>
@@ -1239,11 +1276,11 @@ const Comparison = () => {
                 {/* 경쟁사 긍정 최고 (브랜드 긍정이 없을 때) */}
                 {brandSentimentAverages.pos === 0 &&
                   competitorSentimentAverages.pos > 0 && (
-                    <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200/50 p-4 backdrop-blur-sm">
+                    <div className="group bg-gradient-to-br from-blue-50/50 to-white p-4 rounded-xl border border-blue-100 hover:shadow-md transition-all">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md">
+                        <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center">
                           <svg
-                            className="w-6 h-6 text-white"
+                            className="w-5 h-5 text-white"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -1257,10 +1294,10 @@ const Comparison = () => {
                           </svg>
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm text-gray-600 mb-1">
+                          <p className="text-xs text-gray-600 mb-0.5">
                             긍정 감성이 가장 높은 분석 단어
                           </p>
-                          <p className="text-2xl font-bold text-blue-700">
+                          <p className="text-lg font-bold text-blue-700">
                             {selectedCompetitor?.name || "경쟁사"}{" "}
                             {competitorPositiveRatioText}
                           </p>
@@ -1271,15 +1308,16 @@ const Comparison = () => {
               </div>
 
               {/* 브랜드와 경쟁사 워드클라우드 비교 */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
                 {/* Brand Panel */}
-                <div className="relative overflow-hidden bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 rounded-xl shadow-lg border border-blue-100/50 p-6 backdrop-blur-sm">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-400/10 to-indigo-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                  <div className="relative mb-6">
-                    <h3 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                <div className="bg-white border border-gray-200 rounded-xl p-4">
+                  <div className="mb-4">
+                    <h3 className="text-sm font-bold text-gray-800">
                       {brandName}
                     </h3>
-                    <p className="text-xs text-gray-500 mt-1">브랜드 분석</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">
+                      브랜드 분석
+                    </p>
                   </div>
 
                   {/* Word Cloud */}
@@ -1308,13 +1346,14 @@ const Comparison = () => {
                 </div>
 
                 {/* Competitor Panel */}
-                <div className="relative overflow-hidden bg-gradient-to-br from-white via-green-50/30 to-emerald-50/20 rounded-xl shadow-lg border border-green-100/50 p-6 backdrop-blur-sm">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-green-400/10 to-emerald-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                  <div className="relative mb-6">
-                    <h3 className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                <div className="bg-white border border-gray-200 rounded-xl p-4">
+                  <div className="mb-4">
+                    <h3 className="text-sm font-bold text-gray-800">
                       {selectedCompetitor?.name || "경쟁사"}
                     </h3>
-                    <p className="text-xs text-gray-500 mt-1">경쟁사 분석</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">
+                      경쟁사 분석
+                    </p>
                   </div>
 
                   {/* Word Cloud */}
@@ -1344,13 +1383,13 @@ const Comparison = () => {
               </div>
 
               {/* 긍·부정 추이 비교 차트 */}
-              <div className="relative mb-6">
-                <div className="flex items-center justify-between mb-4">
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-3">
                   <div>
-                    <h3 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    <h3 className="text-sm font-bold text-gray-800">
                       긍·부정 추이 비교
                     </h3>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-[10px] text-gray-400 mt-0.5">
                       브랜드 vs 경쟁사 감성 트렌드 비교
                     </p>
                   </div>
@@ -1364,14 +1403,14 @@ const Comparison = () => {
                       <button
                         key={sentiment.value}
                         onClick={() => setSelectedSentiment(sentiment.value)}
-                        className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                        className={`px-3 py-1 rounded-lg font-medium text-xs transition-all ${
                           selectedSentiment === sentiment.value
                             ? sentiment.value === "POS"
-                              ? "bg-blue-500 text-white shadow-md"
+                              ? "bg-blue-500 text-white"
                               : sentiment.value === "NEG"
-                              ? "bg-red-500 text-white shadow-md"
-                              : "bg-gray-500 text-white shadow-md"
-                            : "bg-white/80 text-gray-700 hover:bg-gray-100 border border-gray-200"
+                              ? "bg-red-500 text-white"
+                              : "bg-gray-500 text-white"
+                            : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
                         }`}
                       >
                         {sentiment.label}
@@ -1381,24 +1420,17 @@ const Comparison = () => {
                 </div>
               </div>
 
-              <div className="relative w-full">
+              <div className="w-full bg-white border border-gray-200 rounded-xl p-6 min-h-[300px]">
                 {combinedSentimentChartData ? (
-                  <div className="relative rounded-xl bg-white/60 backdrop-blur-sm border border-gray-200/50 p-6 shadow-inner w-full">
-                    <div className="h-[400px]">
-                      <Line
-                        data={combinedSentimentChartData}
-                        options={baseChartOptions}
-                      />
-                    </div>
+                  <div className="h-[300px]">
+                    <Line
+                      data={combinedSentimentChartData}
+                      options={baseChartOptions}
+                    />
                   </div>
                 ) : (
-                  <div className="rounded-xl bg-gray-50/50 border border-gray-200 p-12 text-center w-full">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                      <span className="text-2xl">📊</span>
-                    </div>
-                    <p className="text-gray-500 font-medium">
-                      데이터가 없습니다.
-                    </p>
+                  <div className="flex items-center justify-center h-[300px] text-gray-400 text-sm">
+                    데이터가 없습니다.
                   </div>
                 )}
               </div>
@@ -1408,11 +1440,11 @@ const Comparison = () => {
       )}
 
       {!loading && !error && !selectedCompetitorId && (
-        <div className="relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 p-12 text-center">
-          <div className="inline-flex flex-col items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
+        <div className="w-full bg-white border border-gray-200 rounded-xl p-10 text-center">
+          <div className="inline-flex flex-col items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
               <svg
-                className="w-8 h-8 text-gray-400"
+                className="w-6 h-6 text-gray-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -1426,10 +1458,10 @@ const Comparison = () => {
               </svg>
             </div>
             <div>
-              <p className="text-lg font-semibold text-gray-900 mb-1">
+              <p className="text-sm font-semibold text-gray-900 mb-0.5">
                 경쟁사를 선택하세요
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs text-gray-500">
                 위 필터에서 경쟁사를 선택하면 비교 데이터가 표시됩니다.
               </p>
             </div>

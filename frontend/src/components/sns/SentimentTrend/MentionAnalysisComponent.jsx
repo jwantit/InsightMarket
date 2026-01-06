@@ -7,133 +7,178 @@ const MentionAnalysisComponent = ({
   selectedSources,
   baseChartOptions,
 }) => {
+  // 대시보드와 동일한 아이콘
+  const Icons = {
+    Chart: () => (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <line x1="18" y1="20" x2="18" y2="10" />
+        <line x1="12" y1="20" x2="12" y2="4" />
+        <line x1="6" y1="20" x2="6" y2="14" />
+      </svg>
+    ),
+    Shield: () => (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      </svg>
+    ),
+    Calendar: () => (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+      </svg>
+    ),
+  };
+
   const statCards = [
     {
       label: "총 언급량",
       value: summaryStats?.totalMentions?.toLocaleString() || "0",
-      subtext: "건 기준 집계",
-      icon: "📊",
-      gradient: "from-blue-500 to-cyan-500",
-      bgGradient: "from-blue-50 to-cyan-50",
-      iconBg: "bg-blue-100",
-      iconColor: "text-blue-600",
+      subtext: summaryStats?.dateRange || "",
+      description: "건 기준 집계",
+      icon: Icons.Chart,
+      color: "indigo",
     },
     {
       label: "최다 채널",
       value: summaryStats?.topSource?.name || "-",
-      subtext: summaryStats?.topSource
+      subtext: summaryStats?.dateRange || "",
+      description: summaryStats?.topSource
         ? `${summaryStats.topSource.count.toLocaleString()}건`
-        : "",
-      icon: summaryStats?.topSource?.name?.[0] || "N",
-      gradient: "from-purple-500 to-pink-500",
-      bgGradient: "from-purple-50 to-pink-50",
-      iconBg: "bg-purple-100",
-      iconColor: "text-purple-600",
+        : "감성 반응이 가장 활발한 채널",
+      icon: Icons.Shield,
+      color: "blue",
     },
     {
       label: "급증일",
       value: summaryStats?.topDate?.date || "-",
-      subtext: summaryStats?.topDate
+      subtext: summaryStats?.dateRange || "",
+      description: summaryStats?.topDate
         ? `${summaryStats.topDate.count.toLocaleString()}건`
-        : "",
-      icon: "📅",
-      gradient: "from-orange-500 to-red-500",
-      bgGradient: "from-orange-50 to-red-50",
-      iconBg: "bg-orange-100",
-      iconColor: "text-orange-600",
+        : "언급량이 가장 높은 날짜",
+      icon: Icons.Calendar,
+      color: "rose",
     },
   ];
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-white via-blue-50/30 to-purple-50/20 rounded-2xl shadow-lg border border-blue-100/50 p-8 backdrop-blur-sm">
-      {/* Decorative elements */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-400/10 to-purple-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-cyan-400/10 to-blue-400/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-      
-      <div className="relative mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              언급량 분석
-            </h2>
-            <p className="text-xs text-gray-500 mt-0.5">실시간 트렌드 모니터링</p>
-          </div>
-        </div>
+    <div className="w-full bg-white flex flex-col border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+      <div className="px-4 py-3 border-b border-gray-100 bg-white">
+        <h2 className="text-sm font-bold text-gray-800">언급량 분석</h2>
       </div>
+      <div className="p-4">
+        {/* 언급량 요약 카드 */}
+        {summaryStats && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            {statCards.map((card, index) => {
+              const colorMap = {
+                indigo: {
+                  bg: "from-indigo-50/50",
+                  border: "border-indigo-100",
+                  text: "text-indigo-500",
+                  badge: "bg-indigo-100/50",
+                  icon: "text-indigo-600",
+                },
+                blue: {
+                  bg: "from-blue-50/50",
+                  border: "border-blue-100",
+                  text: "text-blue-500",
+                  badge: "bg-blue-100/50",
+                  icon: "text-blue-600",
+                },
+                rose: {
+                  bg: "from-rose-50/50",
+                  border: "border-rose-100",
+                  text: "text-rose-500",
+                  badge: "bg-rose-100/50",
+                  icon: "text-rose-600",
+                },
+              };
+              const colors = colorMap[card.color] || colorMap.indigo;
+              const IconComponent = card.icon;
 
-      {/* 언급량 요약 카드 */}
-      {summaryStats && (
-        <div className="relative grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-          {statCards.map((card, index) => (
-            <div
-              key={index}
-              className="group relative overflow-hidden rounded-xl bg-white/80 backdrop-blur-sm border border-gray-100/50 p-6 hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 hover:-translate-y-1"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              {/* Gradient overlay on hover */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${card.bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-              
-              <div className="relative flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                    {card.label}
-                  </p>
-                  <p className={`text-3xl font-bold tabular-nums bg-gradient-to-r ${card.gradient} bg-clip-text text-transparent mb-1`}>
-                    {card.value}
-                  </p>
-                  {card.subtext && (
-                    <p className="text-xs text-gray-500 font-medium">{card.subtext}</p>
-                  )}
+              return (
+                <div
+                  key={index}
+                  className={`group bg-gradient-to-br ${colors.bg} to-white p-5 rounded-2xl border ${colors.border} hover:shadow-md transition-all relative overflow-hidden`}
+                >
+                  <div className="absolute right-[-10px] top-[-10px] scale-[3] opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
+                    <IconComponent />
+                  </div>
+                  <div className="relative z-10">
+                    <div className="flex justify-between items-center mb-4">
+                      <span
+                        className={`text-[10px] font-bold ${colors.text} ${colors.badge} px-2 py-0.5 rounded-full uppercase tracking-wider`}
+                      >
+                        {card.label}
+                      </span>
+                      <div className={colors.icon}>
+                        <IconComponent />
+                      </div>
+                    </div>
+                    {card.subtext && (
+                      <p className="text-[11px] text-gray-400 font-medium mb-1">
+                        {card.subtext}
+                      </p>
+                    )}
+                    <p className="text-[13px] text-gray-600 font-bold mb-1">
+                      {card.description}
+                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-2xl font-black text-gray-800">
+                        {card.value}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className={`w-14 h-14 rounded-xl ${card.iconBg} flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300`}>
-                  <span className={`text-xl font-bold ${card.iconColor}`}>{card.icon}</span>
-                </div>
-              </div>
-              
-              {/* Shine effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* 언급량 추이 차트 */}
-      <div className="relative">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-1">언급량 추이</h3>
-            <p className="text-xs text-gray-500">시간대별 언급량 변화</p>
-          </div>
-          <div className="px-3 py-1.5 rounded-full bg-blue-100/80 backdrop-blur-sm border border-blue-200/50">
-            <span className="text-xs font-semibold text-blue-700">
-              {selectedSources.length === 0
-                ? "전체 소스"
-                : selectedSources.length === 1
-                ? selectedSources[0]
-                : `${selectedSources.length}개 소스`}
-            </span>
-          </div>
-        </div>
-
-        {mentionChartData ? (
-          <div className="relative rounded-xl bg-white/60 backdrop-blur-sm border border-gray-200/50 p-6 shadow-inner">
-            <div className="h-96">
-              <Line data={mentionChartData} options={baseChartOptions} />
-            </div>
-          </div>
-        ) : (
-          <div className="rounded-xl bg-gray-50/50 border border-gray-200 p-12 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-              <span className="text-2xl">📊</span>
-            </div>
-            <p className="text-gray-500 font-medium">데이터가 없습니다.</p>
+              );
+            })}
           </div>
         )}
+
+        {/* 언급량 추이 차트 */}
+        <div className="w-full bg-white border border-gray-200 rounded-xl p-6 min-h-[300px]">
+          {mentionChartData ? (
+            <div className="h-[300px]">
+              <Line data={mentionChartData} options={baseChartOptions} />
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-[300px] text-gray-400 text-sm">
+              데이터가 없습니다.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

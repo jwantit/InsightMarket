@@ -1,6 +1,5 @@
-import React from "react";
-import { Doughnut } from "react-chartjs-2";
-import { TOKENS, doughnutCenterTextPlugin } from "./utils";
+import React, { useMemo } from "react";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 const SentimentRatioComponent = ({
   sentimentDoughnutData,
@@ -9,80 +8,146 @@ const SentimentRatioComponent = ({
   summaryStats,
   size = "large", // "large" | "small"
 }) => {
+  // Chart.js 형식을 recharts 형식으로 변환
+  const chartData = useMemo(() => {
+    if (!sentimentAverages) return [];
+
+    return [
+      { name: "긍정", value: Number(sentimentAverages.pos) || 0 },
+      { name: "중립", value: Number(sentimentAverages.neu) || 0 },
+      { name: "부정", value: Number(sentimentAverages.neg) || 0 },
+    ];
+  }, [sentimentAverages]);
+
+  // 대시보드와 동일한 색상
+  const COLORS = {
+    positive: "#3B82F6", // blue-500
+    neutral: "#FACC15", // yellow-400
+    negative: "#FF0055", // 부정 빨강
+  };
+
+  if (!chartData || chartData.length === 0 || !sentimentAverages) {
+    return (
+      <div className="w-full h-full flex flex-col">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-[14px] font-extrabold text-gray-800 tracking-tight">
+              긍부정 비율
+            </h3>
+            <p className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1 font-medium">
+              <span className="w-1 h-1 bg-blue-500 rounded-full animate-pulse" />
+              평균(%) 기준
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center justify-center h-full text-gray-400 text-sm">
+          데이터가 없습니다.
+        </div>
+      </div>
+    );
+  }
+
+  // size에 따른 높이 설정
   const chartHeight = size === "small" ? "h-48" : "h-96";
-  const legendItems = [
-    {
-      label: "긍정",
-      val: sentimentAverages.pos,
-      color: TOKENS.color.positive,
-      gradient: "from-green-500 to-emerald-500",
-      bg: "bg-green-50",
-      border: "border-green-200",
-    },
-    {
-      label: "부정",
-      val: sentimentAverages.neg,
-      color: TOKENS.color.negative,
-      gradient: "from-red-500 to-rose-500",
-      bg: "bg-red-50",
-      border: "border-red-200",
-    },
-    {
-      label: "중립",
-      val: sentimentAverages.neu,
-      color: TOKENS.color.neutral,
-      gradient: "from-yellow-500 to-amber-500",
-      bg: "bg-yellow-50",
-      border: "border-yellow-200",
-    },
-  ];
+  const centerTextSize = size === "small" ? "text-2xl" : "text-4xl";
+  const centerLabelSize = size === "small" ? "text-[8px]" : "text-[10px]";
 
   return (
-    <div className="lg:col-span-3">
-      <div className="flex items-center justify-between mb-6">
+    <div className="w-full flex flex-col">
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-lg font-bold text-gray-900 mb-1">긍부정 비율</h3>
-          <p className="text-xs text-gray-500">평균(%)</p>
+          <h3 className="text-[14px] font-extrabold text-gray-800 tracking-tight">
+            긍부정 비율
+          </h3>
+          <p className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1 font-medium">
+            <span className="w-1 h-1 bg-blue-500 rounded-full animate-pulse" />
+            평균(%) 기준
+          </p>
         </div>
       </div>
 
-      {sentimentDoughnutData ? (
-        <div className="relative rounded-xl bg-white/60 backdrop-blur-sm border border-gray-200/50 p-6 shadow-inner">
-          <div className={chartHeight}>
-            <Doughnut
-              data={sentimentDoughnutData}
-              options={doughnutOptions}
-              plugins={[doughnutCenterTextPlugin]}
-            />
-          </div>
-        </div>
-      ) : (
-        <div className="rounded-xl bg-gray-50/50 border border-gray-200 p-12 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-            <span className="text-2xl">📊</span>
-          </div>
-          <p className="text-gray-500 font-medium">데이터가 없습니다.</p>
-        </div>
-      )}
-
-      {/* Enhanced legend */}
-      <div className="mt-4 grid grid-cols-3 gap-2">
-        {legendItems.map((item) => (
-          <div
-            key={item.label}
-            className={`relative overflow-hidden rounded-xl ${item.bg} border-2 ${item.border} p-3 hover:shadow-md transition-all duration-200 hover:-translate-y-0.5`}
+      <div
+        className={`w-full relative ${chartHeight} flex items-center justify-center`}
+      >
+        {/* 중앙 텍스트 */}
+        <div className="absolute flex flex-col items-center justify-center pointer-events-none z-10">
+          <span
+            className={`${centerTextSize} font-black text-[#FF0055] leading-none`}
           >
-            <div className="flex items-center gap-2 mb-2">
-              <div
-                className={`w-3 h-3 rounded-full bg-gradient-to-br ${item.gradient} shadow-sm`}
-              />
-              <span className="text-xs font-bold text-gray-700">
-                {item.label}
-              </span>
-            </div>
-            <div className="text-lg font-bold tabular-nums bg-gradient-to-r from-gray-800 to-gray-900 bg-clip-text text-transparent">
+            {Number(sentimentAverages.neg).toFixed(1)}%
+          </span>
+          <span
+            className={`${centerLabelSize} font-black text-[#FF0055] mt-2 uppercase tracking-widest`}
+          >
+            부정 비율
+          </span>
+        </div>
+
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={chartData}
+              cx="50%"
+              cy="50%"
+              innerRadius="65%"
+              outerRadius="95%"
+              paddingAngle={0}
+              dataKey="value"
+              stroke="none"
+            >
+              {/* 대시보드와 동일한 색상 */}
+              <Cell fill={COLORS.positive} /> {/* 긍정: #3B82F6 */}
+              <Cell fill={COLORS.neutral} /> {/* 중립: #FACC15 */}
+              <Cell fill={COLORS.negative} /> {/* 부정: #FF0055 */}
+            </Pie>
+            <Tooltip
+              contentStyle={{
+                borderRadius: "15px",
+                border: "none",
+                boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
+                fontWeight: "900",
+                fontSize: "12px",
+                padding: "10px 14px",
+              }}
+              formatter={(value, name) => [`${value.toFixed(1)}%`, `${name}`]}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Legend - 대시보드와 동일한 스타일 */}
+      <div className="mt-4 flex gap-3">
+        {[
+          {
+            label: "긍정",
+            val: sentimentAverages.pos,
+            color: COLORS.positive,
+            text: "text-[#3B82F6]",
+          },
+          {
+            label: "중립",
+            val: sentimentAverages.neu,
+            color: COLORS.neutral,
+            text: "text-yellow-600",
+          },
+          {
+            label: "부정",
+            val: sentimentAverages.neg,
+            color: COLORS.negative,
+            text: "text-[#FF0055]",
+          },
+        ].map((item) => (
+          <div key={item.label} className="flex-1 flex flex-col items-center">
+            <span className="text-[9px] font-black text-gray-300 mb-1 uppercase">
+              {item.label}
+            </span>
+            <div
+              className="w-full h-1.5 rounded-full mb-1 shadow-sm"
+              style={{ backgroundColor: item.color }}
+            ></div>
+            <span className={`text-[11px] font-black ${item.text}`}>
               {Number(item.val).toFixed(1)}%
-            </div>
+            </span>
           </div>
         ))}
       </div>

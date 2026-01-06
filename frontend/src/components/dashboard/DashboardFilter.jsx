@@ -1,6 +1,6 @@
 import React from 'react';
 
-const DashboardFilter = ({ tempChannels, handleToggle, handleApply }) => {
+const DashboardFilter = ({ appliedChannels, handleToggle }) => {
   return (
     // top-8로 기존보다 조금 더 아래로 배치
     <div className="sticky top-8 z-50 w-full flex justify-center pointer-events-none transition-all duration-500">
@@ -22,12 +22,12 @@ const DashboardFilter = ({ tempChannels, handleToggle, handleApply }) => {
             <button
               onClick={() => handleToggle('NAVER')}
               className={`relative inline-flex h-4 w-8 items-center rounded-full transition-all ${
-                tempChannels.includes('NAVER') ? 'bg-green-500/60 group-hover:bg-green-500' : 'bg-gray-200/40 group-hover:bg-gray-200'
+                appliedChannels.includes('NAVER') ? 'bg-green-500/60 group-hover:bg-green-500' : 'bg-gray-200/40 group-hover:bg-gray-200'
               }`}
             >
               <span
                 className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-sm transition-transform ${
-                  tempChannels.includes('NAVER') ? 'translate-x-4.5' : 'translate-x-0.5'
+                  appliedChannels.includes('NAVER') ? 'translate-x-4.5' : 'translate-x-0.5'
                 }`}
               />
             </button>
@@ -39,25 +39,17 @@ const DashboardFilter = ({ tempChannels, handleToggle, handleApply }) => {
             <button
               onClick={() => handleToggle('YOUTUBE')}
               className={`relative inline-flex h-4 w-8 items-center rounded-full transition-all ${
-                tempChannels.includes('YOUTUBE') ? 'bg-red-500/60 group-hover:bg-red-500' : 'bg-gray-200/40 group-hover:bg-gray-200'
+                appliedChannels.includes('YOUTUBE') ? 'bg-red-500/60 group-hover:bg-red-500' : 'bg-gray-200/40 group-hover:bg-gray-200'
               }`}
             >
               <span
                 className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-sm transition-transform ${
-                  tempChannels.includes('YOUTUBE') ? 'translate-x-4.5' : 'translate-x-0.5'
+                  appliedChannels.includes('YOUTUBE') ? 'translate-x-4.5' : 'translate-x-0.5'
                 }`}
               />
             </button>
           </div>
         </div>
-
-        {/* 적용 버튼: 평소엔 투명했다가 호버 시 선명 */}
-        <button
-          onClick={handleApply}
-          className="bg-blue-600/40 group-hover:bg-blue-600 text-white px-5 py-1.5 rounded-full text-[10px] font-black hover:scale-105 transition-all active:scale-95 shadow-md shadow-blue-500/10 group-hover:shadow-blue-500/30 uppercase tracking-tight"
-        >
-          Apply Changes
-        </button>
       </div>
     </div>
   );

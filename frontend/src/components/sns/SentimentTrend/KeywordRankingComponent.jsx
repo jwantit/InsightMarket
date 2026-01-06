@@ -16,26 +16,33 @@ const KeywordRankingComponent = ({ wordCloudData }) => {
   };
 
   return (
-    <div className="relative h-full">
-      <div className="mb-4">
-        <h3 className="text-lg font-bold text-gray-900 mb-1">키워드 순위</h3>
-        <p className="text-xs text-gray-500">인기 키워드 TOP {wordCloudData.length}</p>
+    <div className="w-full h-full flex flex-col">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="text-[14px] font-extrabold text-gray-800 tracking-tight">
+            키워드 순위
+          </h3>
+          <p className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1 font-medium">
+            <span className="w-1 h-1 bg-blue-500 rounded-full animate-pulse" />
+            인기 키워드 TOP {wordCloudData.length}
+          </p>
+        </div>
       </div>
       {wordCloudData.length > 0 ? (
-        <div className="h-[360px] overflow-y-auto rounded-xl border border-gray-200/50 bg-white/60 backdrop-blur-sm shadow-inner">
-          <table className="w-full text-sm">
-            <thead className="bg-gradient-to-r from-gray-50 to-gray-100/50 sticky top-0 z-10 backdrop-blur-sm">
+        <div className="h-[360px] overflow-y-auto border border-gray-200 rounded-lg bg-white">
+          <table className="w-full text-xs">
+            <thead className="bg-gray-50 sticky top-0 z-10">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                   순위
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                   단어
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                   감성
                 </th>
-                <th className="px-4 py-3 text-right text-xs font-bold text-gray-600 uppercase tracking-wider">
+                <th className="px-3 py-2 text-right text-[10px] font-bold text-gray-600 uppercase">
                   건수
                 </th>
               </tr>
@@ -44,9 +51,24 @@ const KeywordRankingComponent = ({ wordCloudData }) => {
               {wordCloudData.map((word, index) => {
                 const rank = index + 1;
                 const sentimentColorMap = {
-                  POS: { text: "긍정", color: "text-purple-600", bg: "bg-purple-100", border: "border-purple-200" },
-                  NEG: { text: "부정", color: "text-red-600", bg: "bg-red-100", border: "border-red-200" },
-                  NEU: { text: "중립", color: "text-yellow-600", bg: "bg-yellow-100", border: "border-yellow-200" },
+                  POS: {
+                    text: "긍정",
+                    color: "text-blue-600",
+                    bg: "bg-blue-50",
+                    border: "border-blue-200",
+                  },
+                  NEG: {
+                    text: "부정",
+                    color: "text-red-600",
+                    bg: "bg-red-50",
+                    border: "border-red-200",
+                  },
+                  NEU: {
+                    text: "중립",
+                    color: "text-gray-600",
+                    bg: "bg-gray-50",
+                    border: "border-gray-200",
+                  },
                 };
                 const sentiment = sentimentColorMap[word.sentiment] || {
                   text: "알 수 없음",
@@ -58,24 +80,28 @@ const KeywordRankingComponent = ({ wordCloudData }) => {
                 return (
                   <tr
                     key={index}
-                    className="group hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all duration-200"
+                    className="group hover:bg-gray-50 transition-colors"
                   >
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className={`inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br ${getRankColor(rank)} text-white font-bold text-xs shadow-sm`}>
+                    <td className="px-3 py-2 whitespace-nowrap">
+                      <div
+                        className={`inline-flex items-center justify-center w-6 h-6 rounded bg-gray-200 text-gray-700 font-bold text-[10px]`}
+                      >
                         {getRankBadge(rank)}
                       </div>
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                    <td className="px-3 py-2 whitespace-nowrap">
+                      <span className="font-semibold text-gray-900">
                         {word.text}
                       </span>
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${sentiment.bg} ${sentiment.color} border ${sentiment.border}`}>
+                    <td className="px-3 py-2 whitespace-nowrap">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold ${sentiment.bg} ${sentiment.color} border ${sentiment.border}`}
+                      >
                         {sentiment.text}
                       </span>
                     </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-right">
+                    <td className="px-3 py-2 whitespace-nowrap text-right">
                       <span className="font-bold text-gray-900 tabular-nums">
                         {word.value.toLocaleString()}
                       </span>
@@ -87,11 +113,8 @@ const KeywordRankingComponent = ({ wordCloudData }) => {
           </table>
         </div>
       ) : (
-        <div className="rounded-xl bg-gray-50/50 border border-gray-200 p-12 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-            <span className="text-2xl">📊</span>
-          </div>
-          <p className="text-gray-500 font-medium">순위표 데이터가 없습니다.</p>
+        <div className="flex items-center justify-center h-[200px] text-gray-400 text-sm border border-gray-200 rounded-lg">
+          순위표 데이터가 없습니다.
         </div>
       )}
     </div>
@@ -99,4 +122,3 @@ const KeywordRankingComponent = ({ wordCloudData }) => {
 };
 
 export default KeywordRankingComponent;
-
