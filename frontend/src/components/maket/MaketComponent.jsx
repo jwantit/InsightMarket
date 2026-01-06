@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getLatestStrategyByProject, getAllSolutionByProject, removeSolution } from "../../api/solutionApi";
+import {
+  getLatestStrategyByProject,
+  getAllSolutionByProject,
+  removeSolution,
+} from "../../api/solutionApi";
 import PageComponentA from "./PageComponentA";
 import useCustomMove from "../../hooks/useCustomMove";
 import FetchingModal from "../common/FetchingModal";
 import useCustomCart from "../../hooks/useCustomCart"; // useCustomCart 임포트
 import usePayment from "../../hooks/common/payment/useCustomPayment";
+import { useBrand } from "../../hooks/useBrand";
 
 const initState = {
   dtoList: [],
@@ -19,19 +24,19 @@ const initState = {
   totalPage: 0,
   current: 0,
 };
-                     //MaketLsit에서 전달받은 projectid = n , filter = ALL 또는 RECENT 
+//MaketLsit에서 전달받은 projectid = n , filter = ALL 또는 RECENT
 const MaketComponent = ({ projectId, filter }) => {
   const { page, size, refresh, moveToList } = useCustomMove(projectId, filter);
   const [serverData, setServerData] = useState(initState);
   const [loading, setLoading] = useState(false);
   const [selectedSolution, setSelectedSolution] = useState(null);
-  const { addCartItem, cartState , refreshCart} = useCustomCart(projectId); // useCustomCart 훅 사용
+  const { addCartItem, cartState, refreshCart } = useCustomCart(projectId); // useCustomCart 훅 사용
 
   const { handlePayment } = usePayment();
   const navigate = useNavigate();
+  const { brandId } = useBrand();
 
-
-  const {items} = cartState;
+  const { items } = cartState;
 
   useEffect(() => {
     if (projectId) {
@@ -44,7 +49,8 @@ const MaketComponent = ({ projectId, filter }) => {
 
     setLoading(true);
 
-    if (filter === "ALL") { //filter가 ALL이면 
+    if (filter === "ALL") {
+      //filter가 ALL이면
       // NEW전략: getLatestStrategyByProject 사용 (배열 데이터) -> 백엔드
       getLatestStrategyByProject(projectId)
         .then((data) => {
@@ -53,10 +59,11 @@ const MaketComponent = ({ projectId, filter }) => {
           console.log("NEW전략 목록:", data);
 
           const solutionList = Array.isArray(data) ? data : [];
-          setServerData({ //state 반영
+          setServerData({
+            //state 반영
             ...initState,
             dtoList: solutionList,
-            strategyName: solutionList[0]?.strategytitle || ""
+            strategyName: solutionList[0]?.strategytitle || "",
           });
           setLoading(false);
         })
@@ -69,7 +76,6 @@ const MaketComponent = ({ projectId, filter }) => {
       // 전체보기: getAllSolutionByProject 사용 (페이지네이션)
       getAllSolutionByProject(page, size, projectId)
         .then((data) => {
-
           console.log("전체보기:", data);
 
           setServerData(data);
@@ -120,7 +126,9 @@ const MaketComponent = ({ projectId, filter }) => {
             className="flex items-center gap-4 px-4 py-3 border-t text-sm hover:bg-gray-50"
           >
             {/* No */}
-            <span className="text-gray-500 w-16 flex-shrink-0">{solution.solutionid}</span>
+            <span className="text-gray-500 w-16 flex-shrink-0">
+              {solution.solutionid}
+            </span>
 
             {/* 상품명 - flex-1로 남은 공간 차지 */}
             <span className="font-bold text-gray-800 flex-1 min-w-0 truncate">
@@ -128,7 +136,7 @@ const MaketComponent = ({ projectId, filter }) => {
             </span>
 
             <span className="font-bold text-gray-800 flex-1 min-w-0 truncate">
-            {solution.price?.toLocaleString()}원
+              {solution.price?.toLocaleString()}원
             </span>
 
             {/* 버튼 영역 - 오른쪽 정렬, 고정 너비 */}
@@ -161,17 +169,19 @@ const MaketComponent = ({ projectId, filter }) => {
               </button>
               <button
                 onClick={async () => {
-
                   const isExist = items.some(
-                          (item) => item.solutionid === solution.solutionid
-                         );
+                    (item) => item.solutionid === solution.solutionid
+                  );
                   if (isExist) {
                     alert("이미 장바구니에 담긴 상품입니다.");
                     return;
                   }
 
                   try {
-                    await addCartItem({ projectid: projectId, solutionid: solution.solutionid}); // addCartItem 사용
+                    await addCartItem({
+                      projectid: projectId,
+                      solutionid: solution.solutionid,
+                    }); // addCartItem 사용
                     alert("장바구니에 추가되었습니다.");
                   } catch (error) {
                     console.error("장바구니 추가 실패", error);
@@ -210,26 +220,29 @@ const MaketComponent = ({ projectId, filter }) => {
         <FetchingModal
           solution={selectedSolution}
           onClose={() => setSelectedSolution(null)}
-          onPurchase={async() => {
-
+          onPurchase={async () => {
             if (!selectedSolution) return;
             console.log("구매하기:", selectedSolution);
 
-            try{
-              const isSuccess = await handlePayment(projectId, [selectedSolution]);
+            try {
+              const isSuccess = await handlePayment(projectId, [
+                selectedSolution,
+              ]);
               if (isSuccess) {
                 setSelectedSolution(null);
-                navigate(0);   
+                navigate(0);
+              }
+            } catch (error) {
+              console.error("단일 구매 중 에러:", error);
             }
-          }catch (error) {
-            console.error("단일 구매 중 에러:", error);
-          }
-        }}
+          }}
           onDelete={async () => {
             if (window.confirm("솔루션을 정말 삭제하시겠습니까?")) {
               try {
                 await removeSolution(selectedSolution.solutionid);
-                alert("삭제되었습니다. 전략추천에서 다시 생성하실 수 있습니다.");
+                alert(
+                  "삭제되었습니다. 전략추천에서 다시 생성하실 수 있습니다."
+                );
                 setSelectedSolution(null);
                 // 목록 새로고침을 위해 refresh 트리거
                 window.location.reload();

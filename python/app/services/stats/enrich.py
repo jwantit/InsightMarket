@@ -32,8 +32,9 @@ def enrich_spike_infos(spike_infos: List[Dict]) -> List[Dict]:
         return spike_infos
 
     brand_ids = sorted({int(x["brand_id"]) for x in spike_infos})
-    project_ids = sorted({int(x["project_id"]) for x in spike_infos})
-    keyword_ids = sorted({int(x["keyword_id"]) for x in spike_infos})
+    # project_id와 keyword_id는 None일 수 있으므로 필터링
+    project_ids = sorted({int(x["project_id"]) for x in spike_infos if x.get("project_id") is not None})
+    keyword_ids = sorted({int(x["keyword_id"]) for x in spike_infos if x.get("keyword_id") is not None})
 
     brand_map = _fetch_map(
         "SELECT brand_id, name FROM brand WHERE brand_id IN ({placeholders})",
@@ -58,8 +59,19 @@ def enrich_spike_infos(spike_infos: List[Dict]) -> List[Dict]:
     for info in spike_infos:
         i = dict(info)
         i["brand_name"] = brand_map.get(int(i["brand_id"]), f"brand({i['brand_id']})")
-        i["project_name"] = project_map.get(int(i["project_id"]), f"project({i['project_id']})")
-        i["keyword_text"] = keyword_map.get(int(i["keyword_id"]), f"keyword({i['keyword_id']})")
+        
+        # project_id가 None인 경우 처리
+        if i.get("project_id") is not None:
+            i["project_name"] = project_map.get(int(i["project_id"]), f"project({i['project_id']})")
+        else:
+            i["project_name"] = None
+        
+        # keyword_id가 None인 경우 처리
+        if i.get("keyword_id") is not None:
+            i["keyword_text"] = keyword_map.get(int(i["keyword_id"]), f"keyword({i['keyword_id']})")
+        else:
+            i["keyword_text"] = None
+        
         enriched.append(i)
 
     return enriched

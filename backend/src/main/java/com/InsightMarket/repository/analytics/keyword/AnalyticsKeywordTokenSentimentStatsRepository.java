@@ -27,7 +27,24 @@ public interface AnalyticsKeywordTokenSentimentStatsRepository extends JpaReposi
             @Param("brandId") Long brandId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate,
-            @Param("sources") List<String> sources
-    );
+            @Param("sources") List<String> sources);
+    
+    @Query("SELECT t FROM AnalyticsKeywordTokenSentimentStats t " +
+           "WHERE t.brandId = :brandId " +
+           "AND (:projectId IS NULL OR t.projectId = :projectId) " +
+           "AND (:keywordId IS NULL OR t.keywordId = :keywordId) " +
+           "AND (:competitorId IS NULL OR t.competitorId = :competitorId) " +
+           "AND (:source IS NULL OR t.source = :source) " +
+           "AND (:startDate IS NULL OR t.statDate >= :startDate) " +
+           "AND (:endDate IS NULL OR t.statDate <= :endDate) " +
+           "ORDER BY t.tokenCount DESC")
+    List<AnalyticsKeywordTokenSentimentStats> findByFilters(
+            @Param("brandId") Long brandId,
+            @Param("projectId") Long projectId,
+            @Param("keywordId") Long keywordId,
+            @Param("competitorId") Long competitorId,
+            @Param("source") String source,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
 }
 

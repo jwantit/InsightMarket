@@ -29,6 +29,9 @@ public class OrderItem extends BaseEntity {
     private String solutionName; // 결제 시점의 상품명
 
     private int orderPrice;    // 결제 시점의 개별 가격
+    
+    @Builder.Default
+    private int quantity = 1;   // 주문 수량 (기본값: 1)
 
     // Orders의 addOrderItem에서 호출하여 양방향을 연결해줍니다.
     public void setOrder(Orders order) {

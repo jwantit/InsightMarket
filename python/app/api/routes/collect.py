@@ -1,3 +1,11 @@
+# app/api/routes/collect.py
+# ============================================================
+# [기능] 데이터 수집 및 배치 관리 엔드포인트
+# - Spring -> Python 데이터 수집 요청 처리
+# - 배치 수집 관리 (batch-start, batch-complete)
+# - raw_data 파일 관리 (로드, 저장)
+# ============================================================
+
 import logging
 import json
 from datetime import datetime
@@ -7,7 +15,7 @@ from fastapi import APIRouter, Request
 
 from app.services.collector.collector import collect_data
 
-api_router = APIRouter(prefix="/api", tags=["api"])
+api_router = APIRouter(prefix="/api", tags=["collect"])
 log = logging.getLogger(__name__)
 # .env 파일 로드
 # YOUTUBE_API_KEY = "AIzaSyDvYCedIYjRykuXICeO3BV0FISiWPOEUP0"
@@ -296,6 +304,46 @@ async def collect(request: Request):
         print(traceback.format_exc())
         return {"status": "error", "message": str(e)}
 
+@api_router.post("/process")
+async def process_raw_data(request: Request):
+    """
+    Postman으로 raw_data JSON을 직접 업로드하여 당일 파일로 저장
+    - 테스트용 엔드포인트
+    """
+    try:
+        # 요청 Body에서 raw_data JSON 읽기
+        raw_data = await request.json()
+        
+        # raw_data 구조 검증
+        if not isinstance(raw_data, dict) or "brands" not in raw_data:
+            return {
+                "status": "error",
+                "message": "잘못된 raw_data 형식입니다. 'brands' 필드가 필요합니다."
+            }
+        
+        # 당일 파일로 저장
+        file_path = save_collected_data(raw_data)
+        
+        print(f"[process] raw_data 업로드 완료: {file_path}")
+        
+        return {
+            "status": "success",
+            "message": "raw_data 업로드 및 저장 완료",
+            "file": str(file_path),
+            "brands_count": len(raw_data.get("brands", []))
+        }
+        
+    except Exception as e:
+        error_msg = str(e)
+        print(f"[process] 오류: {error_msg}")
+        import traceback
+        print(traceback.format_exc())
+        return {
+            "status": "error",
+            "message": f"업로드 실패: {error_msg}"
+        }
+
+
 @api_router.post("/collect/recollect")
 async def recollect(request: Request):
     """브랜드/경쟁사/프로젝트 키워드 생성/수정 시 재수집"""
@@ -405,3 +453,4 @@ async def recollect(request: Request):
         import traceback
         print(traceback.format_exc())
         return {"status": "error", "message": str(e)}
+

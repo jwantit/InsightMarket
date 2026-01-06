@@ -1,204 +1,134 @@
 # app/services/strategy/template_matcher.py
 # ============================================================
-# [기능] 템플릿 유사도 매칭
-# - 질문과 템플릿 간 임베딩 유사도 계산
-# - 상위 N개 템플릿 선택
+# [기능] 템플릿 유사도 매칭 (Qdrant 기반)
+# - Query Engineering 쿼리를 벡터로 변환
+# - Qdrant에서 유사한 템플릿 검색
 # - 템플릿별 유사도 점수 반환
 # ============================================================
 
-import json
-from pathlib import Path
-from typing import Dict, List, Any, Tuple
-import numpy as np
+import requests
+from typing import Dict, List, Any, Optional
 from sentence_transformers import SentenceTransformer
+from qdrant_client import QdrantClient
+from app.config.settings import settings
 
 # 상수 정의
 TEMPLATE_CATEGORIES = ["solutions", "causes", "insights"]  # 템플릿 카테고리
-QUESTION_WEIGHT = 0.6  # 질문 유사도 가중치
-RAW_DATA_WEIGHT = 0.4  # raw_data 유사도 가중치
-RAW_DATA_TEXT_MAX_LENGTH = 5000  # raw_data 텍스트 최대 길이
 
 
-def load_templates(template_path: Path = None) -> Dict[str, Any]:
-    """
-    템플릿 파일 로드
-    
-    [입력]
-    - template_path: 템플릿 파일 경로 (None이면 기본 경로 사용)
-    
-    [출력]
-    - 템플릿 딕셔너리
-    """
-    if template_path is None:
-        template_path = Path("templates/strategy_templates.json")
-    
-    if not template_path.exists():
-        raise FileNotFoundError(f"템플릿 파일을 찾을 수 없습니다: {template_path}")
-    
-    with open(template_path, 'r', encoding='utf-8') as f:
-        return json.load(f)
-
-
-def _create_template_text(template: Dict[str, Any]) -> str:
-    """
-    템플릿에서 유사도 계산용 텍스트 생성
-    
-    [입력]
-    - template: 템플릿 딕셔너리
-    
-    [출력]
-    - 유사도 계산용 텍스트 문자열
-    """
-    parts = []
-    
-    # 제목
-    if template.get("title"):
-        parts.append(template["title"])
-    
-    # 설명
-    if template.get("description"):
-        parts.append(template["description"])
-    
-    # 키워드
-    if template.get("keywords"):
-        parts.extend(template["keywords"])
-    
-    # 예시
-    if template.get("examples"):
-        parts.extend(template["examples"])
-    
-    return " ".join(parts)
-
-
-def match_templates_by_similarity(
-    question: str,
-    templates: Dict[str, Any],
+def match_strategy_templates(
+    query_text: str,
+    template_type: str,  # "cause", "solution", "insight"
+    qdrant_client: QdrantClient,
     embed_model: SentenceTransformer,
-    top_k: int = 5,
-    raw_data_text: str = None
+    collection_name: str = "strategy_templates",
+    top_k: int = 3,
+    category: Optional[str] = None
 ) -> List[Dict[str, Any]]:
     """
-    질문과 템플릿 간 유사도 계산 후 상위 N개 선택
-    raw_data가 제공되면 질문 유사도와 raw_data 유사도를 결합
+    Query Engineering 방식으로 템플릿 매칭 (Qdrant REST API 사용)
     
     [입력]
-    - question: 사용자 질문
-    - templates: 템플릿 딕셔너리 (solutions, causes, insights 포함)
-    - embed_model: SentenceTransformer 모델
-    - top_k: 선택할 템플릿 개수
-    - raw_data_text: raw_data의 텍스트 내용 (선택적)
+    - query_text: 생성된 자연어 쿼리 (부정 키워드 + 카테고리 + 질문)
+    - template_type: 템플릿 타입 ("cause", "solution", "insight")
+    - qdrant_client: Qdrant 클라이언트 (URL 추출용)
+    - embed_model: 임베딩 모델
+    - collection_name: Qdrant 컬렉션 이름
+    - top_k: 반환할 개수
+    - category: 카테고리 필터 (선택적)
     
     [출력]
-    - 매칭된 템플릿 리스트 (유사도 점수 포함):
+    - 매칭된 템플릿 리스트:
       [
         {
-          "template": {...},  # 원본 템플릿
-          "category": "solutions",  # 카테고리
-          "similarity": 0.85  # 유사도 점수
+          "id": "...",
+          "score": 0.89,
+          "payload": {...}
         },
         ...
       ]
     """
-    # 질문 임베딩 생성
-    question_embedding = embed_model.encode(
-        [f"query: {question}"],
-        normalize_embeddings=True
-    )[0]
+    # QdrantClient에서 URL 추출
+    # QdrantClient는 _client.http_client.base_url 또는 url 속성을 가질 수 있음
+    try:
+        if hasattr(qdrant_client, '_client') and hasattr(qdrant_client._client, 'http_client'):
+            qdrant_url = str(qdrant_client._client.http_client.base_url).rstrip('/')
+        elif hasattr(qdrant_client, 'url'):
+            qdrant_url = qdrant_client.url
+        else:
+            qdrant_url = settings.qdrant_url
+    except:
+        qdrant_url = settings.qdrant_url
     
-    # raw_data 임베딩 생성 (제공된 경우)
-    raw_data_embedding = None
-    if raw_data_text and raw_data_text.strip():
-        raw_data_embedding = embed_model.encode(
-            [raw_data_text[:RAW_DATA_TEXT_MAX_LENGTH]],  # 너무 길면 잘라냄
-            normalize_embeddings=True
-        )[0]
-    
-    # 모든 템플릿 수집 및 임베딩 생성
-    all_templates = []
-    template_texts = []
-    
-    for category in TEMPLATE_CATEGORIES:
-        category_templates = templates.get(category, [])
-        for template in category_templates:
-            template_text = _create_template_text(template)
-            all_templates.append({
-                "template": template,
-                "category": category
-            })
-            template_texts.append(template_text)
-    
-    if not template_texts:
-        return []
-    
-    # 템플릿 임베딩 생성
-    template_embeddings = embed_model.encode(
-        template_texts,
-        normalize_embeddings=True
+    # REST API를 통한 검색
+    return match_templates_via_qdrant_rest(
+        query_text=query_text,
+        template_type=template_type,
+        qdrant_url=qdrant_url,
+        embed_model=embed_model,
+        collection_name=collection_name,
+        top_k=top_k,
+        category=category
     )
-    
-    # 질문-템플릿 유사도 계산 (코사인 유사도)
-    question_similarities = np.dot(template_embeddings, question_embedding)
-    
-    # raw_data-템플릿 유사도 계산 (raw_data가 제공된 경우)
-    if raw_data_embedding is not None:
-        raw_data_similarities = np.dot(template_embeddings, raw_data_embedding)
-        # 질문 유사도와 raw_data 유사도 가중 평균
-        combined_similarities = (
-            QUESTION_WEIGHT * question_similarities + 
-            RAW_DATA_WEIGHT * raw_data_similarities
-        )
-    else:
-        # raw_data가 없으면 질문 유사도만 사용
-        combined_similarities = question_similarities
-    
-    # 유사도 점수와 함께 결과 생성
-    results = []
-    for i, (template_info, similarity) in enumerate(zip(all_templates, combined_similarities)):
-        results.append({
-            "template": template_info["template"],
-            "category": template_info["category"],
-            "similarity": float(similarity)
-        })
-    
-    # 유사도 내림차순 정렬
-    results.sort(key=lambda x: x["similarity"], reverse=True)
-    
-    # 상위 N개 반환
-    return results[:top_k]
 
 
-def match_templates(
-    question: str,
-    template_path: Path = None,
-    embed_model: SentenceTransformer = None,
-    top_k: int = 5,
-    raw_data_text: str = None
-) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
+def match_templates_via_qdrant_rest(
+    query_text: str,
+    template_type: str,
+    qdrant_url: str,
+    embed_model: SentenceTransformer,
+    collection_name: str = "strategy_templates",
+    top_k: int = 3,
+    category: Optional[str] = None
+) -> List[Dict[str, Any]]:
     """
-    템플릿 파일 로드 및 유사도 매칭 (편의 함수)
+    Qdrant REST API를 통한 템플릿 매칭 (QdrantClient가 없을 때 사용)
     
     [입력]
-    - question: 사용자 질문
-    - template_path: 템플릿 파일 경로
-    - embed_model: SentenceTransformer 모델 (None이면 에러)
-    - top_k: 선택할 템플릿 개수
+    - query_text: 생성된 자연어 쿼리
+    - template_type: 템플릿 타입
+    - qdrant_url: Qdrant 서버 URL
+    - embed_model: 임베딩 모델
+    - collection_name: 컬렉션 이름
+    - top_k: 반환할 개수
+    - category: 카테고리 필터
     
     [출력]
-    - (templates, matched_templates) 튜플
-      - templates: 전체 템플릿 딕셔너리
-      - matched_templates: 매칭된 템플릿 리스트
+    - 매칭된 템플릿 리스트
     """
-    if embed_model is None:
-        raise ValueError("embed_model은 필수입니다.")
+    # 1. 쿼리 문장을 벡터로 변환
+    query_vector = embed_model.encode(
+        [query_text],
+        normalize_embeddings=True
+    )[0].tolist()
     
-    templates = load_templates(template_path)
-    matched = match_templates_by_similarity(
-        question=question,
-        templates=templates,
-        embed_model=embed_model,
-        top_k=top_k,
-        raw_data_text=raw_data_text
-    )
+    # 2. 필터 조건 구성
+    filter_conditions = [{"key": "type", "match": {"value": template_type}}]
     
-    return templates, matched
+    if category:
+        filter_conditions.append({"key": "category", "match": {"value": category}})
+    
+    # 3. Qdrant REST API 호출
+    body = {
+        "vector": query_vector,
+        "limit": top_k,
+        "filter": {"must": filter_conditions} if filter_conditions else None,
+        "with_payload": True,
+    }
+    
+    url = f"{qdrant_url}/collections/{collection_name}/points/search"
+    
+    r = requests.post(url, json=body, timeout=60)
+    r.raise_for_status()
+    
+    results = r.json().get("result", [])
+    
+    return [
+        {
+            "id": r.get("id"),
+            "score": r.get("score", 0),
+            "payload": r.get("payload", {})
+        }
+        for r in results
+    ]
 

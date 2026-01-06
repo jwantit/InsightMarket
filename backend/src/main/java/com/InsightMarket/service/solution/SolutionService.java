@@ -17,4 +17,7 @@ public interface SolutionService {
 
     void deleteSolutionProduct(Long solutionid);
 
+    // 구매한 솔루션 상세 조회 (구매 여부 확인)
+    SolutionDTO getPurchasedSolutionDetail(Long solutionId, Long memberId);
+
 }

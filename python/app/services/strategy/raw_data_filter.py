@@ -8,8 +8,8 @@
 
 from typing import Dict, List, Any, Optional
 
-# scheduler 모듈의 함수 재사용
-from app.api.routes.collectBatchScheduler.scheduler.scheduler import (
+# collect 모듈의 함수 재사용
+from app.api.routes.collect import (
     load_collected_data
 )
 

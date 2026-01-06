@@ -1,11 +1,14 @@
 package com.InsightMarket.ai;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.InsightMarket.security.util.MemberUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.InsightMarket.dto.member.MemberDTO;
 
 @Slf4j
 @RestController
@@ -14,11 +17,13 @@ import org.springframework.web.bind.annotation.*;
 public class AiInsightController {
 
     private final AiInsightService aiInsightService;
+    private final MemberUtil memberUtil;
 
-    @PostMapping("/ask")
-    public ResponseEntity<JsonNode> ask(
+    
+    @PostMapping("/generate-solution-report")
+    public ResponseEntity<JsonNode> generateSolutionReport(
             @PathVariable Long brandId,
-            @RequestBody AiAskRequestDTO req,
+            @RequestBody SolutionReportRequestDTO req,
             HttpServletRequest httpRequest
     ) {
         // TraceIdFilter에서 설정한 attribute에서 traceId 읽기
@@ -30,13 +35,42 @@ public class AiInsightController {
         // ✅ 1) URL brandId를 DTO에 주입
         req.setBrandId(brandId);
 
-        // ✅ 2) traceId는 Filter가 보장하므로 여기서 생성하지 않음
-        log.info("[AiInsightController] POST /api/{}/ai/ask traceId={} brandId={}",
-                brandId, traceId, brandId);
+        log.info("[AiInsightController] POST /api/{}/ai/generate-solution-report traceId={} brandId={} solutionTitle={}",
+                brandId, traceId, brandId, req.getSolutionTitle());
 
-        JsonNode res = aiInsightService.ask(req, traceId);
+        JsonNode res = aiInsightService.generateSolutionReport(req, traceId);
 
-        // ✅ 3) 응답 헤더 X-Trace-Id도 Filter가 이미 세팅함
         return ResponseEntity.ok(res);
+    }
+    
+    @PostMapping("/save-report")
+    public ResponseEntity<JsonNode> saveReport(
+            @PathVariable Long brandId,
+            @RequestBody com.InsightMarket.dto.ai.SaveReportRequestDTO req,
+            HttpServletRequest httpRequest
+    ) {
+        String traceId = (String) httpRequest.getAttribute("X-Trace-Id");
+        if (traceId == null || traceId.isBlank()) {
+            traceId = "unknown";
+        }
+
+        log.info("[AiInsightController] POST /api/{}/ai/save-report traceId={} projectId={} solutionTitle={}",
+                brandId, traceId, req.getProjectId(), req.getSolutionTitle());
+
+        JsonNode res = aiInsightService.saveReportAsSolution(req, traceId);
+
+        return ResponseEntity.ok(res);
+    }
+
+    @GetMapping("/free-report-count")
+    public ResponseEntity<Long> getFreeReportCount(
+            @PathVariable Long brandId,
+            @AuthenticationPrincipal MemberDTO memberDTO
+    ) {
+        Long memberId = memberUtil.getCurrentMember().getId();
+        long count = aiInsightService.getFreeReportCount(memberId);
+        log.info("[AiInsightController] GET /api/{}/ai/free-report-count memberId={} count={}", 
+                brandId, memberId, count);
+        return ResponseEntity.ok(count);
     }
 }

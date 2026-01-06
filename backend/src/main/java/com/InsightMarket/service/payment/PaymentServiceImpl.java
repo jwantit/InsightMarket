@@ -288,7 +288,7 @@ public class PaymentServiceImpl implements PaymentService {
                             .map(item -> {
                                 Solution sol = item.getSolution();
                                 return SolutionDTO.builder()
-                                        .solutionid(item.getId())
+                                        .solutionid(sol.getId()) // Solution의 ID 사용
                                         .title(item.getSolutionName())
                                         .price(item.getOrderPrice())
                                         .projectname(sol.getProject().getName())
