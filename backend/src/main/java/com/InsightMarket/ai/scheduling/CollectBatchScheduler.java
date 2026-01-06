@@ -25,8 +25,7 @@ public class CollectBatchScheduler {
     // Cron 표현식 설명
     // 0 0 0 * * ? = 초(0) 분(0) 시(0) 일() 월() 요일(?)
     // 매일 낮 12시에 실행
-//    @Scheduled(cron = "0 30 14 * * ?")
-//    @Scheduled(fixedRate = 20_000)
+    @Scheduled(cron = "0 30 14 * * ?")
     public void runDailyCollectionBatch() {
         try {
             log.info("=== 배치 수집 스케줄러 시작 ===");
