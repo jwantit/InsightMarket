@@ -1,62 +1,49 @@
+import { Plus, Calendar, Edit2, Trash2 } from "lucide-react";
 import ProjectRowComponent from "./ProjectRowComponent";
 
 const ProjectListComponent = ({ projects, onCreate, onEdit, onDelete }) => {
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-lg font-extrabold tracking-tight text-gray-900">
-            프로젝트 / 캠페인
-          </h1>
-          <p className="text-sm text-gray-500">
-            브랜드별 마케팅 프로젝트를 생성하고 기간/키워드를 관리합니다.
-          </p>
-        </div>
-
+    <div className="space-y-6">
+      {/* 프로젝트 생성 버튼 */}
+      <div className="flex justify-end">
         <button
           onClick={onCreate}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 active:bg-blue-800"
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-semibold transition-all shadow-md active:scale-95"
         >
-          <span className="text-base">＋</span>
+          <Plus size={18} />
           프로젝트 생성
         </button>
       </div>
 
-      {/* Table */}
-      <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="bg-gray-50 text-gray-600">
-              <tr>
-                <th className="px-4 py-3 text-left font-bold">프로젝트명</th>
-                <th className="px-4 py-3 text-left font-bold">기간</th>
-                <th className="px-4 py-3 text-left font-bold">상태</th>
-                <th className="px-4 py-3 text-right font-bold"></th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y">
-              {projects?.length ? (
-                projects.map((p) => (
-                  <ProjectRowComponent
-                    key={p.projectId}
-                    project={p}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                  />
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={4} className="px-4 py-10 text-center text-gray-500">
-                    아직 등록된 프로젝트가 없습니다.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+      {/* 프로젝트 카드 그리드 */}
+      {projects?.length ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {projects.map((p) => (
+            <ProjectRowComponent
+              key={p.projectId}
+              project={p}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))}
         </div>
-      </div>
+      ) : (
+        <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center">
+              <Calendar size={32} className="text-slate-400" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-600 mb-1">
+                등록된 프로젝트가 없습니다.
+              </p>
+              <p className="text-xs text-slate-400">
+                프로젝트 생성 버튼을 눌러 새 프로젝트를 시작하세요.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
