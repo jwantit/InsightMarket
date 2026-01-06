@@ -13,9 +13,6 @@ const AdminUsersPage = () => {
             <h1 className="text-2xl font-black text-slate-900 tracking-tight">
               사용자 계정 관리
             </h1>
-            <p className="text-sm text-slate-500">
-              회사 내 모든 사용자 계정을 관리합니다.
-            </p>
           </div>
         </div>
       </div>
@@ -26,4 +23,3 @@ const AdminUsersPage = () => {
 };
 
 export default AdminUsersPage;
-  

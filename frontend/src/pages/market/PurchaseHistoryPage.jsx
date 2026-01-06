@@ -25,9 +25,6 @@ const PurchaseHistoryPage = () => {
             <h1 className="text-2xl font-black text-slate-900 tracking-tight">
               구매 내역
             </h1>
-            <p className="text-sm text-slate-500">
-              과거 구매한 AI 솔루션 내역을 확인하세요.
-            </p>
           </div>
         </div>
       </div>

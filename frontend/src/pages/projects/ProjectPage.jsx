@@ -13,9 +13,6 @@ const ProjectPage = () => {
             <h1 className="text-2xl font-black text-slate-900 tracking-tight">
               프로젝트 관리
             </h1>
-            <p className="text-sm text-slate-500">
-              브랜드별 마케팅 프로젝트를 생성하고 기간/키워드를 관리합니다.
-            </p>
           </div>
         </div>
       </div>

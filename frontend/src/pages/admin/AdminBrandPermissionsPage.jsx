@@ -13,9 +13,6 @@ const AdminBrandPermissionsPage = () => {
             <h1 className="text-2xl font-black text-slate-900 tracking-tight">
               브랜드 권한 관리
             </h1>
-            <p className="text-sm text-slate-500">
-              브랜드 멤버의 권한을 관리합니다.
-            </p>
           </div>
         </div>
       </div>
@@ -26,4 +23,3 @@ const AdminBrandPermissionsPage = () => {
 };
 
 export default AdminBrandPermissionsPage;
-  

@@ -13,9 +13,6 @@ const AdminApprovalsPage = () => {
             <h1 className="text-2xl font-black text-slate-900 tracking-tight">
               가입 승인
             </h1>
-            <p className="text-sm text-slate-500">
-              대기 중인 회원 가입 요청을 승인합니다.
-            </p>
           </div>
         </div>
       </div>

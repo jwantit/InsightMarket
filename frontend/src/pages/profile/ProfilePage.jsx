@@ -1,15 +1,23 @@
+import { User } from "lucide-react";
 import ProfileComponent from "../../components/profile/ProfileComponent";
 
 const ProfilePage = () => {
   return (
-    <div className="p-4 sm:p-6">
-      <div className="mx-auto max-w-5xl">
-        <div className="bg-white border rounded-2xl shadow-sm">
-          <div className="p-5 sm:p-7">
-            <ProfileComponent />
+    <div className="space-y-6">
+      <div className="flex items-center justify-between bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
+            <User size={24} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+              내 프로필
+            </h1>
           </div>
         </div>
       </div>
+
+      <ProfileComponent />
     </div>
   );
 };

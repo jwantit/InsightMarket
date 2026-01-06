@@ -26,9 +26,6 @@ const BoardLayout = () => {
             <h1 className="text-2xl font-black text-slate-900 tracking-tight">
               브랜드 커뮤니티
             </h1>
-            <p className="text-sm text-slate-500">
-              브랜드 내부 커뮤니케이션과 토론을 위한 게시판입니다.
-            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">

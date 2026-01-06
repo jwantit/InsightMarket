@@ -1,46 +1,60 @@
-// src/components/profile/ProfileComponent.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Edit3, X, Save, User, Mail, Shield, Lock } from "lucide-react";
 import { modifyMember } from "../../api/memberApi";
 import { updateProfile } from "../../store/slices/loginSlice";
 
 const Pill = ({ children }) => (
-  <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
+  <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700 border border-indigo-100">
     {children}
   </span>
 );
 
 const Label = ({ children }) => (
-  <p className="text-xs font-semibold text-gray-500">{children}</p>
+  <p className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
+    {children}
+  </p>
 );
 
 const Input = (props) => (
   <input
     {...props}
     className={[
-      "w-full rounded-xl border bg-white px-3 py-2 text-sm",
-      "outline-none transition",
-      "focus:border-gray-400 focus:ring-4 focus:ring-gray-100",
-      "disabled:bg-gray-50 disabled:text-gray-400",
+      "w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm font-medium",
+      "outline-none transition-all",
+      "focus:ring-4 focus:ring-blue-50 focus:border-blue-500",
+      "disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed",
       props.className || "",
     ].join(" ")}
   />
 );
 
-const FieldCard = ({ title, children, desc }) => (
-  <div className="rounded-2xl border bg-white p-5 sm:p-6">
-    <div>
-      <h2 className="text-base font-bold text-gray-900">{title}</h2>
-      {desc ? <p className="mt-1 text-sm text-gray-500">{desc}</p> : null}
+const FieldCard = ({ title, children, desc, icon: Icon }) => (
+  <div className="group rounded-3xl border border-slate-200 bg-white shadow-sm transition-all hover:border-slate-300">
+    <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+      {Icon && (
+        <div className="p-2 bg-slate-50 rounded-lg text-slate-500 group-hover:text-blue-600 transition-colors">
+          <Icon size={18} />
+        </div>
+      )}
+      <div>
+        <h2 className="text-base font-bold text-slate-900">{title}</h2>
+        {desc ? (
+          <p className="mt-0.5 text-xs text-slate-500">{desc}</p>
+        ) : null}
+      </div>
     </div>
-    <div className="mt-5 space-y-4">{children}</div>
+    <div className="p-6 space-y-4">{children}</div>
   </div>
 );
 
-const InfoRow = ({ label, value }) => (
-  <div className="rounded-xl border p-4 flex items-center justify-between">
-    <div className="text-sm text-gray-500">{label}</div>
-    <div className="text-sm font-semibold text-gray-900">{value ?? "-"}</div>
+const InfoRow = ({ label, value, icon: Icon }) => (
+  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 flex items-center justify-between hover:bg-white transition-colors">
+    <div className="flex items-center gap-2 text-sm text-slate-600">
+      {Icon && <Icon size={16} className="text-slate-400" />}
+      <span className="font-medium">{label}</span>
+    </div>
+    <div className="text-sm font-bold text-slate-900">{value ?? "-"}</div>
   </div>
 );
 
@@ -121,102 +135,105 @@ const ProfileComponent = () => {
 
   return (
     <section className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight">내 프로필</h1>
-        </div>
-
-        {!editing ? (
-          <button
-            onClick={() => setEditing(true)}
-            className="inline-flex items-center justify-center rounded-xl border px-4 py-2 text-sm font-semibold hover:bg-gray-50 active:scale-[0.99]"
-          >
-            프로필 수정
-          </button>
-        ) : (
-          <div className="flex gap-2">
-            <button
-              disabled={saving}
-              onClick={() => {
-                resetForm();
-                setEditing(false);
-              }}
-              className="inline-flex items-center justify-center rounded-xl border px-4 py-2 text-sm font-semibold hover:bg-gray-50 disabled:opacity-50"
-            >
-              취소
-            </button>
-            <button
-              disabled={saving}
-              onClick={handleSave}
-              className="inline-flex items-center justify-center rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-black disabled:opacity-50"
-            >
-              {saving ? "저장 중..." : "저장"}
-            </button>
-          </div>
-        )}
-      </div>
-
       {/* Profile Summary Card */}
-      <div className="rounded-2xl border bg-gradient-to-b from-gray-50 to-white p-5 sm:p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 shrink-0 rounded-2xl bg-gray-900 text-white grid place-items-center font-bold">
-              {initials}
+      <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+        <div className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-5">
+              <div className="h-16 w-16 shrink-0 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white grid place-items-center font-black text-2xl shadow-lg shadow-blue-200">
+                {initials}
+              </div>
+
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <p className="text-xl font-black text-slate-900">
+                    {loginInfo?.name || "이름 없음"}
+                  </p>
+                  <Pill>{role || "ROLE"}</Pill>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-slate-500">
+                  <Mail size={14} />
+                  <span>{email || "-"}</span>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="text-base font-bold text-gray-900">
-                  {loginInfo?.name || "이름 없음"}
-                </p>
-                <Pill>{role || "ROLE"}</Pill>
+            {!editing ? (
+              <button
+                onClick={() => setEditing(true)}
+                className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-all shadow-md shadow-blue-200 active:scale-95"
+              >
+                <Edit3 size={18} />
+                프로필 수정
+              </button>
+            ) : (
+              <div className="flex gap-2">
+                <button
+                  disabled={saving}
+                  onClick={() => {
+                    resetForm();
+                    setEditing(false);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-all border border-slate-200 disabled:opacity-50"
+                >
+                  <X size={18} />
+                  취소
+                </button>
+                <button
+                  disabled={saving}
+                  onClick={handleSave}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg active:scale-95 bg-blue-600 text-white shadow-blue-200 hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {saving ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white animate-spin rounded-full" />
+                  ) : (
+                    <Save size={18} />
+                  )}
+                  {saving ? "저장 중..." : "저장"}
+                </button>
               </div>
-              <p className="mt-1 text-sm text-gray-600">{email || "-"}</p>
-            </div>
-          </div>          
+            )}
+          </div>
         </div>
       </div>
 
       {/* Basic Info */}
-      <FieldCard
-        title="기본 정보"
-      >
+      <FieldCard title="기본 정보" desc="계정의 기본 정보입니다." icon={User}>
         {!editing ? (
           <>
-            <InfoRow label="이름" value={loginInfo?.name} />
-            <InfoRow label="이메일" value={email} />
-            <InfoRow label="권한" value={role} />
+            <InfoRow label="이름" value={loginInfo?.name} icon={User} />
+            <InfoRow label="이메일" value={email} icon={Mail} />
+            <InfoRow label="권한" value={role} icon={Shield} />
           </>
         ) : (
           <>
             <div>
               <Label>이름</Label>
-              <div className="mt-2">
-                <Input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  disabled={saving}
-                  placeholder="이름을 입력하세요"
-                />
-                <p className="mt-1 text-xs text-gray-400">
-                  화면에 표시되는 이름입니다.
-                </p>
-              </div>
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={saving}
+                placeholder="이름을 입력하세요"
+              />
+              <p className="mt-2 text-xs text-slate-400">
+                화면에 표시되는 이름입니다.
+              </p>
             </div>
 
             <div>
               <Label>이메일</Label>
-              <div className="mt-2">
-                <Input value={email} disabled />
-              </div>
+              <Input value={email} disabled />
+              <p className="mt-2 text-xs text-slate-400">
+                이메일은 변경할 수 없습니다.
+              </p>
             </div>
 
             <div>
               <Label>권한</Label>
-              <div className="mt-2">
-                <Input value={role} disabled />
-              </div>
+              <Input value={role} disabled />
+              <p className="mt-2 text-xs text-slate-400">
+                권한은 관리자에게 문의하세요.
+              </p>
             </div>
           </>
         )}
@@ -225,34 +242,37 @@ const ProfileComponent = () => {
       {/* 수정 모드에서만 노출 */}
       {editing ? (
         <FieldCard
-          title="비밀번호 변경 (선택)"
+          title="비밀번호 변경"
+          desc="비밀번호를 변경하려면 아래 필드를 입력하세요. (선택사항)"
+          icon={Lock}
         >
-          <div className="rounded-2xl border bg-gray-50 p-4 space-y-4">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 space-y-5">
             <div>
               <Label>새 비밀번호</Label>
-              <div className="mt-2">
-                <Input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={saving}
-                  placeholder="새 비밀번호"
-                />
-                <p className="mt-1 text-xs text-gray-400">4자 이상 입력</p>
-              </div>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={saving}
+                placeholder="새 비밀번호"
+              />
+              <p className="mt-2 text-xs text-slate-400">
+                4자 이상 입력해주세요.
+              </p>
             </div>
 
             <div>
               <Label>새 비밀번호 확인</Label>
-              <div className="mt-2">
-                <Input
-                  type="password"
-                  value={password2}
-                  onChange={(e) => setPassword2(e.target.value)}
-                  disabled={saving}
-                  placeholder="새 비밀번호 확인"
-                />
-              </div>
+              <Input
+                type="password"
+                value={password2}
+                onChange={(e) => setPassword2(e.target.value)}
+                disabled={saving}
+                placeholder="새 비밀번호 확인"
+              />
+              <p className="mt-2 text-xs text-slate-400">
+                위 비밀번호와 동일하게 입력해주세요.
+              </p>
             </div>
           </div>
         </FieldCard>

@@ -115,9 +115,6 @@ const CartPage = () => {
             <h1 className="text-2xl font-black text-slate-900 tracking-tight">
               AI Solution 장바구니
             </h1>
-            <p className="text-sm text-slate-500">
-              선택한 솔루션을 확인하고 결제하세요.
-            </p>
           </div>
         </div>
       </div>

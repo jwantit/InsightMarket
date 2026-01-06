@@ -13,9 +13,6 @@ const BrandPage = () => {
             <h1 className="text-2xl font-black text-slate-900 tracking-tight">
               브랜드 관리
             </h1>
-            <p className="text-sm text-slate-500">
-              인텔리전스 분석을 위한 브랜드 및 경쟁사를 관리합니다.
-            </p>
           </div>
         </div>
       </div>
