@@ -91,24 +91,47 @@ const CartPage = () => {
   }, [projectId, updateUrlParams]);
 
   return (
-    <section className="p-6 space-y-4">
-      {/* 헤더 */}
-      <header className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-800">AI Solution 장바구니</h1>
-      </header>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+              <path d="M3 6h18" />
+              <path d="M16 10a4 4 0 0 1-8 0" />
+            </svg>
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+              AI Solution 장바구니
+            </h1>
+            <p className="text-sm text-slate-500">
+              선택한 솔루션을 확인하고 결제하세요.
+            </p>
+          </div>
+        </div>
+      </div>
 
       <SolutionToolbar
         projectList={projectList}
         projectId={projectId}
         onProjectChange={setProjectId}
-        filter={undefined} // filter prop을 undefined로 명시적으로 전달
-        onFilterChange={undefined} // onFilterChange prop을 undefined로 명시적으로 전달
+        filter={undefined}
+        onFilterChange={undefined}
         showFilter={false}
       />
-       <CartComponent 
-       projectId={projectId}
-       />
-    </section>
+      <CartComponent projectId={projectId} />
+    </div>
   );
 };
 

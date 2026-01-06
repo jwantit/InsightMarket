@@ -43,28 +43,57 @@ const CartComponent = ({ projectId }) => {
   }, [items, selectedSolutionIds]);
 
   return (
-    <div className="border rounded-lg overflow-hidden mt-4">
-      {/* 리스트 */}
+    <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+      {/* 빈 상태 */}
       {items.length === 0 && (
-        <div className="px-4 py-6 text-center text-gray-400 text-sm">
-          장바구니에 담긴 상품이 없습니다.
+        <div className="p-12 text-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-slate-400"
+              >
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                <path d="M3 6h18" />
+                <path d="M16 10a4 4 0 0 1-8 0" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-600 mb-1">
+                장바구니에 담긴 상품이 없습니다.
+              </p>
+              <p className="text-xs text-slate-400">
+                상품목록에서 원하는 솔루션을 장바구니에 추가하세요.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
-      {items.map((item) => (
+      {/* 리스트 */}
+      {items.map((item, idx) => (
         <CartItemComponent
           key={item.cartItemid}
           item={item}
-          isChecked={selectedSolutionIds.includes(item.solutionid)} //includes 안에 있는지 확인 item.solutionid가 있으면 체크되어있다.
-          onToggle={handleToggle} //solutionId 담기
-          onRemove={removeCartItem} //삭제
+          isChecked={selectedSolutionIds.includes(item.solutionid)}
+          onToggle={handleToggle}
+          onRemove={removeCartItem}
+          isFirst={idx === 0}
         />
       ))}
 
       {/* 총 금액 및 결제 버튼 */}
       {items.length > 0 && (
-        <div className="bg-gray-50 border-t px-4 py-4 flex flex-col items-end space-y-3">
-          <div className="text-lg font-bold text-gray-800">
+        <div className="bg-slate-50 border-t border-slate-200 px-6 py-6 flex flex-col items-end space-y-4">
+          <div className="text-xl font-black text-slate-900">
             총 결제 금액:{" "}
             <span className="text-blue-600">
               {selectedTotalPrice.toLocaleString()}원
@@ -72,7 +101,6 @@ const CartComponent = ({ projectId }) => {
           </div>
           <button
             onClick={async () => {
-              // 1. async 추가
               if (selectedSolutionIds.length === 0) {
                 alert("결제할 상품을 선택해주세요.");
                 return;
@@ -83,7 +111,6 @@ const CartComponent = ({ projectId }) => {
               }));
 
               try {
-                // 2. await 추가: 결제가 완전히 끝날 때까지 기다립니다.
                 const isSuccess = await handlePayment(projectId, formattedList);
 
                 if (isSuccess) {
@@ -91,9 +118,9 @@ const CartComponent = ({ projectId }) => {
                     .filter((item) =>
                       selectedSolutionIds.includes(item.solutionid)
                     )
-                    .map((item) => item.cartitemid); // items 내의 실제 카트 아이템 PK 추출
+                    .map((item) => item.cartitemid);
 
-                  setSelectedSolutionIds([]); //선택상태비우기
+                  setSelectedSolutionIds([]);
 
                   if (cartItemIdsToDelete.length > 0) {
                     try {
@@ -107,7 +134,7 @@ const CartComponent = ({ projectId }) => {
                 console.error("결제 진행 중 에러:", error);
               }
             }}
-            className="px-8 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 font-bold text-lg"
+            className="px-8 py-3.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 font-bold text-base transition-all shadow-lg shadow-emerald-200 active:scale-95"
           >
             결제하기
           </button>

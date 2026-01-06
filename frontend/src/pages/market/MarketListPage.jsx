@@ -123,11 +123,36 @@ const MarketListPage = () => {
 
 
   return (
-    <section className="p-6 space-y-4">
-      {/* 헤더 */}
-      <header className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-800">AI Solution 상품목록</h1>
-      </header>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+              <path d="M3 6h18" />
+              <path d="M16 10a4 4 0 0 1-8 0" />
+            </svg>
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+              AI Solution 상품목록
+            </h1>
+            <p className="text-sm text-slate-500">
+              프로젝트별 AI 마케팅 솔루션을 확인하고 구매하세요.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* 필터 영역 */}
       <SolutionToolbar
@@ -138,15 +163,11 @@ const MarketListPage = () => {
         onFilterChange={setFilter}
       />
 
-      {/* 상품 리스트
-      프로젝트id가 있는경우 실행 전달하는것 projectid = n , filter = ALL 또는 RECENT 
-      */}
+      {/* 상품 리스트 */}
       {projectId && (
-        <div className="bg-white rounded-lg shadow-sm border">
-          <MaketComponent projectId={projectId} filter={filter} />
-        </div>
+        <MaketComponent projectId={projectId} filter={filter} />
       )}
-    </section>
+    </div>
   );
 };
 

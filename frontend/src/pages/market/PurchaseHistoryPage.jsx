@@ -1,9 +1,7 @@
-// PurchaseHistoryPage.jsx
 import PurchaseFilterSection from "../../components/maket/PurchaseFilterSection";
 import PurchaseComponent from "../../components/maket/PurchaseComponent";
 import { useSearchParams } from "react-router-dom";
-
-
+import { Receipt } from "lucide-react";
 
 const PurchaseHistoryPage = () => {
   const [params, setParams] = useSearchParams();
@@ -17,10 +15,22 @@ const PurchaseHistoryPage = () => {
   };
 
   return (
-    <section className="min-h-screen bg-gray-50 p-10 space-y-8">
-      <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
-        구매 내역
-      </h1>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
+            <Receipt size={24} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+              구매 내역
+            </h1>
+            <p className="text-sm text-slate-500">
+              과거 구매한 AI 솔루션 내역을 확인하세요.
+            </p>
+          </div>
+        </div>
+      </div>
 
       <div className="space-y-6">
         <PurchaseFilterSection
@@ -31,12 +41,9 @@ const PurchaseHistoryPage = () => {
           updateFilter={updateFilter}
         />
 
-        <PurchaseComponent
-        params={params}
-        />
+        <PurchaseComponent params={params} />
       </div>
-      
-    </section>
+    </div>
   );
 };
 
