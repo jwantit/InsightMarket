@@ -109,7 +109,7 @@ const SideBar = ({ onNavigate }) => {
           <SideLink to={`/app/${brandId}/ai/strategy`} onNavigate={onNavigate}>
             전략 추천
           </SideLink>
-          <SideLink to={`/app/${brandId}/ai/marketbot`} onNavigate={onNavigate}>
+          <SideLink to={`/app/${brandId}/ai/chatbot`} onNavigate={onNavigate}>
             챗봇
           </SideLink>
         </Section>

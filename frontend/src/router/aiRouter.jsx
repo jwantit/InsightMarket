@@ -1,15 +1,13 @@
 import { lazy } from "react";
 
 const StrategyPage = lazy(() => import("../pages/ai/StrategyPage"));
-const MarketBot = lazy(() => import("../pages/ai/MarketBot"));
-const MarketBotResultPage = lazy(() => import("../pages/ai/MarketBotResultPage"));
-const MarketBotGuidePage = lazy(() => import("../pages/ai/MarketBotGuidePage"));
+const ChatBot = lazy(() => import("../pages/ai/ChatBot"));
+const AiQuickTestPage = lazy(() => import("../pages/ai/AiQuickTestPage"));
 
 const aiRouter = (wrap) => [
     { path: "strategy", element: wrap(StrategyPage) },
-    { path: "marketbot", element: wrap(MarketBot) },
-    { path: "marketbot/result", element: wrap(MarketBotResultPage) },
-    { path: "marketbot/guide", element: wrap(MarketBotGuidePage) },
+    { path: "chatbot", element: wrap(ChatBot) },
+    { path: "quick-test", element: wrap(AiQuickTestPage) },
 ];
 
 export default aiRouter;
