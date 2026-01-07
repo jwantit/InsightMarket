@@ -1,29 +1,57 @@
-import { useCallback, useMemo, useState } from "react";
+import React, { useMemo, useCallback } from "react";
+import {
+  Save,
+  X,
+  Plus,
+  CheckCircle2,
+  AlertCircle,
+  Building2,
+  Users,
+} from "lucide-react";
 import CompetitorCard from "./CompetitorCard";
 
+const cn = (...xs) => xs.filter(Boolean).join(" ");
 const trim = (v) => (v ?? "").trim();
-const uniq = (arr) => Array.from(new Set(arr));
 
-function cn(...xs) {
-  return xs.filter(Boolean).join(" ");
-}
-
-function StatPill({ label, value }) {
+// 업그레이드된 StatPill: 그라데이션 보더와 아이콘 추가
+function StatPill({ label, value, icon: Icon, colorClass }) {
   return (
-    <div className="rounded-xl border bg-white px-4 py-3">
-      <p className="text-xs text-gray-500">{label}</p>
-      <p className="text-lg font-bold text-gray-900 mt-1">{value}</p>
+    <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:shadow-md">
+      <div className={cn("absolute top-0 left-0 h-1 w-full", colorClass)} />
+      <div className="flex items-center gap-3">
+        <div
+          className={cn(
+            "p-2 rounded-xl bg-slate-50",
+            colorClass.replace("bg-", "text-")
+          )}
+        >
+          <Icon size={18} />
+        </div>
+        <div>
+          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            {label}
+          </p>
+          <p className="text-xl font-black text-slate-900">{value}</p>
+        </div>
+      </div>
     </div>
   );
 }
 
-function Section({ title, desc, right, children }) {
+function Section({ title, desc, icon: Icon, right, children }) {
   return (
-    <div className="rounded-2xl border bg-white shadow-sm overflow-hidden">
-      <div className="px-6 py-4 border-b flex items-start justify-between gap-4">
-        <div>
-          <h3 className="text-sm font-bold text-gray-900">{title}</h3>
-          {desc && <p className="text-sm text-gray-600 mt-1">{desc}</p>}
+    <div className="group rounded-3xl border border-slate-200 bg-white shadow-sm transition-all hover:border-slate-300">
+      <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          {Icon && (
+            <div className="p-2 bg-slate-50 rounded-lg text-slate-500 group-hover:text-blue-600 transition-colors">
+              <Icon size={20} />
+            </div>
+          )}
+          <div>
+            <h3 className="text-base font-bold text-slate-900">{title}</h3>
+            {desc && <p className="text-xs text-slate-500 mt-0.5">{desc}</p>}
+          </div>
         </div>
         {right}
       </div>
@@ -32,76 +60,8 @@ function Section({ title, desc, right, children }) {
   );
 }
 
-function ChipInput({ placeholder, value, onChange }) {
-  const [draft, setDraft] = useState("");
-
-  const add = useCallback(() => {
-    const v = trim(draft);
-    if (!v) return;
-    onChange(uniq([...(value || []), v]));
-    setDraft("");
-  }, [draft, onChange, value]);
-
-  const remove = useCallback(
-    (target) => {
-      onChange((value || []).filter((x) => x !== target));
-    },
-    [onChange, value]
-  );
-
-  return (
-    <div className="space-y-3">
-      <div className="flex gap-2">
-        <input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              add();
-            }
-          }}
-          placeholder={placeholder}
-          className="flex-1 border px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
-        />
-        <button
-          type="button"
-          onClick={add}
-          className="px-4 py-2 rounded-lg border bg-white hover:bg-gray-50"
-        >
-          추가
-        </button>
-      </div>
-
-      {(value || []).length > 0 ? (
-        <div className="flex flex-wrap gap-2">
-          {value.map((k) => (
-            <span
-              key={k}
-              className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-gray-100 text-sm text-gray-800 border"
-              title={k}
-            >
-              <span className="truncate max-w-[240px]">#{k}</span>
-              <button
-                type="button"
-                onClick={() => remove(k)}
-                className="text-gray-500 hover:text-gray-800"
-                aria-label="remove"
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
-      ) : (
-        <p className="text-sm text-gray-500">아직 키워드가 없어요.</p>
-      )}
-    </div>
-  );
-}
-
 export default function BrandFormComponent({
-  mode, // CREATE | EDIT
+  mode,
   loading,
   saving,
   canSubmit,
@@ -110,211 +70,191 @@ export default function BrandFormComponent({
   onCancel,
   onSubmit,
 }) {
-  const keywordCount = (form.keywords || []).length;
   const competitorCount = (form.competitors || []).length;
+  const enabledCount = (form.competitors || []).filter((c) => c.enabled).length;
 
-  const enabledCompetitorCount = useMemo(
-    () => (form.competitors || []).filter((c) => c.enabled).length,
-    [form.competitors]
-  );
-
-  // ✅ 토글 버튼 문구 판단: 모두 활성 상태면 "전체 비활성", 아니면 "전체 활성"
-  const allEnabled = useMemo(() => {
-    const list = form.competitors || [];
-    if (list.length === 0) return false;
-    return list.every((c) => !!c.enabled);
-  }, [form.competitors]);
-
-  const toggleAllEnabled = useCallback(() => {
-    const nextEnabled = !allEnabled;
-
-    setForm((prev) => ({
-      ...prev,
-      competitors: (prev.competitors || []).map((c) => ({
-        ...c,
-        enabled: nextEnabled,
-      })),
-    }));
-  }, [allEnabled, setForm]);
-
-  const addCompetitor = useCallback(() => {
-    setForm((prev) => ({
-      ...prev,
-      competitors: [
-        ...(prev.competitors || []),
-        { competitorId: null, name: "", enabled: true, keywords: [] },
-      ],
-    }));
-  }, [setForm]);
-
-  // 검색/필터 제거 → index 그대로 원본에 대응
-  const updateCompetitor = useCallback(
-    (index, updated) => {
-      setForm((prev) => {
-        const all = [...(prev.competitors || [])];
-        if (!all[index]) return prev;
-        all[index] = updated;
-        return { ...prev, competitors: all };
-      });
-    },
-    [setForm]
-  );
-
-  const removeCompetitor = useCallback(
-    (index) => {
-      setForm((prev) => ({
-        ...prev,
-        competitors: (prev.competitors || []).filter((_, i) => i !== index),
-      }));
-    },
-    [setForm]
-  );
+  const allEnabled =
+    competitorCount > 0 && (form.competitors || []).every((c) => c.enabled);
 
   const updateBasic = (key, value) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
   return (
-    <div className="space-y-4">
-      {/* 상단 고정 느낌의 헤더 */}
-      <div className="rounded-2xl border bg-white shadow-sm">
-        <div className="p-6 border-b flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">
-              {mode === "EDIT" ? "브랜드 수정" : "브랜드 추가"}
-            </h2>
+    <div className="space-y-6 pb-20">
+      {/* 상단 액션 바: 스티키 적용으로 사용성 개선 */}
+      <div className="sticky top-16 z-30 flex items-center justify-between bg-white/80 backdrop-blur-md p-4 rounded-2xl border border-slate-200 shadow-lg mb-8">
+        <div className="flex items-center gap-3 px-2">
+          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+            <Building2 size={20} />
           </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-4 py-2 rounded-lg border bg-white hover:bg-gray-50"
-            >
-              닫기
-            </button>
-            <button
-              type="button"
-              onClick={onSubmit}
-              disabled={!canSubmit || saving}
-              className={cn(
-                "px-5 py-2.5 rounded-lg text-white",
-                !canSubmit || saving
-                  ? "bg-blue-300 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
-              )}
-            >
-              {saving ? "저장 중..." : mode === "EDIT" ? "수정 저장" : "추가 저장"}
-            </button>
-          </div>
+          <h2 className="text-lg font-black text-slate-900">
+            {mode === "EDIT" ? "브랜드 정보 수정" : "새 브랜드 프로필 생성"}
+          </h2>
         </div>
-
-        <div className="p-6 bg-gray-50">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <StatPill label="브랜드 키워드" value={`${keywordCount}개`} />
-            <StatPill label="경쟁사" value={`${competitorCount}개`} />
-            <StatPill label="활성 경쟁사" value={`${enabledCompetitorCount}개`} />
-          </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100 rounded-xl transition-all"
+          >
+            취소
+          </button>
+          <button
+            onClick={onSubmit}
+            disabled={!canSubmit || saving}
+            className={cn(
+              "flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg active:scale-95",
+              !canSubmit || saving
+                ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                : "bg-blue-600 text-white shadow-blue-200 hover:bg-blue-700"
+            )}
+          >
+            {saving ? (
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white animate-spin rounded-full" />
+            ) : (
+              <Save size={18} />
+            )}
+            {mode === "EDIT" ? "변경사항 저장" : "브랜드 등록"}
+          </button>
         </div>
       </div>
 
-      {loading && (
-        <div className="rounded-2xl border bg-white shadow-sm p-6">
-          <div className="text-sm text-gray-600">불러오는 중…</div>
-        </div>
-      )}
+      {/* 대시보드형 스탯바 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <StatPill
+          label="분석 경쟁사"
+          value={`${competitorCount}개`}
+          icon={Users}
+          colorClass="bg-indigo-500"
+        />
+        <StatPill
+          label="현재 활성화"
+          value={`${enabledCount}개`}
+          icon={CheckCircle2}
+          colorClass="bg-emerald-500"
+        />
+      </div>
 
-      {/* 기본 정보 */}
-      <Section title="기본 정보" desc="브랜드명은 필수, 설명은 선택입니다.">
-        <div className="space-y-4">
+      {/* 기본 정보 섹션 */}
+      <Section
+        title="기본 정보"
+        desc="플랫폼 내에서 식별될 브랜드의 기본 정체성을 설정합니다."
+        icon={Building2}
+      >
+        <div className="grid gap-6">
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-900">
-              브랜드명 <span className="text-red-500">*</span>
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-bold text-slate-700">
+                브랜드 공식 명칭
+              </label>
+              <span className="text-[10px] text-red-500 font-bold uppercase">
+                Required
+              </span>
+            </div>
             <input
               value={form.name}
               onChange={(e) => updateBasic("name", e.target.value)}
-              placeholder="예: ACME"
+              disabled={mode === "EDIT"}
               className={cn(
-                "w-full border px-3 py-2 rounded-lg focus:outline-none focus:ring-2",
-                trim(form.name)
-                  ? "focus:ring-blue-200"
-                  : "border-red-200 focus:ring-red-100"
+                "w-full px-4 py-3 rounded-xl border transition-all outline-none text-sm font-medium",
+                mode === "EDIT"
+                  ? "bg-slate-50 text-slate-500 cursor-not-allowed"
+                  : "focus:ring-4 focus:ring-blue-50 focus:border-blue-500 border-slate-200"
               )}
+              placeholder="예: InsightMarket 공식 계정"
             />
-            {!trim(form.name) && (
-              <p className="text-xs text-red-600">브랜드명은 필수입니다.</p>
-            )}
           </div>
-
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-900">설명</label>
+            <label className="text-sm font-bold text-slate-700">
+              브랜드 상세 설명
+            </label>
             <textarea
               value={form.description}
               onChange={(e) => updateBasic("description", e.target.value)}
-              placeholder="브랜드 설명을 입력하세요"
-              rows={4}
-              className="w-full border px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 resize-y"
+              rows={3}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all text-sm resize-none"
+              placeholder="브랜드의 주요 비즈니스 영역이나 목적을 입력하세요."
             />
           </div>
         </div>
       </Section>
 
-      {/* 브랜드 키워드 */}
-      <Section title="브랜드 키워드" desc="브랜드의 주요 키워드를 입력하세요.">
-        <ChipInput
-          placeholder="키워드 입력 후 Enter"
-          value={form.keywords}
-          onChange={(nextKeywords) =>
-            setForm((prev) => ({ ...prev, keywords: nextKeywords }))
-          }
-        />
-      </Section>
-
-      {/* 경쟁사 */}
+      {/* 경쟁사 관리 섹션 */}
       <Section
-        title="경쟁사"
-        desc="비교할 경쟁사와 키워드를 입력하세요."
+        title="경쟁사 벤치마킹"
+        desc="분석 데이터에 포함될 라이벌 브랜드와 핵심 키워드를 구성합니다."
+        icon={Users}
         right={
-          <div className="flex items-center gap-2">
-            {/* 전체 활성/비활성: 버튼 */}
+          <div className="flex gap-2">
             <button
               type="button"
-              onClick={toggleAllEnabled}
-              className="px-3 py-2 rounded-lg border bg-white hover:bg-gray-50 text-sm"
-              disabled={(form.competitors || []).length === 0}
-              title={
-                (form.competitors || []).length === 0
-                  ? "경쟁사가 없어요"
-                  : undefined
+              onClick={() =>
+                setForm((prev) => ({
+                  ...prev,
+                  competitors: (prev.competitors || []).map((c) => ({
+                    ...c,
+                    enabled: !allEnabled,
+                  })),
+                }))
               }
+              className="px-3 py-1.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
             >
-              {allEnabled ? "전체 비활성" : "전체 활성"}
+              {allEnabled ? "전체 비활성화" : "전체 활성화"}
             </button>
-
             <button
               type="button"
-              onClick={addCompetitor}
-              className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"
+              onClick={() =>
+                setForm((prev) => ({
+                  ...prev,
+                  competitors: [
+                    ...(prev.competitors || []),
+                    {
+                      competitorId: null,
+                      name: "",
+                      enabled: true,
+                    },
+                  ],
+                }))
+              }
+              className="px-3 py-1.5 text-xs font-bold text-white bg-slate-900 hover:bg-black rounded-lg transition-colors flex items-center gap-1.5"
             >
-              + 경쟁사 추가
+              <Plus size={14} /> 추가
             </button>
           </div>
         }
       >
         <div className="space-y-4">
           {(form.competitors || []).length === 0 ? (
-            <div className="rounded-xl border bg-gray-50 px-4 py-6 text-sm text-gray-700">
-              아직 경쟁사가 없어요. “+ 경쟁사 추가”로 등록해보세요.
+            <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-slate-100 rounded-3xl bg-slate-50/50">
+              <Users size={40} className="text-slate-200 mb-3" />
+              <p className="text-sm font-bold text-slate-400">
+                등록된 경쟁사가 없습니다.
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                상단의 추가 버튼을 눌러 분석 대상을 등록하세요.
+              </p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {(form.competitors || []).map((c, i) => (
+            <div className="grid gap-4">
+              {form.competitors.map((c, i) => (
                 <CompetitorCard
-                  key={`${c?.competitorId ?? "new"}-${i}`}
+                  key={i}
                   competitor={c}
                   index={i}
-                  onChange={(updated) => updateCompetitor(i, updated)}
-                  onRemove={() => removeCompetitor(i)}
+                  onChange={(updated) =>
+                    setForm((prev) => {
+                      const all = [...prev.competitors];
+                      all[i] = updated;
+                      return { ...prev, competitors: all };
+                    })
+                  }
+                  onRemove={() =>
+                    setForm((prev) => ({
+                      ...prev,
+                      competitors: prev.competitors.filter(
+                        (_, idx) => idx !== i
+                      ),
+                    }))
+                  }
                 />
               ))}
             </div>

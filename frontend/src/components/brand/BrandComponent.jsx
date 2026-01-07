@@ -16,7 +16,6 @@ import { getErrorMessage } from "../../util/errorUtil";
 const initBrandForm = {
   name: "",
   description: "",
-  keywords: [],
   competitors: [],
 };
 const trim = (v) => (v ?? "").trim();
@@ -75,7 +74,7 @@ export default function BrandComponent() {
       .filter((b) => (onlyAdmin ? b.role === "BRAND_ADMIN" : true))
       .filter((b) => {
         if (!q) return true;
-        const hay = [b?.name, b?.description, ...(b?.keywords || []), b?.role]
+        const hay = [b?.name, b?.description, b?.role]
           .filter(Boolean)
           .join(" ")
           .toLowerCase();
@@ -140,7 +139,6 @@ export default function BrandComponent() {
           competitorId: c?.competitorId ?? null, // 필드명이 competitorId로 확인됨
           name: c?.name ?? "",
           enabled: c?.enabled ?? true,
-          keywords: c?.keywords ?? [],
         };
       });
       console.log("정규화된 경쟁사 데이터:", normalizedCompetitors);
@@ -150,7 +148,6 @@ export default function BrandComponent() {
       setForm({
         name: detail?.name ?? "",
         description: detail?.description ?? "",
-        keywords: detail?.keywords ?? [],
         competitors: normalizedCompetitors,
       });
       setScreen("FORM");
@@ -173,14 +170,12 @@ export default function BrandComponent() {
         competitorId: c?.competitorId ?? null, // null이면 신규 생성, 값이 있으면 수정
         name: trim(c?.name),
         enabled: !!c?.enabled,
-        keywords: uniq((c?.keywords || []).map(trim).filter(Boolean)),
       }))
       .filter((c) => c.name.length > 0); // 빈 이름의 경쟁사는 제외
 
     const payload = {
       name: trim(form.name),
       description: trim(form.description),
-      keywords: uniq((form.keywords || []).map(trim).filter(Boolean)),
       competitors: competitorsData,
     };
 

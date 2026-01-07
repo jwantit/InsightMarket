@@ -2,56 +2,90 @@ import { useMemo, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useBrand } from "../../hooks/useBrand";
 import { useSelector } from "react-redux";
+import {
+  LayoutDashboard,
+  Building2,
+  Rocket,
+  BarChart3,
+  PieChart,
+  BrainCircuit,
+  MessageSquare,
+  ShoppingBag,
+  History,
+  Users,
+  Settings,
+  ShieldCheck,
+  ChevronDown,
+  ShoppingCart,
+  LayoutList,
+} from "lucide-react";
 
 const cx = (...arr) => arr.filter(Boolean).join(" ");
 
-const SideLink = ({ to, children, onNavigate }) => (
+// 스타일이 개선된 SideLink
+const SideLink = ({ to, icon: Icon, children, onNavigate }) => (
   <NavLink
     to={to}
     onClick={onNavigate}
     className={({ isActive }) =>
       cx(
-        "flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition",
+        "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm transition-all duration-200 group",
         isActive
-          ? "bg-blue-50 text-blue-700 font-semibold ring-1 ring-blue-100"
-          : "text-gray-700 hover:bg-gray-100"
+          ? "bg-blue-600 text-white shadow-md shadow-blue-200 font-semibold"
+          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
       )
     }
   >
-    <span className="h-1.5 w-1.5 rounded-full bg-current opacity-60" />
+    {Icon ? (
+      <Icon
+        size={18}
+        className="shrink-0 group-hover:scale-110 transition-transform"
+      />
+    ) : (
+      <span className="h-1.5 w-1.5 rounded-full bg-current opacity-60 ml-1.5 mr-1" />
+    )}
     <span className="truncate">{children}</span>
   </NavLink>
 );
 
+// 애니메이션과 스타일이 개선된 Section
 const Section = ({ title, open, onToggle, children }) => (
-  <div className="mt-5">
+  <div className="mt-6">
     <button
       onClick={onToggle}
-      className="w-full px-3 mb-2 flex items-center justify-between text-xs font-bold tracking-wide text-gray-500 uppercase hover:text-gray-700"
+      className="w-full px-3 mb-2 flex items-center justify-between text-[11px] font-bold tracking-wider text-slate-400 uppercase hover:text-slate-600 transition-colors"
     >
       {title}
-      <span className={cx("transition", open ? "rotate-180" : "")}>⌄</span>
+      <ChevronDown
+        size={14}
+        className={cx(
+          "transition-transform duration-300",
+          open ? "rotate-180" : ""
+        )}
+      />
     </button>
-    {open && <div className="space-y-1">{children}</div>}
+    <div
+      className={cx(
+        "space-y-1 overflow-hidden transition-all duration-300 px-1",
+        open ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+      )}
+    >
+      {children}
+    </div>
   </div>
 );
 
 const SideBar = ({ onNavigate }) => {
-
   const { brandId } = useBrand();
   const location = useLocation();
 
   const loginState = useSelector((state) => state.loginSlice);
-  const systemRole = loginState?.role; // "ADMIN" | "COMPANY_ADMIN" | "USER"
+  const systemRole = loginState?.role;
   const isAdminArea = systemRole === "ADMIN" || systemRole === "COMPANY_ADMIN";
-  
-  console.log("loginState:", loginState);
-  console.log("systemRole candidate:", loginState?.systemRole);
 
   const [openMap, setOpenMap] = useState(() => {
     const p = location.pathname;
     return {
-      dash: true,
       sns: p.includes("/sns/"),
       ai: p.includes("/ai/"),
       board: p.includes("/board/"),
@@ -65,23 +99,34 @@ const SideBar = ({ onNavigate }) => {
   if (!brandId) return null;
 
   return (
-    <aside className="w-72 lg:w-64 shrink-0 border-r bg-white h-[calc(100vh-56px)] sticky top-14 overflow-y-auto">
+    <aside className="w-72 lg:w-64 shrink-0 border-r border-slate-200 bg-white h-[calc(100vh-56px)] sticky top-14 overflow-y-auto scrollbar-hide">
       <div className="p-4">
-        <div className="mt-6 space-y-1">
-          <SideLink to={`/app/${brandId}/dashboard`} onNavigate={onNavigate}>
+        {/* 상단 기본 메뉴 */}
+        <div className="mt-2 space-y-1">
+          <SideLink
+            to={`/app/${brandId}/dashboard`}
+            icon={LayoutDashboard}
+            onNavigate={onNavigate}
+          >
             대시보드
           </SideLink>
           <SideLink
             to={`/app/${brandId}/brands-manage`}
+            icon={Building2}
             onNavigate={onNavigate}
           >
             브랜드 관리
           </SideLink>
-          <SideLink to={`/app/${brandId}/projects`} onNavigate={onNavigate}>
-            프로젝트 / 캠페인
+          <SideLink
+            to={`/app/${brandId}/projects`}
+            icon={Rocket}
+            onNavigate={onNavigate}
+          >
+            프로모션 관리
           </SideLink>
         </div>
 
+        {/* 섹션 메뉴들 */}
         <Section
           title="SNS 분석"
           open={openMap.sns}
@@ -89,12 +134,14 @@ const SideBar = ({ onNavigate }) => {
         >
           <SideLink
             to={`/app/${brandId}/sns/sentiment`}
+            icon={BarChart3}
             onNavigate={onNavigate}
           >
             감성/트렌드
           </SideLink>
           <SideLink
             to={`/app/${brandId}/sns/comparison`}
+            icon={PieChart}
             onNavigate={onNavigate}
           >
             경쟁사 비교
@@ -106,10 +153,19 @@ const SideBar = ({ onNavigate }) => {
           open={openMap.ai}
           onToggle={() => toggle("ai")}
         >
-          <SideLink to={`/app/${brandId}/ai/strategy`} onNavigate={onNavigate}>
+          <SideLink
+            to={`/app/${brandId}/ai/strategy`}
+            icon={BrainCircuit}
+            onNavigate={onNavigate}
+          >
             전략 추천
           </SideLink>
-          <SideLink to={`/app/${brandId}/ai/marketbot`} onNavigate={onNavigate}>
+
+          <SideLink
+            to={`/app/${brandId}/ai/marketbot`}
+            icon={MessageSquare}
+            onNavigate={onNavigate}
+          >
             챗봇
           </SideLink>
         </Section>
@@ -121,9 +177,10 @@ const SideBar = ({ onNavigate }) => {
         >
           <SideLink
             to={`/app/${brandId}/board/discussion`}
+            icon={LayoutList}
             onNavigate={onNavigate}
           >
-            전략 토론
+            커뮤니티
           </SideLink>
         </Section>
 
@@ -134,16 +191,23 @@ const SideBar = ({ onNavigate }) => {
         >
           <SideLink
             to={`/app/${brandId}/market/solutions`}
+            icon={ShoppingBag}
             onNavigate={onNavigate}
           >
             상품 목록
           </SideLink>
-
-          <SideLink to={`/app/${brandId}/market/cart`} onNavigate={onNavigate}>
+          <SideLink
+            to={`/app/${brandId}/market/cart`}
+            icon={ShoppingCart}
+            onNavigate={onNavigate}
+          >
             장바구니
           </SideLink>
-
-          <SideLink to={`/app/${brandId}/market/history`} onNavigate={onNavigate}>
+          <SideLink
+            to={`/app/${brandId}/market/history`}
+            icon={History}
+            onNavigate={onNavigate}
+          >
             구매내역
           </SideLink>
         </Section>
@@ -154,26 +218,42 @@ const SideBar = ({ onNavigate }) => {
             open={openMap.admin}
             onToggle={() => toggle("admin")}
           >
-            <SideLink to={`/app/${brandId}/admin/approvals`} onNavigate={onNavigate}>
+            <SideLink
+              to={`/app/${brandId}/admin/approvals`}
+              icon={ShieldCheck}
+              onNavigate={onNavigate}
+            >
               가입 승인
             </SideLink>
-            <SideLink to={`/app/${brandId}/admin/users`} onNavigate={onNavigate}>
+            <SideLink
+              to={`/app/${brandId}/admin/users`}
+              icon={Users}
+              onNavigate={onNavigate}
+            >
               사용자 계정 관리
             </SideLink>
             <SideLink
               to={`/app/${brandId}/admin/brand-permissions`}
+              icon={Settings}
               onNavigate={onNavigate}
             >
               브랜드 권한 관리
             </SideLink>
-            <SideLink to={`/app/${brandId}/admin/system`} onNavigate={onNavigate}>
+            <SideLink
+              to={`/app/${brandId}/admin/system`}
+              icon={Settings}
+              onNavigate={onNavigate}
+            >
               시스템 설정
             </SideLink>
           </Section>
         )}
 
-        <div className="mt-6 px-3 text-xs text-gray-400">
-          © {new Date().getFullYear()} InsightMarket
+        {/* 하단 푸터 영역 */}
+        <div className="mt-10 mb-4 px-3">
+          <p className="mt-6 text-[11px] text-slate-400 text-center">
+            © {new Date().getFullYear()} InsightMarket
+          </p>
         </div>
       </div>
     </aside>
