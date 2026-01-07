@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { formatDateTime } from "../../util/dateUtil";
 import FileItem from "../common/FileItem";
+import useKeepFiles from "../../hooks/common/useKeepFiles";
 
 const CommentItem = ({
   comment,
@@ -18,11 +19,8 @@ const CommentItem = ({
   onSubmitReply,
   onCancelReply,
   parentInfo,
-  targetCommentId,
   originalCommentId,
   currentUserId,
-  replyFiles,
-  onReplyFilesChange,
   editFiles,
   onEditFilesChange,
   getReplyFiles,
@@ -33,17 +31,40 @@ const CommentItem = ({
   const isEditing = editingId === comment.commentId;
   const isReplying = parentId === comment.commentId;
   const hasParentComment = comment.parentCommentId && parentInfo;
-  
+
   // 대댓글에 답글을 달 때는 원래 댓글을 부모로 사용
-  const actualTargetId = originalCommentId || targetCommentId || comment.commentId;
-  
+  const actualTargetId = originalCommentId || comment.commentId;
+
   // 답글 작성 중일 때 현재 commentId의 replyFiles 가져오기
-  const currentReplyFiles = isReplying 
-    ? (getReplyFiles ? getReplyFiles(comment.commentId) : replyFiles)
+  const currentReplyFiles = isReplying && getReplyFiles
+    ? getReplyFiles(comment.commentId)
     : [];
 
+  // 수정 모드일 때 기존 파일 관리 (keepFileIds)
+  const existingFiles = useMemo(
+    () => (comment.files && Array.isArray(comment.files) ? comment.files : []),
+    [comment.files]
+  );
+  const { keepFileIds, toggleKeep, resetKeep } = useKeepFiles(existingFiles);
+
+  // 수정 모드 시작 시 keepFileIds 초기화 (한 번만)
+  const prevEditingIdRef = useRef(null);
+  useEffect(() => {
+    if (isEditing && prevEditingIdRef.current !== comment.commentId) {
+      resetKeep();
+      prevEditingIdRef.current = comment.commentId;
+    } else if (!isEditing) {
+      prevEditingIdRef.current = null;
+    }
+  }, [isEditing, comment.commentId, resetKeep]);
+
   // 이미지 붙여넣기 핸들러
-  const handleImagePaste = async (e, onContentChange, onFilesChange, currentContent) => {
+  const handleImagePaste = async (
+    e,
+    onContentChange,
+    onFilesChange,
+    currentContent
+  ) => {
     const items = e.clipboardData.items;
     for (let i = 0; i < items.length; i++) {
       if (items[i].type.indexOf("image") !== -1) {
@@ -53,10 +74,12 @@ const CommentItem = ({
         reader.onload = (event) => {
           const imageUrl = event.target.result;
           const imageTag = `<img src="${imageUrl}" alt="${file.name}" style="max-width: 100%; height: auto; margin: 10px 0;" />`;
-          onContentChange(currentContent + (currentContent ? '\n' : '') + imageTag);
+          onContentChange(
+            currentContent + (currentContent ? "\n" : "") + imageTag
+          );
         };
         reader.readAsDataURL(file);
-        
+
         // 파일도 함께 첨부
         if (onFilesChange) {
           onFilesChange((prev) => [...prev, file]);
@@ -73,9 +96,9 @@ const CommentItem = ({
         </strong>
         <span className="text-xs text-gray-500">
           {formatDateTime(comment.createdAt)}
-          {comment.updatedAt && 
-           comment.updatedAt !== comment.createdAt && 
-           ` (수정됨: ${formatDateTime(comment.updatedAt)})`}
+          {comment.updatedAt &&
+            comment.updatedAt !== comment.createdAt &&
+            ` (수정됨: ${formatDateTime(comment.updatedAt)})`}
         </span>
       </div>
       {isEditing ? (
@@ -83,34 +106,85 @@ const CommentItem = ({
           <textarea
             value={editContent}
             onChange={(e) => onEditContentChange(e.target.value)}
-            onPaste={(e) => handleImagePaste(e, onEditContentChange, onEditFilesChange, editContent)}
+            onPaste={(e) =>
+              handleImagePaste(
+                e,
+                onEditContentChange,
+                onEditFilesChange,
+                editContent
+              )
+            }
             rows={3}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-y"
             placeholder="댓글 내용을 입력하세요 (이미지 붙여넣기 및 드래그앤드롭 가능)"
           />
-          {editFiles && editFiles.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {Array.from(editFiles).map((file, index) => (
-                <FileItem
-                  key={index}
-                  file={file}
-                  size="sm"
-                  onRemove={() => {
-                    if (onEditFilesChange) {
-                      onEditFilesChange((prev) => prev.filter((_, i) => i !== index));
-                    }
-                  }}
-                />
-              ))}
+          {/* 기존 파일 목록 (체크박스로 삭제 선택) */}
+          {existingFiles.length > 0 && (
+            <div className="space-y-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <h5 className="text-xs font-medium text-gray-700 mb-2">
+                기존 파일
+              </h5>
+              <div className="space-y-1.5">
+                {existingFiles.map((file) => (
+                  <label
+                    key={file.id}
+                    className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 p-1.5 rounded text-xs"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={keepFileIds.includes(file.id)}
+                      onChange={() => toggleKeep(file.id)}
+                      className="w-3.5 h-3.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <FileItem file={file} size="sm" />
+                  </label>
+                ))}
+              </div>
             </div>
           )}
+          {/* 새로 추가된 파일 목록 */}
+          {editFiles &&
+            Array.from(editFiles).filter((f) => f instanceof File).length >
+              0 && (
+              <div className="space-y-2">
+                <h5 className="text-xs font-medium text-gray-700">
+                  새로 추가할 파일
+                </h5>
+                <div className="flex flex-wrap gap-1.5">
+                  {Array.from(editFiles)
+                    .filter((f) => f instanceof File)
+                    .map((file, index) => (
+                      <FileItem
+                        key={index}
+                        file={file}
+                        size="sm"
+                        onRemove={() => {
+                          if (onEditFilesChange) {
+                            // File 객체만 필터링하여 제거
+                            const fileList = Array.from(editFiles);
+                            const newFiles = fileList.filter(
+                              (f, i) =>
+                                !(f instanceof File) ||
+                                fileList.indexOf(f) !== index
+                            );
+                            onEditFilesChange(newFiles);
+                          }
+                        }}
+                      />
+                    ))}
+                </div>
+              </div>
+            )}
           <div className="mt-2">
             <input
               type="file"
               multiple
               onChange={(e) => {
                 if (onEditFilesChange && e.target.files) {
-                  onEditFilesChange((prev) => [...prev, ...Array.from(e.target.files)]);
+                  onEditFilesChange((prev) => [
+                    ...prev,
+                    ...Array.from(e.target.files),
+                  ]);
                 }
               }}
               className="block w-full text-xs text-gray-500 file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
@@ -118,7 +192,7 @@ const CommentItem = ({
           </div>
           <div className="flex gap-2">
             <button
-              onClick={onSaveEdit}
+              onClick={() => onSaveEdit(keepFileIds)}
               className="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
             >
               저장
@@ -139,19 +213,21 @@ const CommentItem = ({
                 @{parentInfo.writerName || parentInfo.writerId}
               </span>
             )}
-            <div dangerouslySetInnerHTML={{ __html: comment.content.replace(/\n/g, '<br>') }} />
+            <div
+              dangerouslySetInnerHTML={{
+                __html: comment.content.replace(/\n/g, "<br>"),
+              }}
+            />
           </div>
-          {comment.files && Array.isArray(comment.files) && comment.files.length > 0 && (
-            <div className="mb-3 flex flex-wrap gap-1.5">
-              {comment.files.map((f) => (
-                <FileItem
-                  key={f.id}
-                  file={f}
-                  size="sm"
-                />
-              ))}
-            </div>
-          )}
+          {comment.files &&
+            Array.isArray(comment.files) &&
+            comment.files.length > 0 && (
+              <div className="mb-3 flex flex-wrap gap-1.5">
+                {comment.files.map((f) => (
+                  <FileItem key={f.id} file={f} size="sm" />
+                ))}
+              </div>
+            )}
           <div className="flex gap-2">
             <button
               onClick={() => onReply(comment.commentId)}
@@ -159,22 +235,23 @@ const CommentItem = ({
             >
               답글
             </button>
-            {currentUserId && Number(comment.writerId) === Number(currentUserId) && (
-              <>
-                <button
-                  onClick={() => onEdit(comment)}
-                  className="px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
-                >
-                  수정
-                </button>
-                <button
-                  onClick={() => onDelete(comment.commentId)}
-                  className="px-2 py-1 text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
-                >
-                  삭제
-                </button>
-              </>
-            )}
+            {currentUserId &&
+              Number(comment.writerId) === Number(currentUserId) && (
+                <>
+                  <button
+                    onClick={() => onEdit(comment)}
+                    className="px-2 py-1 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
+                  >
+                    수정
+                  </button>
+                  <button
+                    onClick={() => onDelete(comment.commentId)}
+                    className="px-2 py-1 text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                  >
+                    삭제
+                  </button>
+                </>
+              )}
           </div>
         </>
       )}
@@ -198,12 +275,11 @@ const CommentItem = ({
               e.preventDefault();
               e.stopPropagation();
               const droppedFiles = Array.from(e.dataTransfer.files);
-              if (droppedFiles.length > 0) {
-                if (setReplyFilesForComment) {
-                  setReplyFilesForComment(comment.commentId, (prev) => [...prev, ...droppedFiles]);
-                } else if (onReplyFilesChange) {
-                  onReplyFilesChange((prev) => [...prev, ...droppedFiles]);
-                }
+              if (droppedFiles.length > 0 && setReplyFilesForComment) {
+                setReplyFilesForComment(comment.commentId, (prev) => [
+                  ...prev,
+                  ...droppedFiles,
+                ]);
               }
             }}
           >
@@ -211,31 +287,33 @@ const CommentItem = ({
               value={replyContent}
               onChange={(e) => onReplyContentChange(e.target.value)}
               onPaste={(e) => {
-                const handleFilesChange = (file) => {
-                  if (setReplyFilesForComment) {
-                    setReplyFilesForComment(comment.commentId, (prev) => [...prev, file]);
-                  } else if (onReplyFilesChange) {
-                    onReplyFilesChange((prev) => [...prev, file]);
-                  }
-                };
-                handleImagePaste(e, onReplyContentChange, handleFilesChange, replyContent);
+                handleImagePaste(
+                  e,
+                  onReplyContentChange,
+                  (updater) => {
+                    if (setReplyFilesForComment) {
+                      setReplyFilesForComment(comment.commentId, updater);
+                    }
+                  },
+                  replyContent
+                );
               }}
               placeholder="답글을 입력하세요 (이미지 붙여넣기 및 드래그앤드롭 가능)"
               rows={3}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-y"
             />
-            {currentReplyFiles && Array.isArray(currentReplyFiles) && currentReplyFiles.length > 0 && (
+            {currentReplyFiles.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1.5">
-                {Array.from(currentReplyFiles).map((file, index) => (
+                {currentReplyFiles.map((file, index) => (
                   <FileItem
                     key={index}
                     file={file}
                     size="sm"
                     onRemove={() => {
                       if (setReplyFilesForComment) {
-                        setReplyFilesForComment(comment.commentId, (prev) => prev.filter((_, i) => i !== index));
-                      } else if (onReplyFilesChange) {
-                        onReplyFilesChange((prev) => prev.filter((_, i) => i !== index));
+                        setReplyFilesForComment(comment.commentId, (prev) =>
+                          prev.filter((_, i) => i !== index)
+                        );
                       }
                     }}
                   />
@@ -247,13 +325,12 @@ const CommentItem = ({
                 type="file"
                 multiple
                 onChange={(e) => {
-                  if (e.target.files) {
+                  if (e.target.files && setReplyFilesForComment) {
                     const newFiles = Array.from(e.target.files);
-                    if (setReplyFilesForComment) {
-                      setReplyFilesForComment(comment.commentId, (prev) => [...prev, ...newFiles]);
-                    } else if (onReplyFilesChange) {
-                      onReplyFilesChange((prev) => [...prev, ...newFiles]);
-                    }
+                    setReplyFilesForComment(comment.commentId, (prev) => [
+                      ...prev,
+                      ...newFiles,
+                    ]);
                   }
                 }}
                 className="block w-full text-xs text-gray-500 file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
@@ -262,7 +339,7 @@ const CommentItem = ({
           </div>
           <div className="flex gap-2 mt-2">
             <button
-              onClick={() => onSubmitReply(comment.commentId, replyContent)}
+              onClick={() => onSubmitReply(actualTargetId, replyContent)}
               disabled={!replyContent || !replyContent.trim()}
               className="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
@@ -279,48 +356,38 @@ const CommentItem = ({
       )}
       {comment.replies?.length > 0 && (
         <div className="mt-4 ml-4 pl-4 border-l-2 border-gray-200">
-          {comment.replies.map((reply) => {
-            // 부모 댓글 정보 찾기 (comment가 reply의 부모)
-            const replyParentInfo = comment;
-            // 디버깅: 답글의 파일 정보 확인
-            console.log(`답글 ${reply.commentId} 전체 데이터:`, reply);
-            if (reply.files) {
-              console.log(`답글 ${reply.commentId}의 파일:`, reply.files, `파일 개수: ${reply.files.length}`);
-            } else {
-              console.log(`답글 ${reply.commentId}의 files 속성이 없음`);
-            }
-            return (
-              <CommentItem
-                key={reply.commentId}
-                comment={reply}
-                onReply={onReply}
-                onEdit={onEdit}
-                onDelete={onDelete}
-                editingId={editingId}
-                editContent={editContent}
-                onEditContentChange={onEditContentChange}
-                onSaveEdit={onSaveEdit}
-                onCancelEdit={onCancelEdit}
-                parentId={parentId}
-                replyContent={replyContent}
-                onReplyContentChange={onReplyContentChange}
-                onSubmitReply={onSubmitReply}
-                onCancelReply={onCancelReply}
-                parentInfo={replyParentInfo}
-                targetCommentId={reply.commentId}
-                originalCommentId={comment.commentId}
-                currentUserId={currentUserId}
-                replyFiles={getReplyFiles ? getReplyFiles(reply.commentId) : []}
-                onReplyFilesChange={setReplyFilesForComment ? (updater) => setReplyFilesForComment(reply.commentId, updater) : undefined}
-                editFiles={getEditFiles ? getEditFiles(reply.commentId) : []}
-                onEditFilesChange={setEditFilesForComment ? (updater) => setEditFilesForComment(reply.commentId, updater) : undefined}
-                getReplyFiles={getReplyFiles}
-                setReplyFilesForComment={setReplyFilesForComment}
-                getEditFiles={getEditFiles}
-                setEditFilesForComment={setEditFilesForComment}
-              />
-            );
-          })}
+          {comment.replies.map((reply) => (
+            <CommentItem
+              key={reply.commentId}
+              comment={reply}
+              onReply={onReply}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              editingId={editingId}
+              editContent={editContent}
+              onEditContentChange={onEditContentChange}
+              onSaveEdit={onSaveEdit}
+              onCancelEdit={onCancelEdit}
+              parentId={parentId}
+              replyContent={replyContent}
+              onReplyContentChange={onReplyContentChange}
+              onSubmitReply={onSubmitReply}
+              onCancelReply={onCancelReply}
+              parentInfo={comment}
+              originalCommentId={comment.commentId}
+              currentUserId={currentUserId}
+              editFiles={getEditFiles ? getEditFiles(reply.commentId) : []}
+              onEditFilesChange={
+                setEditFilesForComment
+                  ? (updater) => setEditFilesForComment(reply.commentId, updater)
+                  : undefined
+              }
+              getReplyFiles={getReplyFiles}
+              setReplyFilesForComment={setReplyFilesForComment}
+              getEditFiles={getEditFiles}
+              setEditFilesForComment={setEditFilesForComment}
+            />
+          ))}
         </div>
       )}
     </div>
@@ -328,4 +395,3 @@ const CommentItem = ({
 };
 
 export default CommentItem;
-

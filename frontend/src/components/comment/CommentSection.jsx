@@ -53,7 +53,9 @@ const CommentSection = ({ brandId, boardId }) => {
   const submitReply = async (targetCommentId, content) => {
     if (!content || !content.trim()) return;
     try {
-      const files = getReplyFiles(targetCommentId);
+      // parentId를 파일 조회 키로 사용 (파일은 parentId로 저장됨)
+      const fileLookupId = parentId || targetCommentId;
+      const files = getReplyFiles(fileLookupId);
       await createComment({
         data: {
           content: content.trim(),
@@ -64,7 +66,7 @@ const CommentSection = ({ brandId, boardId }) => {
       });
       setReplyContent("");
       setParentId(null);
-      clearReplyFiles(targetCommentId);
+      clearReplyFiles(fileLookupId);
     } catch (error) {
       alert(getErrorMessage(error, "답글 등록에 실패했습니다."));
     }
@@ -76,9 +78,10 @@ const CommentSection = ({ brandId, boardId }) => {
       handleCancelEdit();
     }
     setEditingId(comment.commentId);
-    setEditingComment(comment); // 댓글 전체 정보 저장 (writerId 포함)
+    setEditingComment(comment); // 댓글 전체 정보 저장 (writerId, files 포함)
     setEditContent(comment.content);
     setParentId(null); // 답글 모드 해제
+    // 기존 파일들을 editFiles에 초기화 (새 파일은 빈 배열로 시작)
     initEditFiles(comment.commentId);
   };
 
@@ -103,17 +106,19 @@ const CommentSection = ({ brandId, boardId }) => {
     }
   };
 
-  const handleSaveEdit = async () => {
+  const handleSaveEdit = async (keepFileIds) => {
     if (!editContent.trim()) return;
     try {
       const files = getEditFiles(editingId);
+      // 새 파일만 필터링 (File 객체인 것만)
+      const newFiles = Array.from(files).filter((file) => file instanceof File);
       await updateComment(editingId, {
         data: {
           content: editContent,
-          keepFileIds: null,
+          keepFileIds: keepFileIds || [],
           writerId: editingComment?.writerId, // @PreAuthorize를 위한 writerId
         },
-        files: Array.from(files),
+        files: newFiles,
       });
       setEditingId(null);
       setEditingComment(null);
@@ -138,6 +143,25 @@ const CommentSection = ({ brandId, boardId }) => {
     await deleteComment(id);
   };
 
+  // 이미지 붙여넣기 공통 핸들러
+  const handleImagePaste = (e, setContentFn, setFilesFn) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf("image") !== -1) {
+        e.preventDefault();
+        const file = items[i].getAsFile();
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const imageUrl = event.target.result;
+          const imageTag = `<img src="${imageUrl}" alt="${file.name}" style="max-width: 100%; height: auto; margin: 10px 0;" />`;
+          setContentFn((prev) => prev + (prev ? "\n" : "") + imageTag);
+        };
+        reader.readAsDataURL(file);
+        setFilesFn((prev) => [...prev, file]);
+      }
+    }
+  };
+
   return (
     <div className="space-y-4">
       <h4 className="text-lg font-semibold text-gray-900">댓글</h4>
@@ -145,30 +169,7 @@ const CommentSection = ({ brandId, boardId }) => {
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          onPaste={async (e) => {
-            const items = e.clipboardData.items;
-            for (let i = 0; i < items.length; i++) {
-              if (items[i].type.indexOf("image") !== -1) {
-                e.preventDefault();
-                const file = items[i].getAsFile();
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                  const imageUrl = event.target.result;
-                  const imageTag = `<img src="${imageUrl}" alt="${file.name}" style="max-width: 100%; height: auto; margin: 10px 0;" />`;
-                  setContent((prev) => prev + (prev ? "\n" : "") + imageTag);
-                };
-                reader.readAsDataURL(file);
-
-                // 파일도 함께 첨부
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(file);
-                setCommentFiles((prev) => [
-                  ...prev,
-                  ...Array.from(dataTransfer.files),
-                ]);
-              }
-            }
-          }}
+          onPaste={(e) => handleImagePaste(e, setContent, setCommentFiles)}
           placeholder="댓글 작성... (이미지 붙여넣기 가능)"
           rows={4}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-y"
@@ -217,13 +218,8 @@ const CommentSection = ({ brandId, boardId }) => {
               onReplyContentChange={setReplyContent}
               onSubmitReply={submitReply}
               onCancelReply={handleCancelReply}
-              targetCommentId={comment.commentId}
               originalCommentId={comment.commentId}
               currentUserId={currentUserId}
-              replyFiles={getReplyFiles(comment.commentId)}
-              onReplyFilesChange={(updater) =>
-                setReplyFilesForComment(comment.commentId, updater)
-              }
               editFiles={getEditFiles(comment.commentId)}
               onEditFilesChange={(updater) =>
                 setEditFilesForComment(comment.commentId, updater)
