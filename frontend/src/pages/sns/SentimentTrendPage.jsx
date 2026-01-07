@@ -20,6 +20,8 @@ import {
   getProjects,
   getProjectKeywords,
 } from "../../api/snsApi";
+import { Activity, Heart, BarChart3 } from "lucide-react";
+import PageHeader from "../../components/common/PageHeader";
 
 // Components
 import InsightSummaryComponent from "../../components/sns/SentimentTrend/InsightSummaryComponent";
@@ -57,7 +59,7 @@ const SentimentTrend = () => {
   // Filters
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [selectedKeywordId, setSelectedKeywordId] = useState(null);
-  const [selectedSources, setSelectedSources] = useState([]); // 배열로 변경: ["NAVER", "YOUTUBE"]
+  const [selectedSources, setSelectedSources] = useState(["NAVER", "YOUTUBE"]); // 기본값: 둘 다 선택
 
   // Data
   const [projects, setProjects] = useState([]);
@@ -75,7 +77,6 @@ const SentimentTrend = () => {
     "NEU",
   ]);
   const [selectedToken, setSelectedToken] = useState(null); // click on word
-  const [wordSearch, setWordSearch] = useState("");
 
   /** -----------------------------
    * Fetch projects / keywords
@@ -84,7 +85,13 @@ const SentimentTrend = () => {
     const fetchProjects = async () => {
       try {
         const data = await getProjects(brandId);
-        setProjects(Array.isArray(data) ? data : []);
+        const projectsList = Array.isArray(data) ? data : [];
+        setProjects(projectsList);
+        
+        // 첫번째 프로젝트 자동 선택
+        if (projectsList.length > 0 && !selectedProjectId) {
+          setSelectedProjectId(projectsList[0].projectId);
+        }
       } catch (err) {
         console.error("프로젝트 목록 조회 실패:", err);
         setError("프로젝트 목록을 불러오는데 실패했습니다.");
@@ -102,8 +109,21 @@ const SentimentTrend = () => {
       }
       try {
         const data = await getProjectKeywords(brandId, selectedProjectId);
-        setKeywords(Array.isArray(data) ? data : []);
-        setSelectedKeywordId(null);
+        const keywordsList = Array.isArray(data) ? data : [];
+        setKeywords(keywordsList);
+        
+        // 첫번째 키워드 자동 선택 (프로젝트가 변경되었거나 키워드가 없을 때)
+        if (keywordsList.length > 0) {
+          // 현재 선택된 키워드가 새 키워드 목록에 없으면 첫번째 키워드 선택
+          const currentKeywordExists = keywordsList.some(
+            (k) => k.keywordId === selectedKeywordId
+          );
+          if (!currentKeywordExists) {
+            setSelectedKeywordId(keywordsList[0].keywordId);
+          }
+        } else {
+          setSelectedKeywordId(null);
+        }
       } catch (err) {
         console.error("키워드 목록 조회 실패:", err);
         setError("키워드 목록을 불러오는데 실패했습니다.");
@@ -150,6 +170,7 @@ const SentimentTrend = () => {
                   brandId,
                   selectedProjectId,
                   selectedKeywordId,
+                  null, // competitorId
                   source
                 )
               )
@@ -160,6 +181,7 @@ const SentimentTrend = () => {
                   brandId,
                   selectedProjectId,
                   selectedKeywordId,
+                  null, // competitorId
                   source
                 )
               )
@@ -170,6 +192,7 @@ const SentimentTrend = () => {
                   brandId,
                   selectedProjectId,
                   selectedKeywordId,
+                  null, // competitorId
                   source
                 )
               )
@@ -207,18 +230,21 @@ const SentimentTrend = () => {
             brandId,
             selectedProjectId,
             selectedKeywordId,
+            null, // competitorId
             sourceParam
           ),
           getSentimentStats(
             brandId,
             selectedProjectId,
             selectedKeywordId,
+            null, // competitorId
             sourceParam
           ),
           getTokenStats(
             brandId,
             selectedProjectId,
             selectedKeywordId,
+            null, // competitorId
             sourceParam
           ),
         ]);
@@ -463,11 +489,9 @@ const SentimentTrend = () => {
   }, [rawWordData]);
 
   const wordCloudData = useMemo(() => {
-    const q = wordSearch.trim().toLowerCase();
-
-    const filtered = rawWordData
-      .filter((w) => activeSentiments.includes(w.sentiment))
-      .filter((w) => (q ? w.text.toLowerCase().includes(q) : true));
+    const filtered = rawWordData.filter((w) =>
+      activeSentiments.includes(w.sentiment)
+    );
 
     // 디버깅: 데이터 개수 확인
     console.log(
@@ -476,13 +500,11 @@ const SentimentTrend = () => {
       "filtered:",
       filtered.length,
       "activeSentiments:",
-      activeSentiments,
-      "wordSearch:",
-      wordSearch
+      activeSentiments
     );
 
     return filtered;
-  }, [rawWordData, activeSentiments, wordSearch]);
+  }, [rawWordData, activeSentiments]);
 
   const topWordsBySentiment = useMemo(() => {
     const by = { POS: [], NEG: [], NEU: [] };
@@ -522,10 +544,17 @@ const SentimentTrend = () => {
       0
     );
 
+    // 날짜 범위 계산
+    const dates = dailyStats.map((stat) => stat.statDate).sort();
+    const dateRange = dates.length > 0 
+      ? `${dates[0]} ~ ${dates[dates.length - 1]}`
+      : "";
+
     return {
       topSource: topSource ? { name: topSource[0], count: topSource[1] } : null,
       topDate: topDate ? { date: topDate[0], count: topDate[1] } : null,
       totalMentions,
+      dateRange,
     };
   }, [dailyStats]);
 
@@ -541,29 +570,30 @@ const SentimentTrend = () => {
         legend: {
           position: "top",
           labels: {
-            color: TOKENS.color.subtext,
-            boxWidth: 10,
-            boxHeight: 10,
-            usePointStyle: true,
+            color: "#64748b",
+            boxWidth: 8,
+            font: { size: 11 },
+            padding: 8,
           },
         },
         tooltip: {
-          backgroundColor: "rgba(17, 24, 39, 0.92)",
-          titleColor: "white",
-          bodyColor: "white",
-          borderColor: "rgba(255,255,255,0.12)",
+          backgroundColor: "rgba(0, 0, 0, 0.85)",
+          padding: 10,
+          titleFont: { size: 11 },
+          bodyFont: { size: 10 },
+          borderColor: "rgba(255,255,255,0.1)",
           borderWidth: 1,
         },
       },
       scales: {
         x: {
-          grid: { color: "rgba(229, 231, 235, 0.6)" },
-          ticks: { color: TOKENS.color.axis, maxRotation: 0, autoSkip: true },
+          grid: { color: "#f1f5f9", drawBorder: false },
+          ticks: { color: "#94a3b8", font: { size: 10 }, maxRotation: 0, autoSkip: true },
         },
         y: {
           beginAtZero: true,
-          grid: { color: "rgba(229, 231, 235, 0.8)" },
-          ticks: { color: TOKENS.color.axis },
+          grid: { color: "#f1f5f9", drawBorder: false },
+          ticks: { color: "#94a3b8", font: { size: 10 } },
         },
       },
     };
@@ -610,220 +640,130 @@ const SentimentTrend = () => {
    * UI
    * ----------------------------- */
   return (
-    <div className="space-y-6 p-6 bg-gradient-to-br from-gray-50 via-blue-50/20 to-purple-50/20 min-h-screen">
-      {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-white via-indigo-50/30 to-purple-50/20 rounded-2xl shadow-xl border border-indigo-100/50 p-8 backdrop-blur-sm">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="relative flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-              <svg
-                className="w-8 h-8 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-                감성 / 트렌드 분석
-              </h1>
-              <p className="text-gray-600 font-medium">
-                키워드별 언급량 및 감성 분포를 확인하고, 원인 키워드로 빠르게
-                해석하세요.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="max-w-[1400px] mx-auto p-6 space-y-10 pb-20 animate-in fade-in duration-700">
+      {/* Page Header */}
+      <PageHeader
+        icon={BarChart3}
+        title="감성 / 트렌드 분석"
+        breadcrumb="Analytics / Sentiment & Trend"
+        subtitle="브랜드의 소셜 미디어 언급량과 감성 트렌드를 분석하여 인사이트를 제공합니다."
+      />
 
       {/* Filters */}
-      <div className="relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 p-6">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-purple-50/20" />
-        <div className="relative flex items-center justify-between gap-3 mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-md">
-              <svg
-                className="w-5 h-5 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                />
-              </svg>
-            </div>
-            <h2 className="text-xl font-bold text-gray-900">필터</h2>
+      <div className="sticky top-8 z-50 w-full flex justify-center pointer-events-none transition-all duration-500 mb-4">
+        <div className="inline-flex items-center bg-white/10 backdrop-blur-md px-5 py-2 rounded-full shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] border border-white/20 gap-4 pointer-events-auto transition-all duration-300 hover:bg-white/90 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] group flex-wrap">
+          <div className="flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+            <span className="text-[10px] font-black text-gray-400 group-hover:text-gray-500 uppercase tracking-widest transition-colors">Filter</span>
           </div>
-          {selectedToken && (
-            <button
-              onClick={() => setSelectedToken(null)}
-              className="text-xs px-4 py-2 rounded-full border-2 border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold transition-all duration-200 hover:scale-105 shadow-sm"
-              title="선택한 키워드 해제"
-            >
-              선택 키워드 해제:{" "}
-              <span className="font-bold">{selectedToken}</span>
-            </button>
-          )}
-        </div>
 
-        <div className="relative grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Project */}
-          <div className="group">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              프로젝트
-            </label>
-            <div className="relative">
-              <select
-                value={selectedProjectId || ""}
-                onChange={(e) =>
-                  setSelectedProjectId(
-                    e.target.value ? Number(e.target.value) : null
-                  )
-                }
-                className="w-full p-3.5 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 hover:border-indigo-300 shadow-sm hover:shadow-md font-medium text-gray-900"
-              >
-                <option value="">전체 프로젝트</option>
-                {projects.map((p) => (
-                  <option key={p.projectId} value={p.projectId}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className="flex items-center gap-2 border-l border-gray-200/30 group-hover:border-gray-200 pl-4">
+            <select
+              value={selectedProjectId || ""}
+              onChange={(e) =>
+                setSelectedProjectId(
+                  e.target.value ? Number(e.target.value) : null
+                )
+              }
+              className="text-[11px] font-bold text-gray-500 group-hover:text-gray-700 bg-transparent border-none focus:outline-none cursor-pointer"
+            >
+              <option value="">프로젝트</option>
+              {projects.map((p) => (
+                <option key={p.projectId} value={p.projectId}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Keyword */}
-          <div className="group">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              키워드
-            </label>
-            <div className="relative">
-              <select
-                value={selectedKeywordId || ""}
-                onChange={(e) =>
-                  setSelectedKeywordId(
-                    e.target.value ? Number(e.target.value) : null
-                  )
-                }
-                disabled={!selectedProjectId}
-                className="w-full p-3.5 border-2 border-gray-200 rounded-xl bg-white/80 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 hover:border-indigo-300 shadow-sm hover:shadow-md font-medium text-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <option value="">
-                  {selectedProjectId
-                    ? "전체 키워드"
-                    : "프로젝트를 먼저 선택하세요"}
+          <div className="flex items-center gap-2 border-l border-gray-200/30 group-hover:border-gray-200 pl-4">
+            <select
+              value={selectedKeywordId || ""}
+              onChange={(e) =>
+                setSelectedKeywordId(
+                  e.target.value ? Number(e.target.value) : null
+                )
+              }
+              disabled={!selectedProjectId}
+              className="text-[11px] font-bold text-gray-500 group-hover:text-gray-700 bg-transparent border-none focus:outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <option value="">키워드</option>
+              {keywords.map((k) => (
+                <option key={k.keywordId} value={k.keywordId}>
+                  {k.keyword}
                 </option>
-                {keywords.map((k) => (
-                  <option key={k.keywordId} value={k.keywordId}>
-                    {k.keyword}
-                  </option>
-                ))}
-              </select>
-            </div>
+              ))}
+            </select>
           </div>
 
           {/* Source Toggles */}
-          <div className="group md:col-span-3">
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
-              소스
-            </label>
-            <div className="flex items-center gap-6 flex-wrap">
-              {[
-                {
-                  value: "NAVER",
-                  label: "NAVER",
-                  activeColor: "bg-green-500",
-                  activeBorder: "border-green-500",
-                  focusRing: "focus:ring-green-500",
-                  hoverColor: "hover:bg-green-400",
-                },
-                {
-                  value: "YOUTUBE",
-                  label: "YOUTUBE",
-                  activeColor: "bg-red-500",
-                  activeBorder: "border-red-500",
-                  focusRing: "focus:ring-red-500",
-                  hoverColor: "hover:bg-red-400",
-                },
-              ].map((source) => {
-                const isActive = selectedSources.includes(source.value);
-                return (
-                  <div key={source.value} className="flex items-center gap-3">
-                    <span
-                      className={`text-sm font-semibold min-w-[90px] transition-colors ${
-                        isActive ? "text-gray-900" : "text-gray-600"
-                      }`}
-                    >
-                      {source.label}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedSources((prev) =>
-                          prev.includes(source.value)
-                            ? prev.filter((s) => s !== source.value)
-                            : [...prev, source.value]
-                        );
-                      }}
-                      className={`relative inline-flex h-8 w-16 items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm ${
-                        isActive
-                          ? `${source.activeColor} ${source.activeBorder} ${source.focusRing} ${source.hoverColor}`
-                          : "bg-gray-300 border-gray-300 focus:ring-gray-400 hover:bg-gray-400"
-                      }`}
-                      role="switch"
-                      aria-checked={isActive}
-                    >
-                      <span
-                        className={`inline-block h-6 w-6 transform rounded-full bg-white transition-all duration-300 shadow-lg ${
-                          isActive ? "translate-x-9" : "translate-x-1"
-                        }`}
-                      />
-                      <span
-                        className={`absolute text-[10px] font-bold transition-opacity duration-200 ${
-                          isActive
-                            ? "left-2 text-white opacity-100"
-                            : "right-2 text-gray-600 opacity-100"
-                        }`}
-                      >
-                        {isActive ? "On" : "Off"}
-                      </span>
-                    </button>
-                  </div>
+          <div className="flex items-center gap-2.5 border-l border-gray-200/30 group-hover:border-gray-200 pl-4">
+            <span className="text-[11px] font-bold text-gray-500 group-hover:text-gray-700">NAVER</span>
+            <button
+              onClick={() => {
+                setSelectedSources((prev) =>
+                  prev.includes("NAVER")
+                    ? prev.filter((s) => s !== "NAVER")
+                    : [...prev, "NAVER"]
                 );
-              })}
-              {selectedSources.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setSelectedSources([])}
-                  className="ml-auto px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl border-2 border-gray-300 transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
-                >
-                  재설정
-                </button>
-              )}
-            </div>
+              }}
+              className={`relative inline-flex h-4 w-8 items-center rounded-full transition-all ${
+                selectedSources.includes("NAVER") ? 'bg-green-500/60 group-hover:bg-green-500' : 'bg-gray-200/40 group-hover:bg-gray-200'
+              }`}
+            >
+              <span
+                className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-sm transition-transform ${
+                  selectedSources.includes("NAVER") ? 'translate-x-4.5' : 'translate-x-0.5'
+                }`}
+              />
+            </button>
           </div>
+
+          <div className="flex items-center gap-2.5 border-l border-gray-200/30 group-hover:border-gray-200 pl-4">
+            <span className="text-[11px] font-bold text-gray-500 group-hover:text-gray-700">YOUTUBE</span>
+            <button
+              onClick={() => {
+                setSelectedSources((prev) =>
+                  prev.includes("YOUTUBE")
+                    ? prev.filter((s) => s !== "YOUTUBE")
+                    : [...prev, "YOUTUBE"]
+                );
+              }}
+              className={`relative inline-flex h-4 w-8 items-center rounded-full transition-all ${
+                selectedSources.includes("YOUTUBE") ? 'bg-red-500/60 group-hover:bg-red-500' : 'bg-gray-200/40 group-hover:bg-gray-200'
+              }`}
+            >
+              <span
+                className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-sm transition-transform ${
+                  selectedSources.includes("YOUTUBE") ? 'translate-x-4.5' : 'translate-x-0.5'
+                }`}
+              />
+            </button>
+          </div>
+
+          {selectedToken && (
+            <div className="flex items-center gap-2 border-l border-gray-200/30 group-hover:border-gray-200 pl-4">
+              <button
+                onClick={() => setSelectedToken(null)}
+                className="text-[10px] px-2 py-1 rounded-full border border-blue-200/50 bg-blue-50/50 hover:bg-blue-100 text-blue-700 font-semibold transition-all"
+                title="선택한 키워드 해제"
+              >
+                {selectedToken} ×
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       {/* States */}
       {error && (
-        <div className="relative overflow-hidden bg-gradient-to-br from-red-50 to-pink-50 rounded-2xl shadow-lg border-2 border-red-200/50 p-6 backdrop-blur-sm">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
+        <div className="w-full bg-white border border-red-200 rounded-xl p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center">
               <svg
-                className="w-6 h-6 text-red-600"
+                className="w-4 h-4 text-red-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -837,116 +777,113 @@ const SentimentTrend = () => {
               </svg>
             </div>
             <div>
-              <h3 className="font-bold text-red-900 mb-1">
+              <h3 className="text-sm font-bold text-red-900 mb-0.5">
                 오류가 발생했습니다
               </h3>
-              <p className="text-sm text-red-700">{error}</p>
+              <p className="text-xs text-red-700">{error}</p>
             </div>
           </div>
         </div>
       )}
 
       {loading && (
-        <div className="relative overflow-hidden bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 p-12 text-center">
-          <div className="inline-flex flex-col items-center gap-4">
-            <div className="relative">
-              <div className="w-16 h-16 rounded-full border-4 border-indigo-100"></div>
-              <div className="absolute top-0 left-0 w-16 h-16 rounded-full border-4 border-transparent border-t-indigo-600 border-r-indigo-600 animate-spin"></div>
-            </div>
+        <div className="w-full bg-white border border-gray-200 rounded-xl p-10 text-center">
+          <div className="inline-flex flex-col items-center gap-3">
+            <div className="w-6 h-6 border-2 border-blue-100 border-t-blue-500 rounded-full animate-spin" />
             <div>
-              <p className="text-lg font-semibold text-gray-900 mb-1">
+              <p className="text-sm font-semibold text-gray-900 mb-0.5">
                 데이터를 불러오는 중...
               </p>
-              <p className="text-sm text-gray-500">잠시만 기다려주세요</p>
+              <p className="text-xs text-gray-500">잠시만 기다려주세요</p>
             </div>
           </div>
         </div>
       )}
 
       {!loading && !error && (
-        <>
-          {/* Insights - 필터 바로 아래 */}
-          <InsightSummaryComponent insights={insights} />
-
-          {/* 언급량 분석 패널 */}
-          <MentionAnalysisComponent
-            mentionChartData={mentionChartData}
-            summaryStats={summaryStats}
-            selectedSources={selectedSources}
-            baseChartOptions={baseChartOptions}
-          />
-
-          {/* 긍/부정 분석 패널 */}
-          <div className="relative overflow-hidden bg-gradient-to-br from-white via-purple-50/30 to-pink-50/20 rounded-2xl shadow-lg border border-purple-100/50 p-8 backdrop-blur-sm">
-            {/* Decorative elements */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-purple-400/10 to-pink-400/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-pink-400/10 to-purple-400/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-
-            <div className="relative mb-8">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                  <svg
-                    className="w-6 h-6 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                    긍/부정 분석
-                  </h2>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    감성 키워드 분석
-                  </p>
-                </div>
+        <div className="space-y-14">
+          {/* 언급량 분석 섹션 */}
+          <section className="space-y-6">
+            <div className="flex items-center gap-3 px-2">
+              <div className="p-2 bg-blue-50 text-blue-600 rounded-xl border border-blue-100 shadow-sm">
+                <Activity size={20} />
               </div>
+              <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">
+                Mention Analysis
+              </h3>
+              <div className="h-px flex-1 bg-slate-200 opacity-50" />
             </div>
+            
+            {/* 인사이트 - Mention Analysis 섹션 하위 */}
+            <InsightSummaryComponent insights={insights} />
+            
+            <MentionAnalysisComponent
+              mentionChartData={mentionChartData}
+              summaryStats={summaryStats}
+              selectedSources={selectedSources}
+              baseChartOptions={baseChartOptions}
+            />
+          </section>
+
+          {/* 긍/부정 분석 섹션 */}
+          <section className="space-y-6">
+            <div className="flex items-center gap-3 px-2">
+              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100 shadow-sm">
+                <Heart size={20} />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">
+                Sentiment Insight
+              </h3>
+              <div className="h-px flex-1 bg-slate-200 opacity-50" />
+            </div>
+            <div className="w-full bg-white flex flex-col border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm">
+            <div className="p-8">
 
             {/* 워드클라우드 + 순위표 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               {/* 워드클라우드 */}
-              <WordCloudComponent
-                wordCloudData={wordCloudData}
-                wordCloudMeta={wordCloudMeta}
-                wordView={wordView}
-                setWordView={setWordView}
-                wordSearch={wordSearch}
-                setWordSearch={setWordSearch}
-                activeSentiments={activeSentiments}
-                toggleSentiment={toggleSentiment}
-                selectedToken={selectedToken}
-                setSelectedToken={setSelectedToken}
-                tokenStats={tokenStats}
-              />
+              <div className="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm">
+                <WordCloudComponent
+                  wordCloudData={wordCloudData}
+                  wordCloudMeta={wordCloudMeta}
+                  wordView={wordView}
+                  setWordView={setWordView}
+                  activeSentiments={activeSentiments}
+                  toggleSentiment={toggleSentiment}
+                  selectedToken={selectedToken}
+                  setSelectedToken={setSelectedToken}
+                  tokenStats={tokenStats}
+                />
+              </div>
 
               {/* 순위표 */}
-              <KeywordRankingComponent wordCloudData={wordCloudData} />
+              <div className="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm min-h-[450px] overflow-hidden">
+                <KeywordRankingComponent wordCloudData={wordCloudData} />
+              </div>
             </div>
 
-            {/* 긍부정 추이 + 긍부정 비율 (3:1) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-6 border-t">
-              <SentimentTrendComponent
-                sentimentBarData={sentimentBarData}
-                stackedBarOptions={stackedBarOptions}
-              />
+            {/* 긍부정 추이 + 긍부정 비율 */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-6 border-t border-slate-200">
+              <div className="lg:col-span-2 bg-white border border-slate-200 rounded-[2.5rem] p-10 min-h-[350px] shadow-sm">
+                <SentimentTrendComponent
+                  sentimentBarData={sentimentBarData}
+                  stackedBarOptions={stackedBarOptions}
+                />
+              </div>
 
-              <SentimentRatioComponent
-                sentimentDoughnutData={sentimentDoughnutData}
-                sentimentAverages={sentimentAverages}
-                doughnutOptions={doughnutOptions}
-                summaryStats={summaryStats}
-              />
+              <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 min-h-[350px] shadow-sm">
+                <SentimentRatioComponent
+                  sentimentDoughnutData={sentimentDoughnutData}
+                  sentimentAverages={sentimentAverages}
+                  doughnutOptions={doughnutOptions}
+                  summaryStats={summaryStats}
+                />
+              </div>
             </div>
-          </div>
-        </>
+            </div>
+            </div>
+          </section>
+        </div>
       )}
     </div>
   );

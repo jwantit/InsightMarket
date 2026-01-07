@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Mail, Lock, LogIn, Sparkles } from "lucide-react";
 import useCustomLogin from "../../hooks/useCustomLogin";
 import KakaoLoginComponent from "./KakaoLoginComponent";
 
@@ -37,77 +38,98 @@ const LoginComponent = () => {
   };
 
   return (
-    <div className="w-full max-w-md bg-white rounded-2xl border shadow-sm p-8">
-      {/* Logo / Title */}
-      <div className="text-center mb-8">
-        <div className="text-2xl font-extrabold tracking-tight">
-          Insight<span className="text-blue-600">Market</span>
+    <div className="w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+      {/* 헤더 */}
+      <div className="px-8 pt-8 pb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-slate-100">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4">
+            <Sparkles size={32} className="text-white" />
+          </div>
+          <div className="text-3xl font-black tracking-tight text-slate-900">
+            Insight<span className="text-blue-600">Market</span>
+          </div>
+          <p className="mt-3 text-sm text-slate-600 font-medium">
+            브랜드 인사이트를 한 곳에서 관리하세요
+          </p>
         </div>
-        <p className="mt-2 text-sm text-gray-500">
-          브랜드 인사이트를 한 곳에서 관리하세요
-        </p>
       </div>
 
-      {/* Email */}
-      <div className="mb-4">
-        <label className="block text-sm font-semibold text-gray-700 mb-1">
-          이메일
-        </label>
-        <input
-          className="w-full rounded-lg border bg-gray-50 px-3 py-2 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-blue-200"
-          name="email"
-          type="text"
-          placeholder="user@example.com"
-          value={loginParam.email}
-          onChange={handleChange}
-        />
-      </div>
+      {/* 폼 영역 */}
+      <div className="p-8 space-y-5">
+        {/* Email */}
+        <div>
+          <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
+            이메일
+          </label>
+          <div className="relative">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2">
+              <Mail size={18} className="text-slate-400" />
+            </div>
+            <input
+              className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-sm font-medium focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all"
+              name="email"
+              type="text"
+              placeholder="user@example.com"
+              value={loginParam.email}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
 
-      {/* Password */}
-      <div className="mb-6">
-        <label className="block text-sm font-semibold text-gray-700 mb-1">
-          비밀번호
-        </label>
-        <input
-          className="w-full rounded-lg border bg-gray-50 px-3 py-2 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-blue-200"
-          name="pw"
-          type="password"
-          placeholder="••••••••"
-          value={loginParam.pw}
-          onChange={handleChange}
-        />
-      </div>
+        {/* Password */}
+        <div>
+          <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
+            비밀번호
+          </label>
+          <div className="relative">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2">
+              <Lock size={18} className="text-slate-400" />
+            </div>
+            <input
+              className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-sm font-medium focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all"
+              name="pw"
+              type="password"
+              placeholder="••••••••"
+              value={loginParam.pw}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
 
-      {/* Login Button */}
-      <button
-        onClick={handleClickLogin}
-        className="w-full rounded-lg bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition"
-      >
-        로그인
-      </button>
-
-      {/* 회원가입 이동 */}
-      <div className="mt-4 text-center">
+        {/* Login Button */}
         <button
-          onClick={() => moveToPath("/member/join")}
-          className="text-sm text-blue-600 hover:underline"
+          onClick={handleClickLogin}
+          className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-all shadow-lg shadow-blue-200 active:scale-95"
         >
-          아직 계정이 없으신가요? 회원가입
+          <LogIn size={18} />
+          로그인
         </button>
-      </div>
 
-      {/* Divider */}
-      <div className="my-6 flex items-center gap-2">
-        <div className="flex-1 h-px bg-gray-200" />
-        <span className="text-xs text-gray-400">또는</span>
-        <div className="flex-1 h-px bg-gray-200" />
-      </div>
+        {/* 회원가입 이동 */}
+        <div className="pt-2 text-center">
+          <button
+            onClick={() => moveToPath("/member/join")}
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+          >
+            아직 계정이 없으신가요? <span className="font-bold">회원가입</span>
+          </button>
+        </div>
 
-      <KakaoLoginComponent />
+        {/* Divider */}
+        <div className="my-6 flex items-center gap-3">
+          <div className="flex-1 h-px bg-slate-200" />
+          <span className="text-xs text-slate-400 font-medium">또는</span>
+          <div className="flex-1 h-px bg-slate-200" />
+        </div>
+
+        <KakaoLoginComponent />
+      </div>
 
       {/* Footer */}
-      <div className="mt-6 text-center text-xs text-gray-400">
-        © {new Date().getFullYear()} InsightMarket
+      <div className="px-8 pb-6 pt-2 text-center">
+        <div className="text-xs text-slate-400">
+          © {new Date().getFullYear()} InsightMarket
+        </div>
       </div>
     </div>
   );

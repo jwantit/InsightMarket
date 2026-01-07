@@ -90,60 +90,94 @@ const MaketComponent = ({ projectId, filter }) => {
   }, [projectId, filter, page, size, refresh]);
 
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
       {/* 로딩 상태 */}
       {loading && (
-        <div className="px-4 py-6 text-center text-gray-400 text-sm">
-          로딩 중...
+        <div className="p-12 text-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 bg-slate-100 rounded-2xl animate-pulse" />
+            <p className="text-sm text-slate-500">로딩 중...</p>
+          </div>
         </div>
       )}
 
-      {/* 리스트 */}
+      {/* 빈 상태 */}
       {!loading && serverData.dtoList.length === 0 && (
-        <div className="px-4 py-6 text-center text-gray-400 text-sm">
-          등록된 상품이 없습니다.
+        <div className="p-12 text-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-slate-400"
+              >
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                <path d="M3 6h18" />
+                <path d="M16 10a4 4 0 0 1-8 0" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-slate-600 mb-1">
+                등록된 상품이 없습니다.
+              </p>
+              <p className="text-xs text-slate-400">
+                새로운 솔루션이 등록되면 표시됩니다.
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
       {/* 전략명 표시 (NEW전략일 때만) */}
       {filter === "ALL" && serverData.strategyName && (
-        <div className="bg-blue-50 border-b border-blue-200 px-4 py-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-blue-600 uppercase tracking-wide">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200 px-6 py-4">
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-black text-blue-600 uppercase tracking-wider bg-blue-100 px-3 py-1 rounded-full">
               NEW 전략
             </span>
-            <span className="text-sm font-bold text-gray-800">
+            <span className="text-sm font-bold text-slate-900">
               {serverData.strategyName}
             </span>
           </div>
         </div>
       )}
 
+      {/* 상품 리스트 */}
       {!loading &&
-        serverData.dtoList.map((solution) => (
+        serverData.dtoList.map((solution, idx) => (
           <div
             key={solution.solutionid}
-            className="flex items-center gap-4 px-4 py-3 border-t text-sm hover:bg-gray-50"
+            className={`flex items-center gap-4 px-6 py-4 text-sm transition-colors ${
+              idx === 0 && filter !== "ALL" ? "" : "border-t border-slate-100"
+            } hover:bg-blue-50/30 group`}
           >
-            {/* No */}
-            <span className="text-gray-500 w-16 flex-shrink-0">
+            {/* 번호 */}
+            <span className="text-slate-500 w-16 flex-shrink-0 font-medium">
               {solution.solutionid}
             </span>
 
-            {/* 상품명 - flex-1로 남은 공간 차지 */}
-            <span className="font-bold text-gray-800 flex-1 min-w-0 truncate">
+            {/* 상품명 */}
+            <span className="font-bold text-slate-900 flex-1 min-w-0 truncate group-hover:text-blue-600 transition-colors">
               {solution.title}
             </span>
 
-            <span className="font-bold text-gray-800 flex-1 min-w-0 truncate">
+            {/* 가격 */}
+            <span className="font-bold text-slate-900 w-32 text-right flex-shrink-0">
               {solution.price?.toLocaleString()}원
             </span>
 
-            {/* 버튼 영역 - 오른쪽 정렬, 고정 너비 */}
+            {/* 버튼 영역 */}
             <div className="flex gap-2 justify-end flex-shrink-0">
               <button
                 onClick={() => setSelectedSolution(solution)}
-                className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                className="p-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-200 active:scale-95"
                 title="상세보기"
               >
                 <svg
@@ -181,14 +215,14 @@ const MaketComponent = ({ projectId, filter }) => {
                     await addCartItem({
                       projectid: projectId,
                       solutionid: solution.solutionid,
-                    }); // addCartItem 사용
+                    });
                     alert("장바구니에 추가되었습니다.");
                   } catch (error) {
                     console.error("장바구니 추가 실패", error);
                     alert("장바구니 추가에 실패했습니다.");
                   }
                 }}
-                className="p-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                className="p-2 bg-slate-600 text-white rounded-xl hover:bg-slate-700 transition-all shadow-md shadow-slate-200 active:scale-95"
                 title="장바구니"
               >
                 <svg

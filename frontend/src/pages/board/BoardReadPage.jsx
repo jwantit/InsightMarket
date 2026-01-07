@@ -1,7 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import {fetchBoardDetail,selectBoardDetail,} from "../../store/slices/boardSlice";
+import {
+  Edit3,
+  Trash2,
+  User,
+  Calendar,
+  FileText,
+  ArrowLeft,
+} from "lucide-react";
+import {
+  fetchBoardDetail,
+  selectBoardDetail,
+} from "../../store/slices/boardSlice";
 import useBoardRouteParams from "../../hooks/common/useBoardRouteParams";
 import CommentSection from "../../components/comment/CommentSection";
 import { formatDateTime } from "../../util/dateUtil";
@@ -54,64 +65,98 @@ const BoardReadPage = () => {
 
   if (!detail)
     return (
-      <div className="py-12 text-center text-gray-500">불러오는 중...</div>
+      <div className="bg-white border border-slate-200 rounded-3xl p-12 text-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 bg-slate-100 rounded-2xl animate-pulse" />
+          <p className="text-sm text-slate-500">불러오는 중...</p>
+        </div>
+      </div>
     );
 
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-2xl font-bold text-gray-900">
+      {/* 헤더 */}
+      <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+        <div className="p-6">
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight flex-1">
               {detail.title}
-            </h3>
-            {currentUserId && Number(detail.writerId) === Number(currentUserId) && (
-              <div className="flex gap-2">
-                <button
-                  onClick={goModify}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  수정
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  삭제
-                </button>
-              </div>
-            )}
+            </h1>
+            {currentUserId &&
+              Number(detail.writerId) === Number(currentUserId) && (
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={goModify}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-100"
+                  >
+                    <Edit3 size={16} />
+                    수정
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="p-2 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-xl transition-colors border border-red-50"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                </div>
+              )}
           </div>
-          <div className="flex items-center gap-4 text-sm text-gray-600 pb-4 border-b">
-            <span className="font-medium">작성자: {detail.writerName}</span>
-            <span className="text-gray-500">
-              등록일: {formatDateTime(detail.createdAt)}
-              {detail.updatedAt && 
-               detail.updatedAt !== detail.createdAt && 
-               ` (수정됨: ${formatDateTime(detail.updatedAt)})`}
-            </span>
+
+          {/* 메타 정보 */}
+          <div className="flex items-center gap-6 text-sm text-slate-600 pt-4 border-t border-slate-100">
+            <div className="flex items-center gap-2">
+              <User size={16} className="text-slate-400" />
+              <span className="font-bold">{detail.writerName}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar size={16} className="text-slate-400" />
+              <span>{formatDateTime(detail.createdAt)}</span>
+              {detail.updatedAt && detail.updatedAt !== detail.createdAt && (
+                <span className="text-slate-400">
+                  (수정됨: {formatDateTime(detail.updatedAt)})
+                </span>
+              )}
+            </div>
           </div>
         </div>
+      </div>
 
-        <div
-          className="prose max-w-none py-6 text-gray-800 leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: (detail.content || '').replace(/\n/g, '<br>') }}
-        />
+      {/* 본문 */}
+      <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+        <div className="p-6">
+          <div
+            className="prose max-w-none text-slate-800 leading-relaxed"
+            dangerouslySetInnerHTML={{
+              __html: (detail.content || "").replace(/\n/g, "<br>"),
+            }}
+          />
+        </div>
+      </div>
 
-        {detail.files?.length > 0 && (
-          <div className="pt-4 border-t">
-            <h4 className="text-sm font-medium text-gray-700 mb-3">첨부 파일</h4>
-            <div className="flex flex-wrap gap-2">
+      {/* 첨부 파일 */}
+      {detail.files?.length > 0 && (
+        <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+            <div className="p-2 bg-slate-50 rounded-lg text-slate-500">
+              <FileText size={18} />
+            </div>
+            <h3 className="text-base font-bold text-slate-900">첨부 파일</h3>
+          </div>
+          <div className="p-6">
+            <div className="flex flex-wrap gap-3">
               {detail.files.map((file) => (
                 <FileItem key={file.id} file={file} size="md" />
               ))}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      <div className="pt-6 border-t">
-        <CommentSection brandId={brandId} boardId={boardId} />
+      {/* 댓글 섹션 */}
+      <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+        <div className="p-6">
+          <CommentSection brandId={brandId} boardId={boardId} />
+        </div>
       </div>
     </div>
   );

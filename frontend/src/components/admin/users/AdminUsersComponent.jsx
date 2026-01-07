@@ -57,34 +57,35 @@ const AdminUsersComponent = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6">
-      <div className="max-w-6xl">
-        {/* Search */}
-        <div className="mb-4 flex gap-2">
-          <input
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            placeholder="이름 또는 이메일로 검색"
-            className="w-72 rounded-lg border bg-gray-50 px-3 py-2 text-sm outline-none
-                       focus:bg-white focus:ring-2 focus:ring-blue-200"
-          />
+    <div className="space-y-6">
+      {/* Search */}
+      <div className="bg-white border border-slate-200 rounded-3xl p-6">
+        <div className="flex gap-3">
+          <div className="relative group flex-1">
+            <input
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              placeholder="이름 또는 이메일로 검색"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all text-sm font-medium"
+            />
+          </div>
           <button
             onClick={handleSearch}
-            className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm
-                       hover:bg-blue-700"
+            className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-all shadow-md shadow-blue-200 active:scale-95"
           >
             검색
           </button>
         </div>
-
-        {/* Table */}
-        <UsersTableComponent
-          loading={loading}
-          members={members}
-          onChangeRole={handleChangeRole}
-          onExpire={handleExpire}
-        />
       </div>
+
+      {/* Table */}
+      <UsersTableComponent
+        loading={loading}
+        members={members}
+        onChangeRole={handleChangeRole}
+        onExpire={handleExpire}
+      />
     </div>
   );
 };

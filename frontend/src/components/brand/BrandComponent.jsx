@@ -1,4 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+// src/components/brand/BrandComponent.jsx
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
+import { useDispatch } from "react-redux";
 import {
   createBrand,
   deleteBrand,
@@ -6,76 +15,99 @@ import {
   getBrandList,
   updateBrand,
 } from "../../api/brandApi";
+import { setBrandList } from "../../store/slices/brandSlice";
+import { getErrorMessage } from "../../util/errorUtil";
+
+// 하위 컴포넌트들
 import BrandListComponent from "./BrandListComponent";
 import BrandDetailComponent from "./BrandDetailComponent";
 import BrandFormComponent from "./BrandFormComponent";
-import { useDispatch } from "react-redux";
-import { setBrandList } from "../../store/slices/brandSlice";
-import { getErrorMessage } from "../../util/errorUtil";
 
 const initBrandForm = {
   name: "",
   description: "",
-  keywords: [],
   competitors: [],
 };
-const trim = (v) => (v ?? "").trim();
-const uniq = (arr) => Array.from(new Set(arr));
 
-export default function BrandComponent() {
+const trim = (v) => (v ?? "").trim();
+
+const BrandComponent = forwardRef((props, ref) => {
   const dispatch = useDispatch();
 
-  const [screen, setScreen] = useState("LIST");
+  // --- 화면 및 데이터 상태 ---
+  const [screen, setScreen] = useState("LIST"); // LIST, DETAIL, FORM
   const [brands, setBrands] = useState([]);
-
   const [selectedId, setSelectedId] = useState(null);
   const [selectedBrand, setSelectedBrand] = useState(null);
 
-  const [formMode, setFormMode] = useState("CREATE");
+  // --- 폼 상태 ---
+  const [formMode, setFormMode] = useState("CREATE"); // CREATE, EDIT
   const [form, setForm] = useState(initBrandForm);
 
+  // --- 로딩 및 에러 상태 ---
   const [loadingList, setLoadingList] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
 
+  // --- 필터 상태 ---
   const [query, setQuery] = useState("");
   const [onlyAdmin, setOnlyAdmin] = useState(false);
 
+  // --- 부모 컴포넌트(BrandPage)에 함수 노출 ---
+  useImperativeHandle(ref, () => ({
+    openCreate: () => {
+      openCreate();
+    },
+    refreshList: () => {
+      fetchList();
+    },
+  }));
+
   const canSubmit = useMemo(() => trim(form.name).length > 0, [form.name]);
 
+  // --- 데이터 페칭 ---
   const fetchList = useCallback(async () => {
     setLoadingList(true);
     setErrorMsg(null);
     try {
       const data = await getBrandList();
-      setBrands(data || []); //화면용 (List)
+      const list = data || [];
+      setBrands(list);
+
+      // 1. Topbar용 Redux 업데이트
       dispatch(
         setBrandList(
-          (data || []).map((b) => ({
+          list.map((b) => ({
             brandId: b.brandId,
             name: b.name,
           }))
         )
-      ); // Topbar용 (Redux)
+      );
+
+      // 2. 부모(BrandPage)의 카운터 업데이트
+      if (props.onCountChange) {
+        props.onCountChange(list.length);
+      }
     } catch (e) {
       setErrorMsg(getErrorMessage(e, "브랜드 목록을 불러오지 못했어요."));
     } finally {
       setLoadingList(false);
     }
-  }, []);
+  }, [dispatch, props]);
 
   useEffect(() => {
     fetchList();
   }, [fetchList]);
 
+  // --- 필터링 로직 ---
   const filteredBrands = useMemo(() => {
     const q = trim(query).toLowerCase();
     return (brands || [])
       .filter((b) => (onlyAdmin ? b.role === "BRAND_ADMIN" : true))
       .filter((b) => {
         if (!q) return true;
-        const hay = [b?.name, b?.description, ...(b?.keywords || []), b?.role]
+        const hay = [b?.name, b?.description, b?.role]
           .filter(Boolean)
           .join(" ")
           .toLowerCase();
@@ -83,6 +115,7 @@ export default function BrandComponent() {
       });
   }, [brands, onlyAdmin, query]);
 
+  // --- 화면 전환 함수 ---
   const goList = useCallback(() => {
     setScreen("LIST");
     setSelectedId(null);
@@ -103,12 +136,9 @@ export default function BrandComponent() {
     setErrorMsg(null);
     try {
       const detail = await getBrandDetail(brandId);
-      console.log("상세 페이지 로드된 데이터:", detail);
-      console.log("경쟁사 데이터:", detail?.competitors);
       setSelectedBrand(detail);
       setScreen("DETAIL");
     } catch (e) {
-      console.error("상세 정보 로드 오류:", e);
       setErrorMsg(getErrorMessage(e, "상세 정보를 불러오지 못했어요."));
       setScreen("LIST");
     } finally {
@@ -124,33 +154,19 @@ export default function BrandComponent() {
 
     try {
       const detail = await getBrandDetail(brandId);
-      console.log("수정 화면 로드 - 전체 데이터:", detail);
-      console.log("수정 화면 로드 - 경쟁사 데이터:", detail?.competitors);
 
-      // 경쟁사 데이터 구조 확인 및 정규화
-      const normalizedCompetitors = (detail?.competitors || []).map((c) => {
-        console.log("경쟁사 원본 데이터:", c);
-        console.log(
-          "경쟁사 competitorId 값:",
-          c?.competitorId,
-          "타입:",
-          typeof c?.competitorId
-        );
-        return {
-          competitorId: c?.competitorId ?? null, // 필드명이 competitorId로 확인됨
-          name: c?.name ?? "",
-          enabled: c?.enabled ?? true,
-          keywords: c?.keywords ?? [],
-        };
-      });
-      console.log("정규화된 경쟁사 데이터:", normalizedCompetitors);
+      // 경쟁사 데이터 정규화
+      const normalizedCompetitors = (detail?.competitors || []).map((c) => ({
+        competitorId: c?.competitorId ?? null,
+        name: c?.name ?? "",
+        enabled: c?.enabled ?? true,
+      }));
 
       setSelectedId(brandId);
       setSelectedBrand(detail);
       setForm({
         name: detail?.name ?? "",
         description: detail?.description ?? "",
-        keywords: detail?.keywords ?? [],
         competitors: normalizedCompetitors,
       });
       setScreen("FORM");
@@ -162,6 +178,7 @@ export default function BrandComponent() {
     }
   }, []);
 
+  // --- 데이터 저장 및 삭제 ---
   const handleSubmit = useCallback(async () => {
     if (!canSubmit) {
       setErrorMsg("브랜드명을 입력하세요.");
@@ -170,52 +187,33 @@ export default function BrandComponent() {
 
     const competitorsData = (form.competitors || [])
       .map((c) => ({
-        competitorId: c?.competitorId ?? null, // null이면 신규 생성, 값이 있으면 수정
+        competitorId: c?.competitorId ?? null,
         name: trim(c?.name),
         enabled: !!c?.enabled,
-        keywords: uniq((c?.keywords || []).map(trim).filter(Boolean)),
       }))
-      .filter((c) => c.name.length > 0); // 빈 이름의 경쟁사는 제외
+      .filter((c) => c.name.length > 0);
 
     const payload = {
       name: trim(form.name),
       description: trim(form.description),
-      keywords: uniq((form.keywords || []).map(trim).filter(Boolean)),
       competitors: competitorsData,
     };
-
-    // 디버깅: 전송되는 payload 확인
-    console.log("저장할 브랜드 데이터:", payload);
-    console.log("저장할 경쟁사 데이터 상세:", competitorsData);
-    console.log("경쟁사 개수:", competitorsData.length);
-    competitorsData.forEach((c, idx) => {
-      console.log(
-        `경쟁사 ${idx + 1}:`,
-        c,
-        `competitorId 포함 여부: ${c.hasOwnProperty("competitorId")}`
-      );
-    });
 
     setSaving(true);
     setErrorMsg(null);
     try {
       if (formMode === "EDIT" && selectedId != null) {
         await updateBrand(selectedId, payload);
-        // 저장 후 최신 데이터 다시 로드
         const detail = await getBrandDetail(selectedId);
-        console.log("수정 후 상세 데이터:", detail);
         setSelectedBrand(detail);
         setScreen("DETAIL");
         await fetchList();
       } else {
         const result = await createBrand(payload);
-        console.log("생성 API 응답:", result);
-        // API 응답이 ID만 반환하는지, 전체 객체를 반환하는지 확인
         const newId = result?.brandId ?? result?.id ?? result;
         await fetchList();
         if (newId) {
           const detail = await getBrandDetail(newId);
-          console.log("생성 후 상세 데이터:", detail);
           setSelectedBrand(detail);
           setScreen("DETAIL");
         } else {
@@ -223,12 +221,11 @@ export default function BrandComponent() {
         }
       }
     } catch (e) {
-      console.error("저장 오류:", e);
       setErrorMsg(getErrorMessage(e, "저장에 실패했어요."));
     } finally {
       setSaving(false);
     }
-  }, [canSubmit, fetchList, form, formMode, openDetail, selectedId]);
+  }, [canSubmit, fetchList, form, formMode, selectedId]);
 
   const handleDelete = useCallback(
     async (brandId) => {
@@ -250,12 +247,16 @@ export default function BrandComponent() {
 
   return (
     <div className="space-y-4">
+      {/* 에러 메시지 상단 표시 */}
       {errorMsg && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {errorMsg}
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 animate-in fade-in slide-in-from-top-1">
+          <div className="flex items-center gap-2">
+            <span className="font-bold">오류:</span> {errorMsg}
+          </div>
         </div>
       )}
 
+      {/* 화면 전환 렌더링 */}
       {screen === "LIST" && (
         <BrandListComponent
           brands={filteredBrands}
@@ -297,4 +298,6 @@ export default function BrandComponent() {
       )}
     </div>
   );
-}
+});
+
+export default BrandComponent;

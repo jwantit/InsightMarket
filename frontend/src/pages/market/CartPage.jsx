@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { ShoppingCart } from "lucide-react";
+import PageHeader from "../../components/common/PageHeader";
 import SolutionToolbar from "../../components/maket/SolutionToolbar";
 import CartComponent from "../../components/maket/CartComponent";
 import { getProjectsByTenant } from "../../api/selectProjectApi";
@@ -91,24 +93,24 @@ const CartPage = () => {
   }, [projectId, updateUrlParams]);
 
   return (
-    <section className="p-6 space-y-4">
-      {/* 헤더 */}
-      <header className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-800">AI Solution 장바구니</h1>
-      </header>
+    <div className="max-w-[1400px] mx-auto p-6 space-y-10 pb-20 animate-in fade-in duration-700">
+      <PageHeader
+        icon={ShoppingCart}
+        title="AI Solution 장바구니"
+        breadcrumb="Market / Cart"
+        subtitle="선택한 AI 솔루션 리포트를 확인하고 구매할 수 있습니다."
+      />
 
       <SolutionToolbar
         projectList={projectList}
         projectId={projectId}
         onProjectChange={setProjectId}
-        filter={undefined} // filter prop을 undefined로 명시적으로 전달
-        onFilterChange={undefined} // onFilterChange prop을 undefined로 명시적으로 전달
+        filter={undefined}
+        onFilterChange={undefined}
         showFilter={false}
       />
-       <CartComponent 
-       projectId={projectId}
-       />
-    </section>
+      <CartComponent projectId={projectId} />
+    </div>
   );
 };
 
