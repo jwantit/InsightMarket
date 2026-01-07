@@ -19,6 +19,29 @@ public class AiInsightController {
     private final AiInsightService aiInsightService;
     private final MemberUtil memberUtil;
 
+    @PostMapping("/ask")
+    public ResponseEntity<JsonNode> askAiInsight(
+            @PathVariable Long brandId,
+            @RequestBody AiAskRequestDTO req,
+            HttpServletRequest httpRequest
+    ) {
+        // TraceIdFilter에서 설정한 attribute에서 traceId 읽기
+        String traceId = (String) httpRequest.getAttribute("X-Trace-Id");
+        if (traceId == null || traceId.isBlank()) {
+            traceId = "unknown"; // fallback
+        }
+
+        // ✅ URL brandId를 DTO에 주입
+        req.setBrandId(brandId);
+
+        log.info("[AiInsightController] POST /api/{}/ai/ask traceId={} brandId={} projectId={} questionLen={} topK={}",
+                brandId, traceId, brandId, req.getProjectId(), 
+                req.getQuestion() != null ? req.getQuestion().length() : 0, req.getTopK());
+
+        JsonNode res = aiInsightService.askAiInsight(req, traceId);
+
+        return ResponseEntity.ok(res);
+    }
     
     @PostMapping("/generate-solution-report")
     public ResponseEntity<JsonNode> generateSolutionReport(

@@ -84,6 +84,48 @@ public class AiInsightServiceImpl implements AiInsightService {
     }
     
     @Override
+    public JsonNode askAiInsight(AiAskRequestDTO req, String traceId) {
+        try {
+            log.info("[AiInsightServiceImpl] askAiInsight start traceId={} brandId={} projectId={} questionLen={} topK={}",
+                    traceId, req.getBrandId(), req.getProjectId(), 
+                    req.getQuestion() != null ? req.getQuestion().length() : 0, req.getTopK());
+            
+            // 1. Brand 조회
+            Brand brand = brandRepository.findById(req.getBrandId())
+                    .orElseThrow(() -> new ApiException(ErrorCode.BRAND_NOT_FOUND));
+            
+            // 2. Project 조회
+            Project project = projectRepository.findById(req.getProjectId())
+                    .orElseThrow(() -> new ApiException(ErrorCode.PROJECT_NOT_FOUND));
+            
+            // 3. ProjectKeyword 목록 조회
+            List<ProjectKeyword> keywords = projectKeywordRepository.findByProjectId(req.getProjectId());
+            List<Long> projectKeywordIds = keywords.stream()
+                    .map(ProjectKeyword::getId)
+                    .collect(java.util.stream.Collectors.toList());
+            
+            // 4. Python 호출
+            JsonNode pythonResponse = pythonRagClient.askStrategy(
+                    req.getQuestion(),
+                    req.getBrandId(),
+                    brand.getName(),
+                    req.getProjectId(),
+                    projectKeywordIds,
+                    req.getTopK(),
+                    traceId
+            );
+            
+            log.info("[AiInsightServiceImpl] askAiInsight end traceId={} ok={}",
+                    traceId, pythonResponse != null && pythonResponse.has("ok") && pythonResponse.get("ok").asBoolean());
+            
+            return pythonResponse;
+        } catch (Exception e) {
+            log.error("[AiInsightServiceImpl] askAiInsight error traceId={}", traceId, e);
+            return buildFailResponse(traceId, 0, summarizeReason(e));
+        }
+    }
+    
+    @Override
     public JsonNode generateSolutionReport(SolutionReportRequestDTO req, String traceId) {
         try {
             log.info("[AiInsightServiceImpl] generateSolutionReport start traceId={} brandId={} solutionTitle={} reportType={}",
