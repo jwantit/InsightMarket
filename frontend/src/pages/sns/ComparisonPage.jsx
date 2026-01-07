@@ -20,6 +20,8 @@ import {
   getCompetitors,
 } from "../../api/snsApi";
 import { getBrandDetail } from "../../api/brandApi";
+import { Activity, Heart, Users } from "lucide-react";
+import PageHeader from "../../components/common/PageHeader";
 
 // Components
 import WordCloudComponent from "../../components/sns/SentimentTrend/WordCloudComponent";
@@ -911,10 +913,14 @@ const Comparison = () => {
   );
 
   return (
-    <div className="flex flex-col gap-4">
-      <h3 className="text-lg font-extrabold text-gray-800 tracking-tight">
-        경쟁사 비교
-      </h3>
+    <div className="max-w-[1400px] mx-auto p-6 space-y-10 pb-20 animate-in fade-in duration-700">
+      {/* Page Header */}
+      <PageHeader
+        icon={Users}
+        title="경쟁사 비교 분석"
+        breadcrumb="Analytics / Comparison"
+        subtitle="브랜드와 경쟁사의 언급량, 감성, 키워드를 비교하여 경쟁 우위를 분석합니다."
+      />
 
       {/* Filters */}
       <div className="sticky top-8 z-50 w-full flex justify-center pointer-events-none transition-all duration-500 mb-4">
@@ -1045,398 +1051,411 @@ const Comparison = () => {
       )}
 
       {!loading && !error && selectedCompetitorId && (
-        <>
+        <div className="space-y-14">
           {/* 섹션 1: 언급량 비교 분석 */}
-          <div className="w-full bg-white flex flex-col border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-            <div className="px-4 py-3 border-b border-gray-100 bg-white">
-              <h2 className="text-sm font-bold text-gray-800">
-                언급량 비교 분석
-              </h2>
+          <section className="space-y-6">
+            <div className="flex items-center gap-3 px-2">
+              <div className="p-2 bg-blue-50 text-blue-600 rounded-xl border border-blue-100 shadow-sm">
+                <Activity size={20} />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">
+                Mention Comparison
+              </h3>
+              <div className="h-px flex-1 bg-slate-200 opacity-50" />
             </div>
-            <div className="p-4">
-              {/* 요약 카드 */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div className="group bg-gradient-to-br from-indigo-50/50 to-white p-5 rounded-2xl border border-indigo-100 hover:shadow-md transition-all relative overflow-hidden">
-                  <div className="absolute right-[-10px] top-[-10px] scale-[3] opacity-[0.03] group-hover:opacity-[0.08] transition-opacity text-indigo-600">
-                    <Icons.Shield />
-                  </div>
-                  <div className="relative z-10">
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-[10px] font-bold text-indigo-500 bg-indigo-100/50 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                        Brand
-                      </span>
-                      <div className="text-indigo-500">
-                        <Icons.Shield />
+            <div className="w-full bg-white flex flex-col border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm">
+              <div className="p-4">
+                {/* 요약 카드 */}
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <div className="group bg-gradient-to-br from-indigo-50/50 to-white p-5 rounded-2xl border border-indigo-100 hover:shadow-md transition-all relative overflow-hidden">
+                    <div className="absolute right-[-10px] top-[-10px] scale-[3] opacity-[0.03] group-hover:opacity-[0.08] transition-opacity text-indigo-600">
+                      <Icons.Shield />
+                    </div>
+                    <div className="relative z-10">
+                      <div className="flex justify-between items-center mb-4">
+                        <span className="text-[10px] font-bold text-indigo-500 bg-indigo-100/50 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                          Brand
+                        </span>
+                        <div className="text-indigo-500">
+                          <Icons.Shield />
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-gray-400 font-medium mb-1">
+                        {brandDailyStats.length > 0 &&
+                        competitorDailyStats.length > 0
+                          ? `${brandDailyStats[0]?.statDate || ""} ~ ${
+                              brandDailyStats[brandDailyStats.length - 1]
+                                ?.statDate || ""
+                            }`
+                          : "분석 기간"}
+                      </p>
+                      <p className="text-[13px] text-gray-600 font-bold mb-1">
+                        브랜드 분석 대상
+                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-2xl font-black text-gray-800">
+                          {brandName}
+                        </span>
                       </div>
                     </div>
-                    <p className="text-[11px] text-gray-400 font-medium mb-1">
-                      {brandDailyStats.length > 0 &&
-                      competitorDailyStats.length > 0
-                        ? `${brandDailyStats[0]?.statDate || ""} ~ ${
-                            brandDailyStats[brandDailyStats.length - 1]
-                              ?.statDate || ""
-                          }`
-                        : "분석 기간"}
-                    </p>
-                    <p className="text-[13px] text-gray-600 font-bold mb-1">
-                      브랜드 분석 대상
-                    </p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-2xl font-black text-gray-800">
-                        {brandName}
-                      </span>
-                    </div>
                   </div>
-                </div>
-                <div className="group bg-gradient-to-br from-blue-50/50 to-white p-5 rounded-2xl border border-blue-100 hover:shadow-md transition-all relative overflow-hidden">
-                  <div className="absolute right-[-10px] top-[-10px] scale-[3] opacity-[0.03] group-hover:opacity-[0.08] transition-opacity text-blue-600">
-                    <Icons.Shield />
-                  </div>
-                  <div className="relative z-10">
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-[10px] font-bold text-blue-500 bg-blue-100/50 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                        Competitor
-                      </span>
-                      <div className="text-blue-500">
-                        <Icons.Shield />
-                      </div>
-                    </div>
-                    <p className="text-[11px] text-gray-400 font-medium mb-1">
-                      {brandDailyStats.length > 0 &&
-                      competitorDailyStats.length > 0
-                        ? `${competitorDailyStats[0]?.statDate || ""} ~ ${
-                            competitorDailyStats[
-                              competitorDailyStats.length - 1
-                            ]?.statDate || ""
-                          }`
-                        : "분석 기간"}
-                    </p>
-                    <p className="text-[13px] text-gray-600 font-bold mb-1">
-                      경쟁사 분석 대상
-                    </p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-2xl font-black text-gray-800">
-                        {selectedCompetitor?.name || "경쟁사"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 언급량 추이 비교 차트 */}
-              <div className="w-full bg-white border border-gray-200 rounded-xl p-6 min-h-[300px]">
-                {mentionComparisonChartData ? (
-                  <div className="h-[300px]">
-                    <Line
-                      data={mentionComparisonChartData}
-                      options={{
-                        ...baseChartOptions,
-                        plugins: {
-                          ...baseChartOptions.plugins,
-                          legend: {
-                            display: true,
-                            position: "top",
-                            labels: {
-                              usePointStyle: true,
-                              padding: 10,
-                              font: { size: 11, weight: "500" },
-                            },
-                          },
-                        },
-                        scales: {
-                          ...baseChartOptions.scales,
-                          y: {
-                            beginAtZero: true,
-                            ticks: {
-                              callback: function (value) {
-                                return value.toLocaleString();
-                              },
-                              font: { size: 10 },
-                            },
-                          },
-                          x: {
-                            ticks: { font: { size: 10 } },
-                          },
-                        },
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-[300px] text-gray-400 text-sm">
-                    데이터가 없습니다
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* 섹션 2: 긍부정 비교 분석 */}
-          <div className="w-full bg-white flex flex-col border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-            <div className="px-4 py-3 border-b border-gray-100 bg-white">
-              <h2 className="text-sm font-bold text-gray-800">
-                긍·부정 비교 분석
-              </h2>
-            </div>
-            <div className="p-4">
-              {/* 요약 카드 */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                {/* 브랜드 긍정 최고 */}
-                {brandSentimentAverages.pos > 0 && (
                   <div className="group bg-gradient-to-br from-blue-50/50 to-white p-5 rounded-2xl border border-blue-100 hover:shadow-md transition-all relative overflow-hidden">
                     <div className="absolute right-[-10px] top-[-10px] scale-[3] opacity-[0.03] group-hover:opacity-[0.08] transition-opacity text-blue-600">
-                      <Icons.TrendingUp />
+                      <Icons.Shield />
                     </div>
                     <div className="relative z-10">
                       <div className="flex justify-between items-center mb-4">
                         <span className="text-[10px] font-bold text-blue-500 bg-blue-100/50 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                          Brand Positive
+                          Competitor
                         </span>
                         <div className="text-blue-500">
-                          <Icons.TrendingUp />
+                          <Icons.Shield />
                         </div>
                       </div>
                       <p className="text-[11px] text-gray-400 font-medium mb-1">
-                        긍정 감성이 가장 높은 브랜드
+                        {brandDailyStats.length > 0 &&
+                        competitorDailyStats.length > 0
+                          ? `${competitorDailyStats[0]?.statDate || ""} ~ ${
+                              competitorDailyStats[
+                                competitorDailyStats.length - 1
+                              ]?.statDate || ""
+                            }`
+                          : "분석 기간"}
                       </p>
                       <p className="text-[13px] text-gray-600 font-bold mb-1">
-                        브랜드 평균 긍정도
+                        경쟁사 분석 대상
                       </p>
                       <div className="flex items-center gap-2 mt-2">
                         <span className="text-2xl font-black text-gray-800">
-                          {brandName} {brandPositiveRatioText}
+                          {selectedCompetitor?.name || "경쟁사"}
                         </span>
                       </div>
                     </div>
                   </div>
-                )}
+                </div>
 
-                {/* 경쟁사 부정 최고 */}
-                {competitorSentimentAverages.neg > 0 && (
-                  <div className="group bg-gradient-to-br from-rose-50/50 to-white p-5 rounded-2xl border border-rose-100 hover:shadow-md transition-all relative overflow-hidden">
-                    <div className="absolute right-[-10px] top-[-10px] scale-[3] opacity-[0.03] group-hover:opacity-[0.08] transition-opacity text-rose-600">
-                      <Icons.TrendingDown />
+                {/* 언급량 추이 비교 차트 */}
+                <div className="w-full bg-white border border-slate-200 rounded-[2rem] p-10 min-h-[350px]">
+                  {mentionComparisonChartData ? (
+                    <div className="h-[300px]">
+                      <Line
+                        data={mentionComparisonChartData}
+                        options={{
+                          ...baseChartOptions,
+                          plugins: {
+                            ...baseChartOptions.plugins,
+                            legend: {
+                              display: true,
+                              position: "top",
+                              labels: {
+                                usePointStyle: true,
+                                padding: 10,
+                                font: { size: 11, weight: "500" },
+                              },
+                            },
+                          },
+                          scales: {
+                            ...baseChartOptions.scales,
+                            y: {
+                              beginAtZero: true,
+                              ticks: {
+                                callback: function (value) {
+                                  return value.toLocaleString();
+                                },
+                                font: { size: 10 },
+                              },
+                            },
+                            x: {
+                              ticks: { font: { size: 10 } },
+                            },
+                          },
+                        }}
+                      />
                     </div>
-                    <div className="relative z-10">
-                      <div className="flex justify-between items-center mb-4">
-                        <span className="text-[10px] font-bold text-rose-500 bg-rose-100/50 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                          Competitor Negative
-                        </span>
-                        <div className="text-rose-500">
-                          <Icons.TrendingDown />
-                        </div>
-                      </div>
-                      <p className="text-[11px] text-gray-400 font-medium mb-1">
-                        부정 감성이 가장 높은 경쟁사
-                      </p>
-                      <p className="text-[13px] text-gray-600 font-bold mb-1">
-                        경쟁사 평균 부정도
-                      </p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <span className="text-2xl font-black text-gray-800">
-                          {selectedCompetitor?.name || "경쟁사"}{" "}
-                          {competitorSentimentAverages.neg.toFixed(1)}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* 브랜드 부정 최고 (경쟁사 부정이 없을 때) */}
-                {competitorSentimentAverages.neg === 0 &&
-                  brandSentimentAverages.neg > 0 && (
-                    <div className="group bg-gradient-to-br from-red-50/50 to-white p-4 rounded-xl border border-red-100 hover:shadow-md transition-all">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-red-500 flex items-center justify-center">
-                          <svg
-                            className="w-5 h-5 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"
-                            />
-                          </svg>
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-xs text-gray-600 mb-0.5">
-                            부정 감성이 가장 높은 분석 단어
-                          </p>
-                          <p className="text-lg font-bold text-red-700">
-                            {brandName} {brandSentimentAverages.neg.toFixed(1)}%
-                          </p>
-                        </div>
-                      </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-[350px] text-slate-400 text-sm">
+                      데이터가 없습니다
                     </div>
                   )}
-
-                {/* 경쟁사 긍정 최고 (브랜드 긍정이 없을 때) */}
-                {brandSentimentAverages.pos === 0 &&
-                  competitorSentimentAverages.pos > 0 && (
-                    <div className="group bg-gradient-to-br from-blue-50/50 to-white p-4 rounded-xl border border-blue-100 hover:shadow-md transition-all">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center">
-                          <svg
-                            className="w-5 h-5 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
-                            />
-                          </svg>
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-xs text-gray-600 mb-0.5">
-                            긍정 감성이 가장 높은 분석 단어
-                          </p>
-                          <p className="text-lg font-bold text-blue-700">
-                            {selectedCompetitor?.name || "경쟁사"}{" "}
-                            {competitorPositiveRatioText}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-              </div>
-
-              {/* 브랜드와 경쟁사 워드클라우드 비교 */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-                {/* Brand Panel */}
-                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                  <div className="mb-4">
-                    <h3 className="text-sm font-bold text-gray-800">
-                      {brandName}
-                    </h3>
-                    <p className="text-[10px] text-gray-400 mt-0.5">
-                      브랜드 분석
-                    </p>
-                  </div>
-
-                  {/* Word Cloud */}
-                  <div className="mb-6">
-                    <WordCloudComponent
-                      wordCloudData={brandWordCloudData}
-                      wordCloudMeta={brandWordCloudMeta}
-                      wordView={wordView}
-                      setWordView={setWordView}
-                      activeSentiments={activeSentiments}
-                      toggleSentiment={toggleSentiment}
-                      selectedToken={selectedToken}
-                      setSelectedToken={setSelectedToken}
-                      tokenStats={brandTokenStats}
-                    />
-                  </div>
-
-                  {/* Sentiment Ratio */}
-                  <SentimentRatioComponent
-                    sentimentDoughnutData={brandSentimentDoughnutData}
-                    sentimentAverages={brandSentimentAverages}
-                    doughnutOptions={brandDoughnutOptions}
-                    summaryStats={brandSummaryStats}
-                    size="small"
-                  />
                 </div>
-
-                {/* Competitor Panel */}
-                <div className="bg-white border border-gray-200 rounded-xl p-4">
-                  <div className="mb-4">
-                    <h3 className="text-sm font-bold text-gray-800">
-                      {selectedCompetitor?.name || "경쟁사"}
-                    </h3>
-                    <p className="text-[10px] text-gray-400 mt-0.5">
-                      경쟁사 분석
-                    </p>
-                  </div>
-
-                  {/* Word Cloud */}
-                  <div className="mb-6">
-                    <WordCloudComponent
-                      wordCloudData={competitorWordCloudData}
-                      wordCloudMeta={competitorWordCloudMeta}
-                      wordView={wordView}
-                      setWordView={setWordView}
-                      activeSentiments={activeSentiments}
-                      toggleSentiment={toggleSentiment}
-                      selectedToken={selectedToken}
-                      setSelectedToken={setSelectedToken}
-                      tokenStats={competitorTokenStats}
-                    />
-                  </div>
-
-                  {/* Sentiment Ratio */}
-                  <SentimentRatioComponent
-                    sentimentDoughnutData={competitorSentimentDoughnutData}
-                    sentimentAverages={competitorSentimentAverages}
-                    doughnutOptions={competitorDoughnutOptions}
-                    summaryStats={competitorSummaryStats}
-                    size="small"
-                  />
-                </div>
-              </div>
-
-              {/* 긍·부정 추이 비교 차트 */}
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <h3 className="text-sm font-bold text-gray-800">
-                      긍·부정 추이 비교
-                    </h3>
-                    <p className="text-[10px] text-gray-400 mt-0.5">
-                      브랜드 vs 경쟁사 감성 트렌드 비교
-                    </p>
-                  </div>
-                  {/* 감성 필터 라디오 버튼 */}
-                  <div className="flex items-center gap-2">
-                    {[
-                      { value: "POS", label: "긍정" },
-                      { value: "NEG", label: "부정" },
-                      { value: "NEU", label: "중립" },
-                    ].map((sentiment) => (
-                      <button
-                        key={sentiment.value}
-                        onClick={() => setSelectedSentiment(sentiment.value)}
-                        className={`px-3 py-1 rounded-lg font-medium text-xs transition-all ${
-                          selectedSentiment === sentiment.value
-                            ? sentiment.value === "POS"
-                              ? "bg-blue-500 text-white"
-                              : sentiment.value === "NEG"
-                              ? "bg-red-500 text-white"
-                              : "bg-gray-500 text-white"
-                            : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
-                        }`}
-                      >
-                        {sentiment.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="w-full bg-white border border-gray-200 rounded-xl p-6 min-h-[300px]">
-                {combinedSentimentChartData ? (
-                  <div className="h-[300px]">
-                    <Line
-                      data={combinedSentimentChartData}
-                      options={baseChartOptions}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-[300px] text-gray-400 text-sm">
-                    데이터가 없습니다.
-                  </div>
-                )}
               </div>
             </div>
-          </div>
-        </>
+          </section>
+
+          {/* 섹션 2: 긍부정 비교 분석 */}
+          <section className="space-y-6">
+            <div className="flex items-center gap-3 px-2">
+              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100 shadow-sm">
+                <Heart size={20} />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">
+                Sentiment Comparison
+              </h3>
+              <div className="h-px flex-1 bg-slate-200 opacity-50" />
+            </div>
+            <div className="w-full bg-white flex flex-col border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm">
+              <div className="p-4">
+                {/* 요약 카드 */}
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  {/* 브랜드 긍정 최고 */}
+                  {brandSentimentAverages.pos > 0 && (
+                    <div className="group bg-gradient-to-br from-blue-50/50 to-white p-5 rounded-2xl border border-blue-100 hover:shadow-md transition-all relative overflow-hidden">
+                      <div className="absolute right-[-10px] top-[-10px] scale-[3] opacity-[0.03] group-hover:opacity-[0.08] transition-opacity text-blue-600">
+                        <Icons.TrendingUp />
+                      </div>
+                      <div className="relative z-10">
+                        <div className="flex justify-between items-center mb-4">
+                          <span className="text-[10px] font-bold text-blue-500 bg-blue-100/50 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            Brand Positive
+                          </span>
+                          <div className="text-blue-500">
+                            <Icons.TrendingUp />
+                          </div>
+                        </div>
+                        <p className="text-[11px] text-gray-400 font-medium mb-1">
+                          긍정 감성이 가장 높은 브랜드
+                        </p>
+                        <p className="text-[13px] text-gray-600 font-bold mb-1">
+                          브랜드 평균 긍정도
+                        </p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="text-2xl font-black text-gray-800">
+                            {brandName} {brandPositiveRatioText}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 경쟁사 부정 최고 */}
+                  {competitorSentimentAverages.neg > 0 && (
+                    <div className="group bg-gradient-to-br from-rose-50/50 to-white p-5 rounded-2xl border border-rose-100 hover:shadow-md transition-all relative overflow-hidden">
+                      <div className="absolute right-[-10px] top-[-10px] scale-[3] opacity-[0.03] group-hover:opacity-[0.08] transition-opacity text-rose-600">
+                        <Icons.TrendingDown />
+                      </div>
+                      <div className="relative z-10">
+                        <div className="flex justify-between items-center mb-4">
+                          <span className="text-[10px] font-bold text-rose-500 bg-rose-100/50 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            Competitor Negative
+                          </span>
+                          <div className="text-rose-500">
+                            <Icons.TrendingDown />
+                          </div>
+                        </div>
+                        <p className="text-[11px] text-gray-400 font-medium mb-1">
+                          부정 감성이 가장 높은 경쟁사
+                        </p>
+                        <p className="text-[13px] text-gray-600 font-bold mb-1">
+                          경쟁사 평균 부정도
+                        </p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="text-2xl font-black text-gray-800">
+                            {selectedCompetitor?.name || "경쟁사"}{" "}
+                            {competitorSentimentAverages.neg.toFixed(1)}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 브랜드 부정 최고 (경쟁사 부정이 없을 때) */}
+                  {competitorSentimentAverages.neg === 0 &&
+                    brandSentimentAverages.neg > 0 && (
+                      <div className="group bg-gradient-to-br from-red-50/50 to-white p-4 rounded-xl border border-red-100 hover:shadow-md transition-all">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-red-500 flex items-center justify-center">
+                            <svg
+                              className="w-5 h-5 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"
+                              />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs text-gray-600 mb-0.5">
+                              부정 감성이 가장 높은 분석 단어
+                            </p>
+                            <p className="text-lg font-bold text-red-700">
+                              {brandName}{" "}
+                              {brandSentimentAverages.neg.toFixed(1)}%
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                  {/* 경쟁사 긍정 최고 (브랜드 긍정이 없을 때) */}
+                  {brandSentimentAverages.pos === 0 &&
+                    competitorSentimentAverages.pos > 0 && (
+                      <div className="group bg-gradient-to-br from-blue-50/50 to-white p-4 rounded-xl border border-blue-100 hover:shadow-md transition-all">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center">
+                            <svg
+                              className="w-5 h-5 text-white"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
+                              />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-xs text-gray-600 mb-0.5">
+                              긍정 감성이 가장 높은 분석 단어
+                            </p>
+                            <p className="text-lg font-bold text-blue-700">
+                              {selectedCompetitor?.name || "경쟁사"}{" "}
+                              {competitorPositiveRatioText}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                </div>
+
+                {/* 브랜드와 경쟁사 워드클라우드 비교 */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                  {/* Brand Panel */}
+                  <div className="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm">
+                    <div className="mb-4">
+                      <h3 className="text-sm font-bold text-gray-800">
+                        {brandName}
+                      </h3>
+                      <p className="text-[10px] text-gray-400 mt-0.5">
+                        브랜드 분석
+                      </p>
+                    </div>
+
+                    {/* Word Cloud */}
+                    <div className="mb-6">
+                      <WordCloudComponent
+                        wordCloudData={brandWordCloudData}
+                        wordCloudMeta={brandWordCloudMeta}
+                        wordView={wordView}
+                        setWordView={setWordView}
+                        activeSentiments={activeSentiments}
+                        toggleSentiment={toggleSentiment}
+                        selectedToken={selectedToken}
+                        setSelectedToken={setSelectedToken}
+                        tokenStats={brandTokenStats}
+                      />
+                    </div>
+
+                    {/* Sentiment Ratio */}
+                    <SentimentRatioComponent
+                      sentimentDoughnutData={brandSentimentDoughnutData}
+                      sentimentAverages={brandSentimentAverages}
+                      doughnutOptions={brandDoughnutOptions}
+                      summaryStats={brandSummaryStats}
+                      size="small"
+                    />
+                  </div>
+
+                  {/* Competitor Panel */}
+                  <div className="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm">
+                    <div className="mb-4">
+                      <h3 className="text-sm font-bold text-gray-800">
+                        {selectedCompetitor?.name || "경쟁사"}
+                      </h3>
+                      <p className="text-[10px] text-gray-400 mt-0.5">
+                        경쟁사 분석
+                      </p>
+                    </div>
+
+                    {/* Word Cloud */}
+                    <div className="mb-6">
+                      <WordCloudComponent
+                        wordCloudData={competitorWordCloudData}
+                        wordCloudMeta={competitorWordCloudMeta}
+                        wordView={wordView}
+                        setWordView={setWordView}
+                        activeSentiments={activeSentiments}
+                        toggleSentiment={toggleSentiment}
+                        selectedToken={selectedToken}
+                        setSelectedToken={setSelectedToken}
+                        tokenStats={competitorTokenStats}
+                      />
+                    </div>
+
+                    {/* Sentiment Ratio */}
+                    <SentimentRatioComponent
+                      sentimentDoughnutData={competitorSentimentDoughnutData}
+                      sentimentAverages={competitorSentimentAverages}
+                      doughnutOptions={competitorDoughnutOptions}
+                      summaryStats={competitorSummaryStats}
+                      size="small"
+                    />
+                  </div>
+                </div>
+
+                {/* 긍·부정 추이 비교 차트 */}
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h3 className="text-sm font-bold text-gray-800">
+                        긍·부정 추이 비교
+                      </h3>
+                      <p className="text-[10px] text-gray-400 mt-0.5">
+                        브랜드 vs 경쟁사 감성 트렌드 비교
+                      </p>
+                    </div>
+                    {/* 감성 필터 라디오 버튼 */}
+                    <div className="flex items-center gap-2">
+                      {[
+                        { value: "POS", label: "긍정" },
+                        { value: "NEG", label: "부정" },
+                        { value: "NEU", label: "중립" },
+                      ].map((sentiment) => (
+                        <button
+                          key={sentiment.value}
+                          onClick={() => setSelectedSentiment(sentiment.value)}
+                          className={`px-3 py-1 rounded-lg font-medium text-xs transition-all ${
+                            selectedSentiment === sentiment.value
+                              ? sentiment.value === "POS"
+                                ? "bg-blue-500 text-white"
+                                : sentiment.value === "NEG"
+                                ? "bg-red-500 text-white"
+                                : "bg-gray-500 text-white"
+                              : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+                          }`}
+                        >
+                          {sentiment.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="w-full bg-white border border-slate-200 rounded-[2rem] p-10 min-h-[350px]">
+                  {combinedSentimentChartData ? (
+                    <div className="h-[350px]">
+                      <Line
+                        data={combinedSentimentChartData}
+                        options={baseChartOptions}
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-[350px] text-slate-400 text-sm">
+                      데이터가 없습니다.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
       )}
 
       {!loading && !error && !selectedCompetitorId && (

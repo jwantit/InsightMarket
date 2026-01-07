@@ -20,6 +20,8 @@ import {
   getProjects,
   getProjectKeywords,
 } from "../../api/snsApi";
+import { Activity, Heart, TrendingUp } from "lucide-react";
+import PageHeader from "../../components/common/PageHeader";
 
 // Components
 import InsightSummaryComponent from "../../components/sns/SentimentTrend/InsightSummaryComponent";
@@ -57,7 +59,7 @@ const SentimentTrend = () => {
   // Filters
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [selectedKeywordId, setSelectedKeywordId] = useState(null);
-  const [selectedSources, setSelectedSources] = useState([]); // 배열로 변경: ["NAVER", "YOUTUBE"]
+  const [selectedSources, setSelectedSources] = useState(["NAVER", "YOUTUBE"]); // 기본값: 둘 다 선택
 
   // Data
   const [projects, setProjects] = useState([]);
@@ -83,7 +85,13 @@ const SentimentTrend = () => {
     const fetchProjects = async () => {
       try {
         const data = await getProjects(brandId);
-        setProjects(Array.isArray(data) ? data : []);
+        const projectsList = Array.isArray(data) ? data : [];
+        setProjects(projectsList);
+        
+        // 첫번째 프로젝트 자동 선택
+        if (projectsList.length > 0 && !selectedProjectId) {
+          setSelectedProjectId(projectsList[0].projectId);
+        }
       } catch (err) {
         console.error("프로젝트 목록 조회 실패:", err);
         setError("프로젝트 목록을 불러오는데 실패했습니다.");
@@ -101,8 +109,21 @@ const SentimentTrend = () => {
       }
       try {
         const data = await getProjectKeywords(brandId, selectedProjectId);
-        setKeywords(Array.isArray(data) ? data : []);
-        setSelectedKeywordId(null);
+        const keywordsList = Array.isArray(data) ? data : [];
+        setKeywords(keywordsList);
+        
+        // 첫번째 키워드 자동 선택 (프로젝트가 변경되었거나 키워드가 없을 때)
+        if (keywordsList.length > 0) {
+          // 현재 선택된 키워드가 새 키워드 목록에 없으면 첫번째 키워드 선택
+          const currentKeywordExists = keywordsList.some(
+            (k) => k.keywordId === selectedKeywordId
+          );
+          if (!currentKeywordExists) {
+            setSelectedKeywordId(keywordsList[0].keywordId);
+          }
+        } else {
+          setSelectedKeywordId(null);
+        }
       } catch (err) {
         console.error("키워드 목록 조회 실패:", err);
         setError("키워드 목록을 불러오는데 실패했습니다.");
@@ -149,6 +170,7 @@ const SentimentTrend = () => {
                   brandId,
                   selectedProjectId,
                   selectedKeywordId,
+                  null, // competitorId
                   source
                 )
               )
@@ -159,6 +181,7 @@ const SentimentTrend = () => {
                   brandId,
                   selectedProjectId,
                   selectedKeywordId,
+                  null, // competitorId
                   source
                 )
               )
@@ -169,6 +192,7 @@ const SentimentTrend = () => {
                   brandId,
                   selectedProjectId,
                   selectedKeywordId,
+                  null, // competitorId
                   source
                 )
               )
@@ -206,18 +230,21 @@ const SentimentTrend = () => {
             brandId,
             selectedProjectId,
             selectedKeywordId,
+            null, // competitorId
             sourceParam
           ),
           getSentimentStats(
             brandId,
             selectedProjectId,
             selectedKeywordId,
+            null, // competitorId
             sourceParam
           ),
           getTokenStats(
             brandId,
             selectedProjectId,
             selectedKeywordId,
+            null, // competitorId
             sourceParam
           ),
         ]);
@@ -613,10 +640,14 @@ const SentimentTrend = () => {
    * UI
    * ----------------------------- */
   return (
-    <div className="flex flex-col gap-4">
-      <h3 className="text-lg font-extrabold text-gray-800 tracking-tight">
-        감성 / 트렌드 분석
-      </h3>
+    <div className="max-w-[1400px] mx-auto p-6 space-y-10 pb-20 animate-in fade-in duration-700">
+      {/* Page Header */}
+      <PageHeader
+        icon={TrendingUp}
+        title="감성 / 트렌드 분석"
+        breadcrumb="Analytics / Sentiment & Trend"
+        subtitle="브랜드의 소셜 미디어 언급량과 감성 트렌드를 분석하여 인사이트를 제공합니다."
+      />
 
       {/* Filters */}
       <div className="sticky top-8 z-50 w-full flex justify-center pointer-events-none transition-all duration-500 mb-4">
@@ -770,29 +801,48 @@ const SentimentTrend = () => {
       )}
 
       {!loading && !error && (
-        <>
-          {/* Insights - 필터 바로 아래 */}
-          <InsightSummaryComponent insights={insights} />
-
-          {/* 언급량 분석 패널 */}
-          <MentionAnalysisComponent
-            mentionChartData={mentionChartData}
-            summaryStats={summaryStats}
-            selectedSources={selectedSources}
-            baseChartOptions={baseChartOptions}
-          />
-
-          {/* 긍/부정 분석 패널 */}
-          <div className="w-full bg-white flex flex-col border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-            <div className="px-4 py-3 border-b border-gray-100 bg-white">
-              <h2 className="text-sm font-bold text-gray-800">긍/부정 분석</h2>
+        <div className="space-y-14">
+          {/* 언급량 분석 섹션 */}
+          <section className="space-y-6">
+            <div className="flex items-center gap-3 px-2">
+              <div className="p-2 bg-blue-50 text-blue-600 rounded-xl border border-blue-100 shadow-sm">
+                <Activity size={20} />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">
+                Mention Analysis
+              </h3>
+              <div className="h-px flex-1 bg-slate-200 opacity-50" />
             </div>
-            <div className="p-4">
+            
+            {/* 인사이트 - Mention Analysis 섹션 하위 */}
+            <InsightSummaryComponent insights={insights} />
+            
+            <MentionAnalysisComponent
+              mentionChartData={mentionChartData}
+              summaryStats={summaryStats}
+              selectedSources={selectedSources}
+              baseChartOptions={baseChartOptions}
+            />
+          </section>
+
+          {/* 긍/부정 분석 섹션 */}
+          <section className="space-y-6">
+            <div className="flex items-center gap-3 px-2">
+              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100 shadow-sm">
+                <Heart size={20} />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">
+                Sentiment Insight
+              </h3>
+              <div className="h-px flex-1 bg-slate-200 opacity-50" />
+            </div>
+            <div className="w-full bg-white flex flex-col border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm">
+            <div className="p-8">
 
             {/* 워드클라우드 + 순위표 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               {/* 워드클라우드 */}
-              <div className="bg-white border border-gray-200 rounded-xl p-4">
+              <div className="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm">
                 <WordCloudComponent
                   wordCloudData={wordCloudData}
                   wordCloudMeta={wordCloudMeta}
@@ -807,21 +857,21 @@ const SentimentTrend = () => {
               </div>
 
               {/* 순위표 */}
-              <div className="bg-white border border-gray-200 rounded-xl p-4">
+              <div className="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm min-h-[450px] overflow-hidden">
                 <KeywordRankingComponent wordCloudData={wordCloudData} />
               </div>
             </div>
 
             {/* 긍부정 추이 + 긍부정 비율 */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 pt-4 border-t border-gray-200">
-              <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-6 min-h-[300px]">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-6 border-t border-slate-200">
+              <div className="lg:col-span-2 bg-white border border-slate-200 rounded-[2.5rem] p-10 min-h-[350px] shadow-sm">
                 <SentimentTrendComponent
                   sentimentBarData={sentimentBarData}
                   stackedBarOptions={stackedBarOptions}
                 />
               </div>
 
-              <div className="bg-white border border-gray-200 rounded-xl p-6 min-h-[300px]">
+              <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 min-h-[350px] shadow-sm">
                 <SentimentRatioComponent
                   sentimentDoughnutData={sentimentDoughnutData}
                   sentimentAverages={sentimentAverages}
@@ -831,8 +881,9 @@ const SentimentTrend = () => {
               </div>
             </div>
             </div>
-          </div>
-        </>
+            </div>
+          </section>
+        </div>
       )}
     </div>
   );
