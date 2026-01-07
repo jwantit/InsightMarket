@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes.strategy import router as strategy_router
 from app.api.routes.collect import api_router as collect_router
 from app.api.routes.analyze import router as analyze_router
+from app.api.routes.location import router as location_router
 
 
 class TraceIdFilter(logging.Filter):
@@ -73,4 +74,4 @@ async def trace_id_middleware(request: Request, call_next):
 app.include_router(strategy_router, tags=["strategy"])
 app.include_router(collect_router, tags=["collect"])
 app.include_router(analyze_router, tags=["analyze"])
-
+app.include_router(location_router, tags=["location"])

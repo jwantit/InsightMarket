@@ -1,10 +1,13 @@
+
 package com.InsightMarket.ai.locationchatbot.service;
 
 
+import com.InsightMarket.ai.PythonRagClient;
 import com.InsightMarket.ai.locationchatbot.dto.Insight.LocationInsightResponseDTO;
 import com.InsightMarket.ai.locationchatbot.dto.LocationRequestDTO;
 import com.InsightMarket.ai.locationchatbot.dto.comparison.LocationComparisonResponseDTO;
 import com.InsightMarket.ai.locationchatbot.dto.comparison.PlacesDTO;
+import com.InsightMarket.ai.locationchatbot.dto.llm.LocationLLmRequestDTO;
 import com.InsightMarket.ai.locationchatbot.dto.llm.LocationLLmResponseDTO;
 import com.InsightMarket.ai.locationchatbot.dto.result.LocationAllDocumentDTO;
 import com.InsightMarket.ai.locationchatbot.dto.result.LocationDocumentRowDTO;
@@ -14,10 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 public class LocationServiceImpl implements LocationService {
 
     private final ObjectMapper objectMapper;
+    private final PythonRagClient pythonRagClient;
 
     @Override
     public LocationComparisonResponseDTO getOneLocation(LocationRequestDTO locationRequestDTO) {
@@ -116,7 +117,7 @@ public class LocationServiceImpl implements LocationService {
     }
 
 
-//인사이트----------------------------------------------------------------------------------------------
+    //인사이트----------------------------------------------------------------------------------------------
     @Override
     public LocationInsightResponseDTO getInsightLocation(LocationRequestDTO locationRequestDTO) {
 
@@ -140,15 +141,49 @@ public class LocationServiceImpl implements LocationService {
         return locationInsightResponseDTO;
     }
 
+    //LLM-------------------------------------------------------------------------------------
     @Override
     public LocationLLmResponseDTO getConsulting(LocationRequestDTO locationRequestDTO) {
+        String traceId = UUID.randomUUID().toString();
 
         LocationAllDocumentDTO categoryfilteredData = loadFromJson(locationRequestDTO);
 
+        LocationDocumentRowDTO target = categoryfilteredData.getDocuments().get(0);
 
 
-        return null;
+
+        if (categoryfilteredData == null || categoryfilteredData.getDocuments() == null || categoryfilteredData.getDocuments().isEmpty()) {
+            return null;
+        }
+
+        int oneSales = target.getSalesIndex();
+
+        categoryfilteredData.getDocuments().forEach(doc -> {
+            if (doc.getSalesIndex() >= oneSales) {
+                doc.setContenttype("BEST");
+            } else {
+                doc.setContenttype("WORST");
+            }
+        });
+
+        List<LocationDocumentRowDTO> finalStores = categoryfilteredData.getDocuments();
+
+        LocationDocumentRowDTO bestStore = finalStores.stream()
+                .filter(s -> "BEST".equals(s.getContenttype()))
+                .findFirst()
+                .orElse(null);
+
+        LocationDocumentRowDTO worstStore = finalStores.stream()
+                .filter(s -> "WORST".equals(s.getContenttype()))
+                .findFirst()
+                .orElse(null);
+
+        LocationLLmResponseDTO locationLLmResponseDTO = pythonRagClient.generateLocationReport(bestStore,worstStore,traceId,locationRequestDTO.getRadius());
+
+        return locationLLmResponseDTO;
     }
+    //-------------------------------------------------------------------------------------
+
 
     //공통로직---------------------------------------------------------------------------------------
     public LocationAllDocumentDTO loadFromJson(LocationRequestDTO locationRequestDTO) {
@@ -169,7 +204,9 @@ public class LocationServiceImpl implements LocationService {
             String placeId = locationRequestDTO.getPlaceId();
             String worstId = locationRequestDTO.getWorstPlaceId();
 
-            Set<String> targetIds = Set.of(placeId, worstId);
+            Set<String> targetIds = new HashSet<>();
+            if (placeId != null) targetIds.add(placeId);
+            if (worstId != null) targetIds.add(worstId);
 
 
             if (placeId != null && !placeId.isEmpty()) {

@@ -30,17 +30,5 @@ public class LocationDocumentRowDTO {
 
     private double distance;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    private String contenttype;
 }

@@ -1,5 +1,7 @@
 package com.InsightMarket.ai;
 
+import com.InsightMarket.ai.locationchatbot.dto.llm.LocationLLmResponseDTO;
+import com.InsightMarket.ai.locationchatbot.dto.result.LocationDocumentRowDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -285,6 +287,30 @@ public class PythonRagClient {
                 .bodyValue(body)
                 .retrieve()
                 .bodyToMono(JsonNode.class)
+                .timeout(Duration.ofSeconds(timeoutSec))
+                .block();
+    }
+
+    //위치기반 컨설팅 LLM------------------------------------------------------------------------
+    public LocationLLmResponseDTO generateLocationReport(LocationDocumentRowDTO best, LocationDocumentRowDTO worst, String traceId , Long redius) {
+
+        Map<String, Object> data = new HashMap<>();
+
+        data.put("BEST", best );
+        data.put("WORST",worst);
+        data.put("REDIUS", redius);
+
+        return webClientBuilder
+                .baseUrl(pythonBaseUrl)
+                .build()
+                .post()
+                .uri("/api/location/generate-consulting-report")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header("X-Trace-Id", traceId)
+                .bodyValue(data)
+                .retrieve()
+                .bodyToMono(LocationLLmResponseDTO.class)
                 .timeout(Duration.ofSeconds(timeoutSec))
                 .block();
     }

@@ -3,6 +3,7 @@ package com.InsightMarket.service;
 
 import com.InsightMarket.ai.locationchatbot.dto.LocationRequestDTO;
 import com.InsightMarket.ai.locationchatbot.dto.comparison.LocationComparisonResponseDTO;
+import com.InsightMarket.ai.locationchatbot.dto.llm.LocationLLmResponseDTO;
 import com.InsightMarket.ai.locationchatbot.service.LocationService;
 import com.InsightMarket.ai.locationchatbot.service.LocationServiceImpl;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -98,6 +99,23 @@ public class LocationServiceImplTests {
 //        System.out.println(prettyJson);
 //        System.out.println("개수: " + result.getDocuments().size());
 //    }
+
+    @Test
+    @Transactional
+    @Commit
+    void getLLM() throws Exception {
+        String worstPlaceId = "kakao:111";
+        String placeId = "kakao:112";
+        Long re = 300L;
+
+        LocationRequestDTO locationRequestDTO = LocationRequestDTO.builder()
+                .placeId(placeId)
+                .radius(re)
+                .worstPlaceId(worstPlaceId).build();
+        LocationLLmResponseDTO locationLLmResponseDTO = locationService.getConsulting(locationRequestDTO);
+
+        log.info(locationLLmResponseDTO);
+    }
     }
 
 
