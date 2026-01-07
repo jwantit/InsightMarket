@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { ShoppingCart } from "lucide-react";
+import PageHeader from "../../components/common/PageHeader";
 import SolutionToolbar from "../../components/maket/SolutionToolbar";
 import CartComponent from "../../components/maket/CartComponent";
 import { getProjectsByTenant } from "../../api/selectProjectApi";
@@ -91,33 +93,13 @@ const CartPage = () => {
   }, [projectId, updateUrlParams]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-              <path d="M3 6h18" />
-              <path d="M16 10a4 4 0 0 1-8 0" />
-            </svg>
-          </div>
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-              AI Solution 장바구니
-            </h1>
-          </div>
-        </div>
-      </div>
+    <div className="max-w-[1400px] mx-auto p-6 space-y-10 pb-20 animate-in fade-in duration-700">
+      <PageHeader
+        icon={ShoppingCart}
+        title="AI Solution 장바구니"
+        breadcrumb="Market / Cart"
+        subtitle="선택한 AI 솔루션 리포트를 확인하고 구매할 수 있습니다."
+      />
 
       <SolutionToolbar
         projectList={projectList}

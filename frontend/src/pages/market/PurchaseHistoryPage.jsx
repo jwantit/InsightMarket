@@ -1,7 +1,8 @@
 import PurchaseFilterSection from "../../components/maket/PurchaseFilterSection";
 import PurchaseComponent from "../../components/maket/PurchaseComponent";
 import { useSearchParams } from "react-router-dom";
-import { Receipt } from "lucide-react";
+import { History } from "lucide-react";
+import PageHeader from "../../components/common/PageHeader";
 
 const PurchaseHistoryPage = () => {
   const [params, setParams] = useSearchParams();
@@ -15,19 +16,13 @@ const PurchaseHistoryPage = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
-            <Receipt size={24} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-              구매 내역
-            </h1>
-          </div>
-        </div>
-      </div>
+    <div className="max-w-[1400px] mx-auto p-6 space-y-10 pb-20 animate-in fade-in duration-700">
+      <PageHeader
+        icon={History}
+        title="구매 내역"
+        breadcrumb="Market / Purchase History"
+        subtitle="구매한 AI 솔루션 리포트의 내역을 확인할 수 있습니다."
+      />
 
       <div className="space-y-6">
         <PurchaseFilterSection

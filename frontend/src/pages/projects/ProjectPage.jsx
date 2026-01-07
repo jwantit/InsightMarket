@@ -1,21 +1,16 @@
 import ProjectComponent from "../../components/project/ProjectComponent";
-import { FolderKanban } from "lucide-react";
+import { Rocket } from "lucide-react";
+import PageHeader from "../../components/common/PageHeader";
 
 const ProjectPage = () => {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
-            <FolderKanban size={24} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-              프로젝트 관리
-            </h1>
-          </div>
-        </div>
-      </div>
+    <div className="max-w-[1400px] mx-auto p-6 space-y-10 pb-20 animate-in fade-in duration-700">
+      <PageHeader
+        icon={Rocket}
+        title="프로젝트 관리"
+        breadcrumb="Management / Projects"
+        subtitle="브랜드별 프로젝트를 생성하고 관리할 수 있습니다. 프로젝트별로 키워드와 데이터 수집을 제어합니다."
+      />
       <ProjectComponent />
     </div>
   );

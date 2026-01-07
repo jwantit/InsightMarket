@@ -20,7 +20,7 @@ import {
   getProjects,
   getProjectKeywords,
 } from "../../api/snsApi";
-import { Activity, Heart, TrendingUp } from "lucide-react";
+import { Activity, Heart, BarChart3 } from "lucide-react";
 import PageHeader from "../../components/common/PageHeader";
 
 // Components
@@ -643,7 +643,7 @@ const SentimentTrend = () => {
     <div className="max-w-[1400px] mx-auto p-6 space-y-10 pb-20 animate-in fade-in duration-700">
       {/* Page Header */}
       <PageHeader
-        icon={TrendingUp}
+        icon={BarChart3}
         title="감성 / 트렌드 분석"
         breadcrumb="Analytics / Sentiment & Trend"
         subtitle="브랜드의 소셜 미디어 언급량과 감성 트렌드를 분석하여 인사이트를 제공합니다."

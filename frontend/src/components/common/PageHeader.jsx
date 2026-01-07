@@ -36,7 +36,7 @@ const PageHeader = ({
             ${
               isAi
                 ? "bg-gradient-to-br from-blue-600 to-indigo-600 text-white border-blue-200 shadow-blue-100"
-                : "bg-white text-blue-600 border-slate-200 shadow-slate-100"
+                : "bg-gradient-to-br from-blue-600 to-indigo-600 text-white border-blue-200 shadow-blue-100"
             }
           `}
           >

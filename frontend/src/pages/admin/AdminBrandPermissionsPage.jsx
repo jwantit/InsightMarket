@@ -1,22 +1,16 @@
 import { Settings } from "lucide-react";
+import PageHeader from "../../components/common/PageHeader";
 import BrandPermissionsComponent from "../../components/admin/brand-permissions/BrandPermissionsComponent";
 
 const AdminBrandPermissionsPage = () => {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
-            <Settings size={24} />
-          </div>
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-              브랜드 권한 관리
-            </h1>
-          </div>
-        </div>
-      </div>
-
+    <div className="max-w-[1400px] mx-auto p-6 space-y-10 pb-20 animate-in fade-in duration-700">
+      <PageHeader
+        icon={Settings}
+        title="브랜드 권한 관리"
+        breadcrumb="Admin / Brand Permissions"
+        subtitle="사용자별 브랜드 접근 권한을 관리하고 제어할 수 있습니다."
+      />
       <BrandPermissionsComponent />
     </div>
   );

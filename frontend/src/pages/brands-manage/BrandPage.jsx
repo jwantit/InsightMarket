@@ -67,7 +67,7 @@ const BrandPage = () => {
   );
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-8">
+    <div className="max-w-[1400px] mx-auto p-6 space-y-10 pb-20 animate-in fade-in duration-700">
       <PageHeader
         icon={Building2}
         title="브랜드 관리"

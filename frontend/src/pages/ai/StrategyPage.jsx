@@ -161,7 +161,7 @@ const StrategyPage = () => {
   );
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-8 pb-20">
+    <div className="max-w-[1400px] mx-auto p-6 space-y-10 pb-20 animate-in fade-in duration-700">
       {/* [1] 디벨롭된 페이지 헤더 적용 (AI 모드) */}
       <PageHeader
         isAi={true}

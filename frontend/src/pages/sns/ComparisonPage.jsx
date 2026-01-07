@@ -20,7 +20,7 @@ import {
   getCompetitors,
 } from "../../api/snsApi";
 import { getBrandDetail } from "../../api/brandApi";
-import { Activity, Heart, Users } from "lucide-react";
+import { Activity, Heart, PieChart } from "lucide-react";
 import PageHeader from "../../components/common/PageHeader";
 
 // Components
@@ -916,7 +916,7 @@ const Comparison = () => {
     <div className="max-w-[1400px] mx-auto p-6 space-y-10 pb-20 animate-in fade-in duration-700">
       {/* Page Header */}
       <PageHeader
-        icon={Users}
+        icon={PieChart}
         title="경쟁사 비교 분석"
         breadcrumb="Analytics / Comparison"
         subtitle="브랜드와 경쟁사의 언급량, 감성, 키워드를 비교하여 경쟁 우위를 분석합니다."
