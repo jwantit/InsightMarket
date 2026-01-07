@@ -4,6 +4,7 @@ package com.InsightMarket.ai.locationchatbot;
 import com.InsightMarket.ai.locationchatbot.dto.Insight.LocationInsightResponseDTO;
 import com.InsightMarket.ai.locationchatbot.dto.LocationRequestDTO;
 import com.InsightMarket.ai.locationchatbot.dto.comparison.LocationComparisonResponseDTO;
+import com.InsightMarket.ai.locationchatbot.dto.llm.LocationLLmResponseDTO;
 import com.InsightMarket.ai.locationchatbot.service.LocationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -33,6 +34,15 @@ public class LocationController {
 
         log.info("Insight" + locationRequestDTO);
         LocationInsightResponseDTO result =  locationService.getInsightLocation(locationRequestDTO);
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/llm")
+    public ResponseEntity<LocationLLmResponseDTO> llm(LocationRequestDTO locationRequestDTO){
+
+        log.info("Insight" + locationRequestDTO);
+        LocationLLmResponseDTO result =  locationService.getConsulting(locationRequestDTO);
 
         return ResponseEntity.ok(result);
     }

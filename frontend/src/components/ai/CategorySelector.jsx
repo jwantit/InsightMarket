@@ -2,15 +2,15 @@ import React from "react";
 
 // 카테고리 옵션 (소매점 제외) - export하여 다른 컴포넌트에서도 사용 가능
 export const categories = [
-  { value: "cafe", label: "카페", groupName: "카페" },
-  { value: "restaurant", label: "음식점", groupName: "음식점" },
-  { value: "convenience", label: "편의점", groupName: "편의점" },
+  { value: "cafe", label: "카페", groupName: "cafe" },
+  { value: "restaurant", label: "음식점", groupName: "restaurant" },
+  { value: "convenience", label: "편의점", groupName: "convenience" },
 ];
 
 // 카테고리 그룹명 가져오기 헬퍼 함수
 export const getCategoryGroupName = (categoryValue) => {
   const category = categories.find((cat) => cat.value === categoryValue);
-  return category?.groupName || "카페";
+  return category?.groupName || "cafe";
 };
 
 // 카테고리 라벨 가져오기 헬퍼 함수
@@ -20,7 +20,6 @@ export const getCategoryLabel = (categoryValue) => {
 };
 
 const CategorySelector = ({ category, onCategoryChange }) => {
-
   return (
     <div>
       <label className="block text-sm font-bold text-gray-700 mb-3">
@@ -46,4 +45,3 @@ const CategorySelector = ({ category, onCategoryChange }) => {
 };
 
 export default CategorySelector;
-

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-// import { getPlaceDetail } from "../../api/marketBotApi"; // TODO: API 연결 시 주석 해제
-import { getMockPlaceDetail, getSaturationColor, getErrorMessage } from "../../api/marketBotApi";
+import { getPlaceDetail, getSaturationColor, getErrorMessage } from "../../api/marketBotApi";
 
 const PlaceDetailModal = ({ isOpen, placeId, placeName, onClose }) => {
   const [detailData, setDetailData] = useState(null);
@@ -23,16 +22,11 @@ const PlaceDetailModal = ({ isOpen, placeId, placeName, onClose }) => {
     setError(null);
 
     try {
-      // TODO: API 연결 시 주석 해제
-      // const data = await getPlaceDetail(placeId);
-      // setDetailData(data);
-
-      // 임시: 모의 데이터 (API 연결 시 위의 주석 처리된 코드 사용)
-      setTimeout(() => {
-        const mockData = getMockPlaceDetail(placeId, placeName);
-        setDetailData(mockData);
-        setLoading(false);
-      }, 1000);
+      // API 호출
+      const data = await getPlaceDetail(placeId);
+      console.log("[PlaceDetailModal] 상세 데이터 응답:", data);
+      setDetailData(data);
+      setLoading(false);
     } catch (err) {
       console.error("[PlaceDetailModal] 상세 데이터 조회 오류:", err);
       setError(getErrorMessage(err, "상세 데이터를 불러올 수 없습니다."));

@@ -54,7 +54,9 @@ const MarketBotResultPage = () => {
     return null;
   }
 
-  const { redis, foundCount, bestPlaceId, worstPlaceId, places } = resultData;
+  // 백엔드 응답: radius, 프론트엔드 호환성을 위해 redis로 별칭 사용
+  const radius = resultData.radius || resultData.redis;
+  const { foundCount, bestPlaceId, worstPlaceId, places } = resultData;
 
   const handleBack = () => {
     navigate(`/app/${brandId}/ai/marketbot`);
@@ -77,7 +79,7 @@ const MarketBotResultPage = () => {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <MarketBotHeader>
           <SystemMessage>
-            분석 결과, 반경 {redis}m 내 {foundCount}개의 매장이 발견되었습니다.
+            분석 결과, 반경 {radius}m 내 {foundCount}개의 매장이 발견되었습니다.
           </SystemMessage>
         </MarketBotHeader>
 

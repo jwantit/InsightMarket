@@ -7,8 +7,7 @@ import CategorySelector, {
 } from "../../components/ai/CategorySelector";
 import LocationMap from "../../components/ai/LocationMap";
 import AnalysisLoadingModal from "../../components/ai/AnalysisLoadingModal";
-// import { requestMarketBot } from "../../api/marketBotApi"; // TODO: API 연결 시 주석 해제
-import { getMockAnalysisResult, getErrorMessage } from "../../api/marketBotApi";
+import { requestMarketBot, getErrorMessage } from "../../api/marketBotApi";
 
 const MarketBot = () => {
   const navigate = useNavigate();
@@ -51,33 +50,26 @@ const MarketBot = () => {
       // 선택된 카테고리의 그룹명 가져오기
       const categoryGroupName = getCategoryGroupName(category);
 
+      // 백엔드 LocationRequestDTO 형식에 맞게 파라미터 구성
       const params = {
-        x: location.longitude.toString(), // 경도 (카카오 형식)
-        y: location.latitude.toString(), // 위도 (카카오 형식)
-        redis: radius,
-        address,
-        category_group_name: categoryGroupName,
+        category: categoryGroupName, // 카테고리 그룹명 (카페, 음식점, 편의점)
+        latitude: location.latitude, // 위도
+        longitude: location.longitude, // 경도
+        radius: radius, // 반경 (미터)
+        address: address, // 주소 텍스트
       };
 
       console.log("[MarketBot] 분석 요청:", params);
 
-      // TODO: API 연결 시 주석 해제하고 아래 임시 코드 제거
-      // const result = await requestMarketBot(params);
-      // console.log("[MarketBot] 분석 결과:", result);
-      // 
-      // // 결과 페이지로 이동 (location.state로 데이터 전달)
-      // navigate(`/app/${brandId}/ai/marketbot/result`, {
-      //   state: { resultData: result },
-      // });
+      // API 호출
+      const result = await requestMarketBot(params);
+      console.log("[MarketBot] 분석 결과:", result);
 
-      // 임시: API 연결 전까지 모의 데이터 사용
-      setTimeout(() => {
-        setLoading(false);
-        const mockResult = getMockAnalysisResult(radius);
-        navigate(`/app/${brandId}/ai/marketbot/result`, {
-          state: { resultData: mockResult },
-        });
-      }, 10000); // 모달 애니메이션을 보기 위해 10초로 설정
+      // 결과 페이지로 이동 (location.state로 데이터 전달)
+      setLoading(false);
+      navigate(`/app/${brandId}/ai/marketbot/result`, {
+        state: { resultData: result },
+      });
     } catch (err) {
       console.error("[MarketBot] 분석 오류:", err);
       setError(getErrorMessage(err, "분석 중 오류가 발생했습니다."));

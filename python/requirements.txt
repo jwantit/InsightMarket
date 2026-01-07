@@ -22,5 +22,8 @@ transformers>=4.30.0
 # 수치 연산
 numpy>=1.24.0
 
+# 마크다운 파싱
+markdown>=3.4.0
+
 # CORS 미들웨어 (FastAPI에 포함되지만 명시)
 # fastapi의 CORSMiddleware 사용

@@ -4,6 +4,7 @@ from app.config.settings import settings
 import requests
 import json
 import logging
+import markdown
 
 # 1. log 객체 정의 필수! (이게 없어서 로그가 안 찍혔던 겁니다)
 log = logging.getLogger(__name__)
@@ -70,28 +71,42 @@ async def generate_consulting_report(request: Request):
 
         log.info(radius)
 
-
+        model=settings.openai_model,
     # 프롬프트
         final_prompt = create_consulting_prompt(best_raw, worst_raw, radius)
 
      
         generated_consulting_text = await generate_with_openai(
-        api_key=OPEN_API_KEY,
+        api_key=settings.openai_api_key,
         model=settings.openai_model,
         prompt=final_prompt,
         timeout_sec=settings.openai_timeout_sec,
         trace_id=trace_id
         )
+        if "[SUMMARY]" in generated_consulting_text:
+            parts = generated_consulting_text.split("[SUMMARY]")
+            consulting_body = parts[0].strip()
+            summary_text = parts[1].strip() if len(parts) > 1 else ""
+        else:
+            consulting_body = generated_consulting_text.strip()
+            summary_text = "요약 정보를 찾을 수 없습니다."
 
-    
+        html_consulting = markdown.markdown(consulting_body, extensions=['nl2br', 'fenced_code'])
+        html_consulting = html_consulting.replace("\n", "") # 줄바꿈 문자 아예 삭제
 
-        # 4. 자바 DTO 구조에 맞춰 응답 반환
+        html_summary = markdown.markdown(summary_text, extensions=['nl2br'])
+        html_html_summary = html_summary.replace("\n", "")
+
+
+        # 4. JSON 응답 반환 (자바 DTO 필드명에 맞춤)
         return JSONResponse(
             content={
-                "consulting": generated_consulting_text,
+                "consulting": html_consulting,
+                "summary": html_summary  # 콤마와 키-값 쌍을 확인하세요.
             }, 
             status_code=200
         )
+        
         
     except Exception as e:
         return JSONResponse(
@@ -147,10 +162,18 @@ def create_consulting_prompt(best_raw: dict, worst_raw: dict, radius: int) -> st
     - 목차 번호와 제목을 임의로 수정하지 마라.
     - 서술형으로 작성하되, 가독성을 위해 불렛 포인트( - )를 적절히 섞어라.
 
-    ---
+   ---
+    [가장 중요: 최종 요약 작성]
+    리포트 작성이 끝나면 반드시 맨 마지막에 [SUMMARY]라는 태그를 작성하고, 그 아래에 다음 정보를 포함해라. 이 부분이 누락되면 절대 안 된다.
+
     [SUMMARY] 
-    위의 모든 분석 내용을 바탕으로, 예비 창업자가 이 상권에서 승리하기 위한 
-   '핵심 전략'을 단 한 문장으로 요약해서 작성해라. (반드시 [SUMMARY] 태그 뒤에 작성할 것
+    위의 모든 분석 내용을 바탕으로, 예비 창업자가 이 상권에서 승리하기 위한 핵심 전략을 아래 형식에 맞춰 엄격히 작성해라.
+
+    - 핵심 요약: (위 리포트를 전반적으로 요약한 내용)
+    - 추천 타겟: (가장 매출 기여도가 높을 것으로 예상되는 연령대 및 직업군)
+    - 핵심 전략: (이 상권에서 반드시 실행해야 할 최우선 전략 한 가지)
+
+    [주의] [SUMMARY] 태그 바로 다음 줄부터 위 형식을 지켜서 작성할 것.
     """.strip()
     
     return prompt
