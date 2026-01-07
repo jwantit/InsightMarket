@@ -12,7 +12,7 @@ import { joinMember } from "../../api/memberApi";
 import { getCompanies } from "../../api/companyApi";
 import useCustomLogin from "../../hooks/useCustomLogin";
 import { getErrorMessage } from "../../util/errorUtil";
-import BrandRegistrationModal from "./showBrandModal";
+import BrandRegistrationModal from "./BrandRegistrationModal";
 
 const initState = {
   name: "",
@@ -367,7 +367,6 @@ const JoinComponent = () => {
               onClose={handleCloseBrandModal}
               onSave={handleSaveBrands}
               brands={brands}
-              setBrands={setBrands}
             />
           </div>
         )}
