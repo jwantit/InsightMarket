@@ -23,19 +23,19 @@ export const router = createBrowserRouter([
   //- brandId 없는 /app 엔트리 생성
   {
     path: "/app",
-    element: <RequireAuth />, 
+    element: <RequireAuth />,
     children: [
       // /app (brandId 없음) -> RequireAuth가 redirect 처리
-      { path: ""},
+      { path: "" },
 
-      // /app/:brandId 하위 
+      // /app/:brandId 하위
       {
         path: ":brandId",
         element: <MainLayout />,
         children: [
           ...topBarRouter(wrap),
           ...sideBarRouter(wrap),
-          { path: "", element: <div>기본 메인 화면</div> },
+          { path: "", element: <Navigate to="dashboard" replace /> },
         ],
       },
     ],

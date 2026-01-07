@@ -56,11 +56,9 @@ const RequireAuth = () => {
    *  - 브랜드 여러 개 → 선택 페이지
    */
   if (!brandIdParam) {
-    
-
     if (brands.length === 1) {
       console.log("brands[0].brandId : ", brands[0].brandId);
-      return <Navigate to={`/app/${brands[0].brandId}`} replace />;
+      return <Navigate to={`/app/${brands[0].brandId}/dashboard`} replace />;
     }
 
     return <Navigate to="/member/brand-select" replace />;

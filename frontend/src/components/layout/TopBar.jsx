@@ -57,7 +57,10 @@ const TopBar = ({ onToggleSidebar }) => {
             </div>
           </button>
 
-          <Link to={`/app/${brandId}`} className="flex items-center gap-2">
+          <Link
+            to={`/app/${brandId}/dashboard`}
+            className="flex items-center gap-2"
+          >
             <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
               <span className="text-white font-black text-lg">I</span>
             </div>
