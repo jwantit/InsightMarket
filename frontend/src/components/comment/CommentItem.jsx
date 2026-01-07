@@ -262,7 +262,7 @@ const CommentItem = ({
           </div>
           <div className="flex gap-2 mt-2">
             <button
-              onClick={() => onSubmitReply(actualTargetId, replyContent)}
+              onClick={() => onSubmitReply(comment.commentId, replyContent)}
               disabled={!replyContent || !replyContent.trim()}
               className="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
