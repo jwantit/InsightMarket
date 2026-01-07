@@ -94,9 +94,6 @@ const MentionAnalysisComponent = ({
 
   return (
     <div className="w-full bg-white flex flex-col border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-      <div className="px-4 py-3 border-b border-gray-100 bg-white">
-        <h2 className="text-sm font-bold text-gray-800">언급량 분석</h2>
-      </div>
       <div className="p-4">
         {/* 언급량 요약 카드 */}
         {summaryStats && (

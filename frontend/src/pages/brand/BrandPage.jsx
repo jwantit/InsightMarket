@@ -1,28 +1,3 @@
-// import BrandComponent from "../../components/brand/BrandComponent";
-// import { BarChart3 } from "lucide-react";
-
-// const BrandPage = () => {
-//   return (
-//     <div className="space-y-6">
-//       <div className="flex items-center justify-between bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-//         <div className="flex items-center gap-4">
-//           <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
-//             <BarChart3 size={24} />
-//           </div>
-//           <div>
-//             <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-//               브랜드 관리
-//             </h1>
-//           </div>
-//         </div>
-//       </div>
-//       <BrandComponent />
-//     </div>
-//   );
-// };
-
-// export default BrandPage;
-
 // src/pages/brand/BrandPage.jsx
 import React, { useRef, useState } from "react";
 import { Building2, Plus, Users, LayoutGrid } from "lucide-react";
@@ -42,20 +17,6 @@ const BrandPage = () => {
 
   const headerExtra = (
     <div className="flex items-center gap-4">
-      <div className="hidden sm:flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border border-slate-200 shadow-sm">
-        <div className="text-right">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">
-            Total Brands
-          </p>
-          <p className="text-sm font-black text-slate-900">
-            {totalCount}개 활성
-          </p>
-        </div>
-        <div className="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-          <LayoutGrid size={16} />
-        </div>
-      </div>
-
       <button
         onClick={handleOpenCreate}
         className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-100 transition-all active:scale-95"

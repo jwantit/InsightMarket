@@ -113,7 +113,7 @@ const LoginComponent = () => {
           {/* 서비스 특징 리스트 */}
           <div className="space-y-6">
             {[
-              { icon: BarChart3, text: "실시간 SNS 감성 분석 및 트렌드 추적" },
+              { icon: BarChart3, text: "실시간 SNS 감성 분석 및 언급량 추적" },
               {
                 icon: BrainCircuit,
                 text: "AI 에이전트를 통한 맞춤형 전략 도출",

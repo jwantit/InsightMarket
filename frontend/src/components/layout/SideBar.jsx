@@ -111,7 +111,7 @@ const SideBar = ({ onNavigate }) => {
             대시보드
           </SideLink>
           <SideLink
-            to={`/app/${brandId}/brands-manage`}
+            to={`/app/${brandId}/brands`}
             icon={Building2}
             onNavigate={onNavigate}
           >
@@ -137,7 +137,7 @@ const SideBar = ({ onNavigate }) => {
             icon={BarChart3}
             onNavigate={onNavigate}
           >
-            감성/트렌드
+            언급량 / 긍 · 부정
           </SideLink>
           <SideLink
             to={`/app/${brandId}/sns/comparison`}
@@ -166,7 +166,7 @@ const SideBar = ({ onNavigate }) => {
             icon={MessageSquare}
             onNavigate={onNavigate}
           >
-            챗봇
+            상권 분석 봇
           </SideLink>
         </Section>
 
@@ -238,13 +238,6 @@ const SideBar = ({ onNavigate }) => {
               onNavigate={onNavigate}
             >
               브랜드 권한 관리
-            </SideLink>
-            <SideLink
-              to={`/app/${brandId}/admin/system`}
-              icon={Settings}
-              onNavigate={onNavigate}
-            >
-              시스템 설정
             </SideLink>
           </Section>
         )}

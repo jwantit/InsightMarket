@@ -18,9 +18,6 @@ const InsightSummaryComponent = ({ insights }) => {
         </div>
       ) : (
         <div className="bg-white border border-slate-200 rounded-2xl p-10 text-center shadow-sm">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 mb-3">
-            <span className="text-xl">📊</span>
-          </div>
           <p className="text-sm text-slate-500 font-medium">
             인사이트 데이터가 없습니다.
           </p>

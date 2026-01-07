@@ -122,7 +122,7 @@ const Dashboard = () => {
               <Activity size={20} />
             </div>
             <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">
-              Mention Analysis
+              언급량 분석
             </h3>
             <div className="h-px flex-1 bg-slate-200 opacity-50" />
           </div>
@@ -139,7 +139,7 @@ const Dashboard = () => {
               <Heart size={20} />
             </div>
             <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">
-              Sentiment Insight
+              긍 · 부정 분석
             </h3>
             <div className="h-px flex-1 bg-slate-200 opacity-50" />
           </div>

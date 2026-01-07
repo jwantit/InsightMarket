@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react";
-import { User, Mail, Lock, Building2, Hash, Sparkles, UserPlus } from "lucide-react";
+import {
+  User,
+  Mail,
+  Lock,
+  Building2,
+  Hash,
+  Sparkles,
+  UserPlus,
+} from "lucide-react";
 import { joinMember } from "../../api/memberApi";
 import { getCompanies } from "../../api/companyApi";
 import useCustomLogin from "../../hooks/useCustomLogin";
 import { getErrorMessage } from "../../util/errorUtil";
 import BrandRegistrationModal from "./showBrandModal";
-import { createBrand } from "../../api/brandApi";
 
 const initState = {
   name: "",
@@ -13,7 +20,7 @@ const initState = {
   password: "",
   joinType: "NEW_COMPANY",
   companyName: "",
-  businessNumber: "",//사업자번호 
+  businessNumber: "", //사업자번호
   requestedCompanyId: "",
   brands: [],
 };
@@ -24,42 +31,37 @@ const JoinComponent = () => {
 
   const { moveToLogin } = useCustomLogin();
 
-
-
   //브랜드 생성 부분--------------------------------------------------------
   const [showBrandModal, setShowBrandModal] = useState(false);
-  const [brands, setBrands] = useState([{
-    brandName: '',
-    brandDescription: '',
-    competitorName: ''
-  }]);  //테스트
-
+  const [brands, setBrands] = useState([
+    {
+      brandName: "",
+      brandDescription: "",
+      competitorName: "",
+    },
+  ]); //테스트
 
   useEffect(() => {
     console.log("brands", brands);
   }, [brands]);
   //브랜드 생성 부분--------------------------------------------------------
 
-
-
   //수정추가 포인트
   //------------------------------------------------------
   // // 모달 열기: 기존 데이터가 있으면 유지, 없으면 빈 값
   const handleOpenBrandModal = () => {
-    setShowBrandModal(true); 
+    setShowBrandModal(true);
   };
- //모달을 닫을시 브랜드 상태 초기화
+  //모달을 닫을시 브랜드 상태 초기화
   const handleCloseBrandModal = () => {
     setShowBrandModal(false);
   };
-//브랜드 적용하기 모달에 생성한 브랜드를 set
+  //브랜드 적용하기 모달에 생성한 브랜드를 set
   const handleSaveBrands = (newBrands) => {
     setBrands(newBrands);
     setShowBrandModal(false); //모달 OFF
   };
-//-------------------------------------------------------
- 
-
+  //-------------------------------------------------------
 
   const fetchCompanies = async () => {
     try {
@@ -73,12 +75,12 @@ const JoinComponent = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-  
+
     // 사업자 번호 필드일 때만 특수 로직 적용
     if (name === "businessNumber") {
       // 1. 숫자만 남기고 나머지 문자 제거
       const onlyNums = value.replace(/[^0-9]/g, "");
-      
+
       // 2. 000-00-00000 포맷팅
       let formatted = "";
       if (onlyNums.length <= 3) {
@@ -86,9 +88,12 @@ const JoinComponent = () => {
       } else if (onlyNums.length <= 5) {
         formatted = `${onlyNums.slice(0, 3)}-${onlyNums.slice(3)}`;
       } else {
-        formatted = `${onlyNums.slice(0, 3)}-${onlyNums.slice(3, 5)}-${onlyNums.slice(5, 10)}`;
+        formatted = `${onlyNums.slice(0, 3)}-${onlyNums.slice(
+          3,
+          5
+        )}-${onlyNums.slice(5, 10)}`;
       }
-  
+
       // 포맷팅된 값을 상태에 저장
       setJoinParam({
         ...joinParam,
@@ -119,36 +124,38 @@ const JoinComponent = () => {
     }
     //--------------------------------------------------------------------------------
 
-    
-
     //브랜드 부분 추가 포인트------------------------------------------------------
     const brand = brands[0];
-    const hasValidBrand = brand && brand.brandName && brand.brandName.trim() !== '';
+    const hasValidBrand =
+      brand && brand.brandName && brand.brandName.trim() !== "";
 
     if (joinParam.joinType === "NEW_COMPANY" && !hasValidBrand) {
-        alert("브랜드를 등록해주세요.");
-        return;
+      alert("브랜드를 등록해주세요.");
+      return;
     }
-     //브랜드 가공 --------------------------------------------------------
+    //브랜드 가공 --------------------------------------------------------
 
-  const formattedBrands = hasValidBrand ? [{
-    name: brand.brandName,           // 브랜드 이름
-    description: brand.brandDescription, // 브랜드 설명
-    competitors: [
-      {
-        name: brand.competitorName,  // 경쟁사 이름
-      }
-    ]
-  }] : [];
+    const formattedBrands = hasValidBrand
+      ? [
+          {
+            name: brand.brandName, // 브랜드 이름
+            description: brand.brandDescription, // 브랜드 설명
+            competitors: [
+              {
+                name: brand.competitorName, // 경쟁사 이름
+              },
+            ],
+          },
+        ]
+      : [];
 
- //브랜드 폼 
-  const finalData = {
-    ...joinParam,
-    brands: formattedBrands // 백엔드 DTO 필드명이 'brands' (List<BrandRequestDTO>)
-  };
+    //브랜드 폼
+    const finalData = {
+      ...joinParam,
+      brands: formattedBrands, // 백엔드 DTO 필드명이 'brands' (List<BrandRequestDTO>)
+    };
 
     //브랜드 부분 추가 포인트------------------------------------------------------
-
 
     if (
       joinParam.joinType === "JOIN_COMPANY" &&
@@ -157,7 +164,6 @@ const JoinComponent = () => {
       alert("가입할 회사를 선택해주세요.");
       return;
     }
-
 
     //회원가입
     //------------------------------------------------------
@@ -170,9 +176,6 @@ const JoinComponent = () => {
     }
     //------------------------------------------------------
   };
-
-
-
 
   return (
     <div className="w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
@@ -270,8 +273,6 @@ const JoinComponent = () => {
           </div>
         </div>
 
-      
-
         {/* Company Name */}
         {joinParam.joinType === "NEW_COMPANY" && (
           <div>
@@ -349,7 +350,7 @@ const JoinComponent = () => {
         {joinParam.joinType === "NEW_COMPANY" && (
           <div>
             <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
-              브랜드 등록 <span className="text-blue-600">({brands.length}개 등록됨)</span>
+              브랜드 등록{" "}
             </label>
             <button
               type="button"
@@ -370,9 +371,6 @@ const JoinComponent = () => {
             />
           </div>
         )}
-    
-
-
 
         {/* Submit */}
         <div className="pt-2">

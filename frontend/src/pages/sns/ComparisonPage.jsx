@@ -1059,7 +1059,7 @@ const Comparison = () => {
                 <Activity size={20} />
               </div>
               <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">
-                Mention Comparison
+                언급량 비교 분석
               </h3>
               <div className="h-px flex-1 bg-slate-200 opacity-50" />
             </div>
@@ -1189,7 +1189,7 @@ const Comparison = () => {
                 <Heart size={20} />
               </div>
               <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">
-                Sentiment Comparison
+                긍 · 부정 비교 분석
               </h3>
               <div className="h-px flex-1 bg-slate-200 opacity-50" />
             </div>
@@ -1408,7 +1408,7 @@ const Comparison = () => {
                         긍·부정 추이 비교
                       </h3>
                       <p className="text-[10px] text-gray-400 mt-0.5">
-                        브랜드 vs 경쟁사 감성 트렌드 비교
+                        브랜드 vs 경쟁사 감성 언급량 비교
                       </p>
                     </div>
                     {/* 감성 필터 라디오 버튼 */}

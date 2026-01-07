@@ -87,7 +87,7 @@ const SentimentTrend = () => {
         const data = await getProjects(brandId);
         const projectsList = Array.isArray(data) ? data : [];
         setProjects(projectsList);
-        
+
         // 첫번째 프로젝트 자동 선택
         if (projectsList.length > 0 && !selectedProjectId) {
           setSelectedProjectId(projectsList[0].projectId);
@@ -111,7 +111,7 @@ const SentimentTrend = () => {
         const data = await getProjectKeywords(brandId, selectedProjectId);
         const keywordsList = Array.isArray(data) ? data : [];
         setKeywords(keywordsList);
-        
+
         // 첫번째 키워드 자동 선택 (프로젝트가 변경되었거나 키워드가 없을 때)
         if (keywordsList.length > 0) {
           // 현재 선택된 키워드가 새 키워드 목록에 없으면 첫번째 키워드 선택
@@ -546,9 +546,8 @@ const SentimentTrend = () => {
 
     // 날짜 범위 계산
     const dates = dailyStats.map((stat) => stat.statDate).sort();
-    const dateRange = dates.length > 0 
-      ? `${dates[0]} ~ ${dates[dates.length - 1]}`
-      : "";
+    const dateRange =
+      dates.length > 0 ? `${dates[0]} ~ ${dates[dates.length - 1]}` : "";
 
     return {
       topSource: topSource ? { name: topSource[0], count: topSource[1] } : null,
@@ -588,7 +587,12 @@ const SentimentTrend = () => {
       scales: {
         x: {
           grid: { color: "#f1f5f9", drawBorder: false },
-          ticks: { color: "#94a3b8", font: { size: 10 }, maxRotation: 0, autoSkip: true },
+          ticks: {
+            color: "#94a3b8",
+            font: { size: 10 },
+            maxRotation: 0,
+            autoSkip: true,
+          },
         },
         y: {
           beginAtZero: true,
@@ -644,7 +648,7 @@ const SentimentTrend = () => {
       {/* Page Header */}
       <PageHeader
         icon={BarChart3}
-        title="감성 / 트렌드 분석"
+        title="언급량 / 긍 · 부정 분석"
         breadcrumb="Analytics / Sentiment & Trend"
         subtitle="브랜드의 소셜 미디어 언급량과 감성 트렌드를 분석하여 인사이트를 제공합니다."
       />
@@ -654,7 +658,9 @@ const SentimentTrend = () => {
         <div className="inline-flex items-center bg-white/10 backdrop-blur-md px-5 py-2 rounded-full shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] border border-white/20 gap-4 pointer-events-auto transition-all duration-300 hover:bg-white/90 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] group flex-wrap">
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-            <span className="text-[10px] font-black text-gray-400 group-hover:text-gray-500 uppercase tracking-widest transition-colors">Filter</span>
+            <span className="text-[10px] font-black text-gray-400 group-hover:text-gray-500 uppercase tracking-widest transition-colors">
+              Filter
+            </span>
           </div>
 
           {/* Project */}
@@ -700,7 +706,9 @@ const SentimentTrend = () => {
 
           {/* Source Toggles */}
           <div className="flex items-center gap-2.5 border-l border-gray-200/30 group-hover:border-gray-200 pl-4">
-            <span className="text-[11px] font-bold text-gray-500 group-hover:text-gray-700">NAVER</span>
+            <span className="text-[11px] font-bold text-gray-500 group-hover:text-gray-700">
+              NAVER
+            </span>
             <button
               onClick={() => {
                 setSelectedSources((prev) =>
@@ -710,19 +718,25 @@ const SentimentTrend = () => {
                 );
               }}
               className={`relative inline-flex h-4 w-8 items-center rounded-full transition-all ${
-                selectedSources.includes("NAVER") ? 'bg-green-500/60 group-hover:bg-green-500' : 'bg-gray-200/40 group-hover:bg-gray-200'
+                selectedSources.includes("NAVER")
+                  ? "bg-green-500/60 group-hover:bg-green-500"
+                  : "bg-gray-200/40 group-hover:bg-gray-200"
               }`}
             >
               <span
                 className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-sm transition-transform ${
-                  selectedSources.includes("NAVER") ? 'translate-x-4.5' : 'translate-x-0.5'
+                  selectedSources.includes("NAVER")
+                    ? "translate-x-4.5"
+                    : "translate-x-0.5"
                 }`}
               />
             </button>
           </div>
 
           <div className="flex items-center gap-2.5 border-l border-gray-200/30 group-hover:border-gray-200 pl-4">
-            <span className="text-[11px] font-bold text-gray-500 group-hover:text-gray-700">YOUTUBE</span>
+            <span className="text-[11px] font-bold text-gray-500 group-hover:text-gray-700">
+              YOUTUBE
+            </span>
             <button
               onClick={() => {
                 setSelectedSources((prev) =>
@@ -732,12 +746,16 @@ const SentimentTrend = () => {
                 );
               }}
               className={`relative inline-flex h-4 w-8 items-center rounded-full transition-all ${
-                selectedSources.includes("YOUTUBE") ? 'bg-red-500/60 group-hover:bg-red-500' : 'bg-gray-200/40 group-hover:bg-gray-200'
+                selectedSources.includes("YOUTUBE")
+                  ? "bg-red-500/60 group-hover:bg-red-500"
+                  : "bg-gray-200/40 group-hover:bg-gray-200"
               }`}
             >
               <span
                 className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-sm transition-transform ${
-                  selectedSources.includes("YOUTUBE") ? 'translate-x-4.5' : 'translate-x-0.5'
+                  selectedSources.includes("YOUTUBE")
+                    ? "translate-x-4.5"
+                    : "translate-x-0.5"
                 }`}
               />
             </button>
@@ -809,14 +827,14 @@ const SentimentTrend = () => {
                 <Activity size={20} />
               </div>
               <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">
-                Mention Analysis
+                언급량 분석
               </h3>
               <div className="h-px flex-1 bg-slate-200 opacity-50" />
             </div>
-            
+
             {/* 인사이트 - Mention Analysis 섹션 하위 */}
             <InsightSummaryComponent insights={insights} />
-            
+
             <MentionAnalysisComponent
               mentionChartData={mentionChartData}
               summaryStats={summaryStats}
@@ -832,55 +850,54 @@ const SentimentTrend = () => {
                 <Heart size={20} />
               </div>
               <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">
-                Sentiment Insight
+                긍 · 부정 분석
               </h3>
               <div className="h-px flex-1 bg-slate-200 opacity-50" />
             </div>
             <div className="w-full bg-white flex flex-col border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm">
-            <div className="p-8">
+              <div className="p-8">
+                {/* 워드클라우드 + 순위표 */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                  {/* 워드클라우드 */}
+                  <div className="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm">
+                    <WordCloudComponent
+                      wordCloudData={wordCloudData}
+                      wordCloudMeta={wordCloudMeta}
+                      wordView={wordView}
+                      setWordView={setWordView}
+                      activeSentiments={activeSentiments}
+                      toggleSentiment={toggleSentiment}
+                      selectedToken={selectedToken}
+                      setSelectedToken={setSelectedToken}
+                      tokenStats={tokenStats}
+                    />
+                  </div>
 
-            {/* 워드클라우드 + 순위표 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-              {/* 워드클라우드 */}
-              <div className="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm">
-                <WordCloudComponent
-                  wordCloudData={wordCloudData}
-                  wordCloudMeta={wordCloudMeta}
-                  wordView={wordView}
-                  setWordView={setWordView}
-                  activeSentiments={activeSentiments}
-                  toggleSentiment={toggleSentiment}
-                  selectedToken={selectedToken}
-                  setSelectedToken={setSelectedToken}
-                  tokenStats={tokenStats}
-                />
-              </div>
+                  {/* 순위표 */}
+                  <div className="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm min-h-[450px] overflow-hidden">
+                    <KeywordRankingComponent wordCloudData={wordCloudData} />
+                  </div>
+                </div>
 
-              {/* 순위표 */}
-              <div className="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm min-h-[450px] overflow-hidden">
-                <KeywordRankingComponent wordCloudData={wordCloudData} />
-              </div>
-            </div>
+                {/* 긍부정 추이 + 긍부정 비율 */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-6 border-t border-slate-200">
+                  <div className="lg:col-span-2 bg-white border border-slate-200 rounded-[2.5rem] p-10 min-h-[350px] shadow-sm">
+                    <SentimentTrendComponent
+                      sentimentBarData={sentimentBarData}
+                      stackedBarOptions={stackedBarOptions}
+                    />
+                  </div>
 
-            {/* 긍부정 추이 + 긍부정 비율 */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-6 border-t border-slate-200">
-              <div className="lg:col-span-2 bg-white border border-slate-200 rounded-[2.5rem] p-10 min-h-[350px] shadow-sm">
-                <SentimentTrendComponent
-                  sentimentBarData={sentimentBarData}
-                  stackedBarOptions={stackedBarOptions}
-                />
+                  <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 min-h-[350px] shadow-sm">
+                    <SentimentRatioComponent
+                      sentimentDoughnutData={sentimentDoughnutData}
+                      sentimentAverages={sentimentAverages}
+                      doughnutOptions={doughnutOptions}
+                      summaryStats={summaryStats}
+                    />
+                  </div>
+                </div>
               </div>
-
-              <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 min-h-[350px] shadow-sm">
-                <SentimentRatioComponent
-                  sentimentDoughnutData={sentimentDoughnutData}
-                  sentimentAverages={sentimentAverages}
-                  doughnutOptions={doughnutOptions}
-                  summaryStats={summaryStats}
-                />
-              </div>
-            </div>
-            </div>
             </div>
           </section>
         </div>
