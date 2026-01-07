@@ -48,63 +48,24 @@ export default function BrandFormComponent({
   setForm,
   onCancel,
   onSubmit,
-  isModal = false, // 모달 내부에서 사용될 때 true
 }) {
   const competitorCount = (form.competitors || []).length;
   const allEnabled =
     competitorCount > 0 && (form.competitors || []).every((c) => c.enabled);
 
   return (
-    <div
-      className={cn(
-        "space-y-8",
-        isModal
-          ? "pb-8"
-          : "max-w-[1400px] mx-auto pb-20 animate-in fade-in duration-500"
-      )}
-    >
-      {/* 액션 바 - 모달 모드일 때는 숨김 */}
-      {!isModal && (
-        <div className="sticky top-20 z-30 flex items-center justify-between bg-white/80 backdrop-blur-xl p-4 rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/40 mb-10">
-          <div className="flex items-center gap-3 px-2">
-            <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg">
-              <Building2 size={20} />
-            </div>
-            <h2 className="text-lg font-black text-slate-900">
-              {mode === "EDIT" ? "브랜드 프로필 수정" : "새 브랜드 등록"}
-            </h2>
+    <div className="max-w-[1400px] mx-auto space-y-8 pb-20 animate-in fade-in duration-500">
+      {/* 액션 바 */}
+      <div className="sticky top-20 z-30 flex items-center justify-between bg-white/80 backdrop-blur-xl p-4 rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/40 mb-10">
+        <div className="flex items-center gap-3 px-2">
+          <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg">
+            <Building2 size={20} />
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onCancel}
-              className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-all"
-            >
-              취소
-            </button>
-            <button
-              onClick={onSubmit}
-              disabled={!canSubmit || saving}
-              className={cn(
-                "flex items-center gap-2 px-7 py-2.5 rounded-xl font-black text-sm transition-all shadow-lg active:scale-95",
-                !canSubmit || saving
-                  ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                  : "bg-blue-600 text-white shadow-blue-100 hover:bg-blue-700"
-              )}
-            >
-              {saving ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white animate-spin rounded-full" />
-              ) : (
-                <Save size={18} />
-              )}
-              저장하기
-            </button>
-          </div>
+          <h2 className="text-lg font-black text-slate-900">
+            {mode === "EDIT" ? "브랜드 프로필 수정" : "새 브랜드 등록"}
+          </h2>
         </div>
-      )}
-
-      {/* 모달 모드일 때 하단 액션 버튼 */}
-      {isModal && (
-        <div className="sticky bottom-0 bg-white border-t border-slate-200 p-6 -mx-8 -mb-8 flex items-center justify-end gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={onCancel}
             className="px-5 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-all"
@@ -126,10 +87,10 @@ export default function BrandFormComponent({
             ) : (
               <Save size={18} />
             )}
-            등록하기
+            저장하기
           </button>
         </div>
-      )}
+      </div>
 
       <div className="space-y-8">
         {/* 기본 정보 */}
@@ -172,7 +133,7 @@ export default function BrandFormComponent({
 
         {/* 경쟁사 관리 */}
         <Section
-          title="경쟁사 등록"
+          title="경쟁사 벤치마킹"
           desc="비교 분석 대상이 될 라이벌 브랜드를 등록하세요."
           icon={Users}
           right={
@@ -190,7 +151,7 @@ export default function BrandFormComponent({
                 }
                 className="px-4 py-2 text-[10px] font-black text-slate-500 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl transition-all uppercase"
               >
-                {allEnabled ? "전체 비활성화" : "전체 활성화"}
+                {allEnabled ? "Disable All" : "Enable All"}
               </button>
               <button
                 type="button"
@@ -205,7 +166,7 @@ export default function BrandFormComponent({
                 }
                 className="px-4 py-2 text-[10px] font-black text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all uppercase flex items-center gap-2 shadow-lg shadow-blue-100"
               >
-                <Plus size={14} /> 경쟁사 추가
+                <Plus size={14} /> Add New
               </button>
             </div>
           }

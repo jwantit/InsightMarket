@@ -1,5 +1,6 @@
 // src/components/brand/BrandListComponent.jsx
 import React from "react";
+import { useSelector } from "react-redux";
 import { Plus, Search, Users, ChevronRight, LayoutGrid } from "lucide-react";
 
 const BrandListComponent = ({
@@ -10,6 +11,9 @@ const BrandListComponent = ({
   onSelect,
   loading,
 }) => {
+  const loginState = useSelector((state) => state.loginSlice);
+  const systemRole = loginState?.role;
+  const isCompanyAdmin = systemRole === "COMPANY_ADMIN";
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* 검색 및 액션 바 */}
@@ -78,23 +82,25 @@ const BrandListComponent = ({
           </div>
         ))}
 
-        {/* 빈 카드 추가 버튼 */}
-        <button
-          onClick={onCreate}
-          className="group min-h-[200px] border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center gap-3 text-slate-400 hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-300"
-        >
-          <div className="w-12 h-12 rounded-full bg-slate-50 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-sm">
-            <Plus size={24} />
-          </div>
-          <div className="text-center">
-            <span className="block text-sm font-black text-slate-500 group-hover:text-blue-600">
-              새 브랜드 등록
-            </span>
-            <span className="text-[11px] font-medium text-slate-400">
-              데이터 분석을 시작하세요
-            </span>
-          </div>
-        </button>
+        {/* 빈 카드 추가 버튼 - Company_admin만 표시 */}
+        {isCompanyAdmin && (
+          <button
+            onClick={onCreate}
+            className="group min-h-[200px] border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center gap-3 text-slate-400 hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-300"
+          >
+            <div className="w-12 h-12 rounded-full bg-slate-50 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition-all duration-300 shadow-sm">
+              <Plus size={24} />
+            </div>
+            <div className="text-center">
+              <span className="block text-sm font-black text-slate-500 group-hover:text-blue-600">
+                새 브랜드 등록
+              </span>
+              <span className="text-[11px] font-medium text-slate-400">
+                데이터 분석을 시작하세요
+              </span>
+            </div>
+          </button>
+        )}
       </div>
     </div>
   );

@@ -1,12 +1,16 @@
 // src/pages/brand/BrandPage.jsx
 import React, { useRef, useState } from "react";
-import { Building2, Plus, Users, LayoutGrid } from "lucide-react";
+import { useSelector } from "react-redux";
+import { Building2, Plus, Users } from "lucide-react";
 import BrandComponent from "../../components/brand/BrandComponent";
 import PageHeader from "../../components/common/PageHeader";
 
 const BrandPage = () => {
   const brandRef = useRef();
   const [totalCount, setTotalCount] = useState(0);
+  const loginState = useSelector((state) => state.loginSlice);
+  const systemRole = loginState?.role;
+  const isCompanyAdmin = systemRole === "COMPANY_ADMIN";
 
   // 헤더 우측 "브랜드 등록" 버튼 클릭 시 자식의 openCreate 실행
   const handleOpenCreate = () => {
@@ -15,7 +19,7 @@ const BrandPage = () => {
     }
   };
 
-  const headerExtra = (
+  const headerExtra = isCompanyAdmin ? (
     <div className="flex items-center gap-4">
       <button
         onClick={handleOpenCreate}
@@ -25,7 +29,7 @@ const BrandPage = () => {
         브랜드 등록
       </button>
     </div>
-  );
+  ) : null;
 
   return (
     <div className="max-w-[1400px] mx-auto p-6 space-y-10 pb-20 animate-in fade-in duration-700">
