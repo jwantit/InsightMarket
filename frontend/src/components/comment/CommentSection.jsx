@@ -163,19 +163,21 @@ const CommentSection = ({ brandId, boardId }) => {
   };
 
   return (
-    <div className="space-y-4">
-      <h4 className="text-lg font-semibold text-gray-900">댓글</h4>
-      <div className="space-y-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+    <div className="space-y-6">
+      <h4 className="text-xl font-black text-slate-900">댓글</h4>
+      
+      {/* 댓글 작성 폼 */}
+      <div className="space-y-3 p-5 bg-slate-50 rounded-2xl border border-slate-200">
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onPaste={(e) => handleImagePaste(e, setContent, setCommentFiles)}
-          placeholder="댓글 작성... (이미지 붙여넣기 가능)"
+          placeholder="댓글을 입력하세요... (이미지 붙여넣기 가능)"
           rows={4}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-y"
+          className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-white focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none resize-y text-slate-700 font-medium"
         />
         {commentFiles.length > 0 && (
-          <div className="text-xs text-gray-600">
+          <div className="text-xs text-slate-500 font-medium">
             첨부된 파일: {commentFiles.map((f) => f.name).join(", ")}
           </div>
         )}
@@ -184,52 +186,56 @@ const CommentSection = ({ brandId, boardId }) => {
             type="file"
             multiple
             onChange={(e) => setCommentFiles(Array.from(e.target.files || []))}
-            className="block text-sm text-gray-500 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            className="block text-sm text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors"
           />
           <button
             onClick={submit}
-            disabled={!content}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            disabled={!content.trim()}
+            className="px-5 py-2.5 text-sm font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-100"
           >
             등록
           </button>
         </div>
       </div>
+
+      {/* 댓글 목록 */}
       <div className="mt-6">
         {status === "loading" ? (
-          <div className="py-8 text-center text-gray-500">불러오는 중...</div>
+          <div className="py-12 text-center text-slate-500 font-medium">불러오는 중...</div>
         ) : tree.length === 0 ? (
-          <div className="py-8 text-center text-gray-500">댓글이 없습니다.</div>
+          <div className="py-12 text-center text-slate-400 font-medium">댓글이 없습니다.</div>
         ) : (
-          tree.map((comment) => (
-            <CommentItem
-              key={comment.commentId}
-              comment={comment}
-              onReply={handleReply}
-              onDelete={handleDelete}
-              onEdit={handleEdit}
-              editingId={editingId}
-              editContent={editContent}
-              onEditContentChange={setEditContent}
-              onSaveEdit={handleSaveEdit}
-              onCancelEdit={handleCancelEdit}
-              parentId={parentId}
-              replyContent={replyContent}
-              onReplyContentChange={setReplyContent}
-              onSubmitReply={submitReply}
-              onCancelReply={handleCancelReply}
-              originalCommentId={comment.commentId}
-              currentUserId={currentUserId}
-              editFiles={getEditFiles(comment.commentId)}
-              onEditFilesChange={(updater) =>
-                setEditFilesForComment(comment.commentId, updater)
-              }
-              getReplyFiles={getReplyFiles}
-              setReplyFilesForComment={setReplyFilesForComment}
-              getEditFiles={getEditFiles}
-              setEditFilesForComment={setEditFilesForComment}
-            />
-          ))
+          <div className="space-y-4">
+            {tree.map((comment) => (
+              <CommentItem
+                key={comment.commentId}
+                comment={comment}
+                onReply={handleReply}
+                onDelete={handleDelete}
+                onEdit={handleEdit}
+                editingId={editingId}
+                editContent={editContent}
+                onEditContentChange={setEditContent}
+                onSaveEdit={handleSaveEdit}
+                onCancelEdit={handleCancelEdit}
+                parentId={parentId}
+                replyContent={replyContent}
+                onReplyContentChange={setReplyContent}
+                onSubmitReply={submitReply}
+                onCancelReply={handleCancelReply}
+                originalCommentId={comment.commentId}
+                currentUserId={currentUserId}
+                editFiles={getEditFiles(comment.commentId)}
+                onEditFilesChange={(updater) =>
+                  setEditFilesForComment(comment.commentId, updater)
+                }
+                getReplyFiles={getReplyFiles}
+                setReplyFilesForComment={setReplyFilesForComment}
+                getEditFiles={getEditFiles}
+                setEditFilesForComment={setEditFilesForComment}
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>

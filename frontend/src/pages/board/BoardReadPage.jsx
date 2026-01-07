@@ -75,10 +75,11 @@ const BoardReadPage = () => {
 
   return (
     <div className="space-y-6">
-      {/* 헤더 */}
+      {/* 게시글 내용 (헤더, 본문, 첨부 파일 통합) */}
       <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
-        <div className="p-6">
-          <div className="flex items-start justify-between gap-4 mb-4">
+        {/* 헤더 */}
+        <div className="px-8 pt-8 pb-6 border-b border-slate-100">
+          <div className="flex items-start justify-between gap-4 mb-6">
             <h1 className="text-2xl font-black text-slate-900 tracking-tight flex-1">
               {detail.title}
             </h1>
@@ -103,7 +104,7 @@ const BoardReadPage = () => {
           </div>
 
           {/* 메타 정보 */}
-          <div className="flex items-center gap-6 text-sm text-slate-600 pt-4 border-t border-slate-100">
+          <div className="flex items-center gap-6 text-sm text-slate-600">
             <div className="flex items-center gap-2">
               <User size={16} className="text-slate-400" />
               <span className="font-bold">{detail.writerName}</span>
@@ -119,40 +120,36 @@ const BoardReadPage = () => {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* 본문 */}
-      <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
-        <div className="p-6">
+        {/* 본문 */}
+        <div className="px-8 py-8">
           <div
-            className="prose max-w-none text-slate-800 leading-relaxed"
+            className="prose max-w-none text-slate-800 leading-relaxed text-base"
             dangerouslySetInnerHTML={{
               __html: (detail.content || "").replace(/\n/g, "<br>"),
             }}
           />
         </div>
-      </div>
 
-      {/* 첨부 파일 */}
-      {detail.files?.length > 0 && (
-        <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-            <div className="p-2 bg-slate-50 rounded-lg text-slate-500">
-              <FileText size={18} />
+        {/* 첨부 파일 */}
+        {detail.files?.length > 0 && (
+          <div className="px-8 pb-8 border-t border-slate-100 pt-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-slate-50 rounded-lg text-slate-500">
+                <FileText size={18} />
+              </div>
+              <h3 className="text-base font-bold text-slate-900">첨부 파일</h3>
             </div>
-            <h3 className="text-base font-bold text-slate-900">첨부 파일</h3>
-          </div>
-          <div className="p-6">
             <div className="flex flex-wrap gap-3">
               {detail.files.map((file) => (
                 <FileItem key={file.id} file={file} size="md" />
               ))}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* 댓글 섹션 */}
+      {/* 댓글 섹션 (별도 카드로 분리) */}
       <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
         <div className="p-6">
           <CommentSection brandId={brandId} boardId={boardId} />
