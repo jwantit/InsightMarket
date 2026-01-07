@@ -1,17 +1,81 @@
+// import React, { useEffect, useState } from "react";
+// import { useParams } from "react-router-dom";
+// import DashboardFilter from "../../components/dashboard/DashboardFilter";
+// import BrandMentionSummary from "../../components/dashboard/BrandMentionSummary";
+// import BrandSentimentSummary from "../../components/dashboard/BrandSentimentSummary";
+// import { getBrandWordCloudData } from "../../api/dashboard/dashboard";
+
+// const Dashboard = () => {
+//   // 토글 시 바로 적용되도록 appliedChannels만 사용
+//   const [appliedChannels, setAppliedChannels] = useState(["NAVER", "YOUTUBE"]);
+
+//   const { brandId } = useParams();
+
+//   // 워드 클라우드 데이터
+//   const [wordData, setWordData] = useState([]);
+
+//   useEffect(() => {
+//     const fetchWordData = async () => {
+//       const response = await getBrandWordCloudData(brandId, appliedChannels);
+//       setWordData(response);
+//     };
+//     fetchWordData();
+//   }, [brandId, appliedChannels]);
+
+//   const handleToggle = (channel) => {
+//     if (appliedChannels.includes(channel)) {
+//       if (appliedChannels.length > 1) {
+//         setAppliedChannels(appliedChannels.filter((c) => c !== channel));
+//       } else {
+//         alert("최소 하나는 선택해야 합니다.");
+//       }
+//     } else {
+//       setAppliedChannels([...appliedChannels, channel]);
+//     }
+//   };
+
+//   return (
+//     <div className="flex flex-col gap-4">
+//       {" "}
+//       {/* 3. 반드시 하나의 태그로 감싸야 함 */}
+//       <DashboardFilter
+//         appliedChannels={appliedChannels}
+//         handleToggle={handleToggle}
+//       />
+//       <h3 className="text-lg font-extrabold text-gray-800 tracking-tight">
+//         언급량 분석
+//       </h3>
+//       <BrandMentionSummary
+//         brandId={brandId}
+//         appliedChannels={appliedChannels} // 확정된 채널만 자식에게 전달
+//       />
+//       <h3 className="text-lg font-extrabold text-gray-800 tracking-tight">
+//         긍 · 부정 분석
+//       </h3>
+//       <BrandSentimentSummary
+//         brandId={brandId}
+//         appliedChannels={appliedChannels} // 확정된 채널만 자식에게 전달
+//         wordData={wordData}
+//       />
+//     </div>
+//   );
+// };
+
+// export default Dashboard;
+
+// src/pages/dashboard/Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { LayoutDashboard, Activity, Heart } from "lucide-react";
+import PageHeader from "../../components/common/PageHeader";
 import DashboardFilter from "../../components/dashboard/DashboardFilter";
 import BrandMentionSummary from "../../components/dashboard/BrandMentionSummary";
 import BrandSentimentSummary from "../../components/dashboard/BrandSentimentSummary";
 import { getBrandWordCloudData } from "../../api/dashboard/dashboard";
 
 const Dashboard = () => {
-  // 토글 시 바로 적용되도록 appliedChannels만 사용
-  const [appliedChannels, setAppliedChannels] = useState(["NAVER", "YOUTUBE"]);
-
   const { brandId } = useParams();
-
-  // 워드 클라우드 데이터
+  const [appliedChannels, setAppliedChannels] = useState(["NAVER", "YOUTUBE"]);
   const [wordData, setWordData] = useState([]);
 
   useEffect(() => {
@@ -35,28 +99,57 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      {" "}
-      {/* 3. 반드시 하나의 태그로 감싸야 함 */}
-      <DashboardFilter
-        appliedChannels={appliedChannels}
-        handleToggle={handleToggle}
+    <div className="max-w-[1400px] mx-auto p-6 space-y-10 pb-20 animate-in fade-in duration-700">
+      {/* 1. 세련된 통합 헤더 (필터 포함) */}
+      <PageHeader
+        icon={LayoutDashboard}
+        title="브랜드 대시보드"
+        breadcrumb="Analytics / Dashboard"
+        subtitle="수집된 데이터를 기반으로 브랜드의 소셜 언급량과 감성 상태를 실시간으로 분석합니다."
+        extra={
+          <DashboardFilter
+            appliedChannels={appliedChannels}
+            handleToggle={handleToggle}
+          />
+        }
       />
-      <h3 className="text-lg font-extrabold text-gray-800 tracking-tight">
-        언급량 분석
-      </h3>
-      <BrandMentionSummary
-        brandId={brandId}
-        appliedChannels={appliedChannels} // 확정된 채널만 자식에게 전달
-      />
-      <h3 className="text-lg font-extrabold text-gray-800 tracking-tight">
-        긍 · 부정 분석
-      </h3>
-      <BrandSentimentSummary
-        brandId={brandId}
-        appliedChannels={appliedChannels} // 확정된 채널만 자식에게 전달
-        wordData={wordData}
-      />
+
+      <div className="space-y-14">
+        {/* 2. 언급량 분석 섹션 */}
+        <section className="space-y-6">
+          <div className="flex items-center gap-3 px-2">
+            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl border border-blue-100 shadow-sm">
+              <Activity size={20} />
+            </div>
+            <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">
+              Mention Analysis
+            </h3>
+            <div className="h-px flex-1 bg-slate-200 opacity-50" />
+          </div>
+          <BrandMentionSummary
+            brandId={brandId}
+            appliedChannels={appliedChannels}
+          />
+        </section>
+
+        {/* 3. 긍·부정 분석 섹션 */}
+        <section className="space-y-6">
+          <div className="flex items-center gap-3 px-2">
+            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100 shadow-sm">
+              <Heart size={20} />
+            </div>
+            <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">
+              Sentiment Insight
+            </h3>
+            <div className="h-px flex-1 bg-slate-200 opacity-50" />
+          </div>
+          <BrandSentimentSummary
+            brandId={brandId}
+            appliedChannels={appliedChannels}
+            wordData={wordData}
+          />
+        </section>
+      </div>
     </div>
   );
 };
