@@ -1,15 +1,10 @@
 import ModifyComponent from "../../components/member/ModifyComponent";
-import MainLayout from "../../layouts/MainLayout";
 
 const ModfyPage = () => {
   return (
-    <>
-      <div className=" text-3xl">Member Modify Page</div>
-
-      <div className="bg-white w-full mt-4 p-2">
-        <ModifyComponent></ModifyComponent>
-      </div>
-    </>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8">
+      <ModifyComponent />
+    </div>
   );
 };
 

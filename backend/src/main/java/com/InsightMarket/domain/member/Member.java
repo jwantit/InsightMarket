@@ -82,4 +82,8 @@ public class Member extends BaseEntity {
     public void clearRequestedCompany() {
         this.requestedCompany = null;
     }
+
+    public void changeRequestedCompany(Company requestedCompany) {
+        this.requestedCompany = requestedCompany;
+    }
 }

@@ -1,30 +1,65 @@
+import { CheckCircle, X } from "lucide-react";
+
 const ResultModal = ({ title, content, callbackFn }) => {
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget && callbackFn) {
+      callbackFn();
+    }
+  };
+
   return (
     <div
-      className={`fixed top-0 left-0 z-[1055] flex h-full w-full  justify-center bg-black bg-opacity-20`}
-      onClick={() => {
-        if (callbackFn) {
-          callbackFn();
-        }
-      }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      onMouseDown={handleBackdropClick}
     >
-      <div className="absolute bg-white shadow dark:bg-gray-700 opacity-100 w-1/4 rounded  mt-10 mb-10 px-6 min-w-[600px]">
-        <div className="justify-center bg-warning-400 mt-6 mb-6 text-2xl border-b-4 border-gray-500">
-          {title}
-        </div>
-        <div className="text-4xl  border-orange-400 border-b-4 pt-4 pb-4">
-          {content}
-        </div>
-        <div className="justify-end flex ">
+      <div
+        className="w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* 헤더 */}
+        <div className="flex items-center justify-between gap-4 border-b border-slate-200 bg-white px-6 py-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-200">
+              <CheckCircle size={20} />
+            </div>
+            <div>
+              <h2 className="text-lg font-black text-slate-900">{title}</h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                작업이 완료되었습니다
+              </p>
+            </div>
+          </div>
+
           <button
-            className="rounded bg-blue-500 mt-4 mb-4 px-6 pt-4 pb-4 text-lg text-white"
-            onClick={() => {
-              if (callbackFn) {
-                callbackFn();
-              }
-            }}
+            onClick={callbackFn}
+            className="p-2 text-slate-400 hover:bg-slate-100 rounded-xl transition-colors"
+            aria-label="닫기"
+            title="닫기"
           >
-            Close Modal
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* 내용 */}
+        <div className="px-6 py-8">
+          <div className="text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-50 mb-4">
+              <CheckCircle size={32} className="text-emerald-600" />
+            </div>
+            <p className="text-base font-bold text-slate-900 mb-2">{content}</p>
+            <p className="text-sm text-slate-500">
+              변경사항이 성공적으로 저장되었습니다.
+            </p>
+          </div>
+        </div>
+
+        {/* 푸터 */}
+        <div className="px-6 pb-6 pt-2">
+          <button
+            onClick={callbackFn}
+            className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-all shadow-lg shadow-blue-200 active:scale-95"
+          >
+            확인
           </button>
         </div>
       </div>

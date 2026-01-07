@@ -219,9 +219,22 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findByEmail(memberModifyDTO.getEmail())
                 .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
 
-        member.changePassword(passwordEncoder.encode(memberModifyDTO.getPassword()));
-        member.changeIsSocial(false);
+        // 비밀번호는 입력한 경우에만 변경
+        if (memberModifyDTO.getPassword() != null && !memberModifyDTO.getPassword().isEmpty()) {
+            member.changePassword(passwordEncoder.encode(memberModifyDTO.getPassword()));
+            // 비밀번호를 설정하면 소셜 로그인 플래그 해제
+            member.changeIsSocial(false);
+        }
+
+        // 이름 변경
         member.changeName(memberModifyDTO.getName());
+
+        // 소셜 로그인 사용자의 회사 선택 처리
+        if (memberModifyDTO.getRequestedCompanyId() != null) {
+            Company requestedCompany = companyRepository.findById(memberModifyDTO.getRequestedCompanyId())
+                    .orElseThrow(() -> new ApiException(ErrorCode.COMPANY_NOT_FOUND));
+            member.changeRequestedCompany(requestedCompany);
+        }
 
         memberRepository.save(member);
     }
