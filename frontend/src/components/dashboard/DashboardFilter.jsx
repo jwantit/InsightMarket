@@ -8,18 +8,26 @@ const DashboardFilter = ({ appliedChannels, handleToggle }) => {
         <div className="flex items-center gap-1.5 border-r border-slate-100 pr-4 mr-1">
           <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-            Channels
+            Filter
           </span>
         </div>
 
         {/* 네이버 토글 */}
         <div className="flex items-center gap-2.5">
-          <span className="text-[11px] font-black text-slate-700">NAVER</span>
+          <span
+            className={`text-[11px] font-black transition-colors ${
+              appliedChannels.includes("NAVER")
+                ? "text-emerald-500"
+                : "text-slate-400"
+            }`}
+          >
+            NAVER
+          </span>
           <button
             onClick={() => handleToggle("NAVER")}
             className={`relative inline-flex h-5 w-9 items-center rounded-full transition-all duration-300 ${
               appliedChannels.includes("NAVER")
-                ? "bg-emerald-500 shadow-inner"
+                ? "bg-blue-500 shadow-inner"
                 : "bg-slate-200"
             }`}
           >
@@ -35,12 +43,20 @@ const DashboardFilter = ({ appliedChannels, handleToggle }) => {
 
         {/* 유튜브 토글 */}
         <div className="flex items-center gap-2.5 border-l border-slate-100 pl-5">
-          <span className="text-[11px] font-black text-slate-700">YOUTUBE</span>
+          <span
+            className={`text-[11px] font-black transition-colors ${
+              appliedChannels.includes("YOUTUBE")
+                ? "text-red-500"
+                : "text-slate-400"
+            }`}
+          >
+            YOUTUBE
+          </span>
           <button
             onClick={() => handleToggle("YOUTUBE")}
             className={`relative inline-flex h-5 w-9 items-center rounded-full transition-all duration-300 ${
               appliedChannels.includes("YOUTUBE")
-                ? "bg-red-500 shadow-inner"
+                ? "bg-blue-500 shadow-inner"
                 : "bg-slate-200"
             }`}
           >

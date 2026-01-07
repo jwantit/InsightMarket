@@ -172,7 +172,7 @@ export default function BrandFormComponent({
 
         {/* 경쟁사 관리 */}
         <Section
-          title="경쟁사 벤치마킹"
+          title="경쟁사 등록"
           desc="비교 분석 대상이 될 라이벌 브랜드를 등록하세요."
           icon={Users}
           right={

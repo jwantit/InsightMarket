@@ -655,7 +655,7 @@ const SentimentTrend = () => {
 
       {/* Filters */}
       <div className="sticky top-8 z-50 w-full flex justify-center pointer-events-none transition-all duration-500 mb-4">
-        <div className="inline-flex items-center bg-white/10 backdrop-blur-md px-5 py-2 rounded-full shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] border border-white/20 gap-4 pointer-events-auto transition-all duration-300 hover:bg-white/90 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] group flex-wrap">
+        <div className="inline-flex items-center bg-white/10 backdrop-blur-md px-5 py-2.5 rounded-full shadow-[0_8px_32px_0_rgba(31,38,135,0.07)] border border-white/20 gap-4 pointer-events-auto transition-all duration-300 hover:bg-white/90 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] group flex-wrap">
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
             <span className="text-[10px] font-black text-gray-400 group-hover:text-gray-500 uppercase tracking-widest transition-colors">
@@ -706,7 +706,13 @@ const SentimentTrend = () => {
 
           {/* Source Toggles */}
           <div className="flex items-center gap-2.5 border-l border-gray-200/30 group-hover:border-gray-200 pl-4">
-            <span className="text-[11px] font-bold text-gray-500 group-hover:text-gray-700">
+            <span
+              className={`text-[11px] font-black transition-colors ${
+                selectedSources.includes("NAVER")
+                  ? "text-emerald-500"
+                  : "text-slate-400"
+              }`}
+            >
               NAVER
             </span>
             <button
@@ -717,24 +723,30 @@ const SentimentTrend = () => {
                     : [...prev, "NAVER"]
                 );
               }}
-              className={`relative inline-flex h-4 w-8 items-center rounded-full transition-all ${
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-all duration-300 ${
                 selectedSources.includes("NAVER")
-                  ? "bg-green-500/60 group-hover:bg-green-500"
-                  : "bg-gray-200/40 group-hover:bg-gray-200"
+                  ? "bg-blue-500 shadow-inner"
+                  : "bg-slate-200"
               }`}
             >
               <span
-                className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-sm transition-transform ${
+                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm transition-transform duration-300 ${
                   selectedSources.includes("NAVER")
                     ? "translate-x-4.5"
-                    : "translate-x-0.5"
+                    : "translate-x-1"
                 }`}
               />
             </button>
           </div>
 
           <div className="flex items-center gap-2.5 border-l border-gray-200/30 group-hover:border-gray-200 pl-4">
-            <span className="text-[11px] font-bold text-gray-500 group-hover:text-gray-700">
+            <span
+              className={`text-[11px] font-black transition-colors ${
+                selectedSources.includes("YOUTUBE")
+                  ? "text-red-500"
+                  : "text-slate-400"
+              }`}
+            >
               YOUTUBE
             </span>
             <button
@@ -745,17 +757,17 @@ const SentimentTrend = () => {
                     : [...prev, "YOUTUBE"]
                 );
               }}
-              className={`relative inline-flex h-4 w-8 items-center rounded-full transition-all ${
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-all duration-300 ${
                 selectedSources.includes("YOUTUBE")
-                  ? "bg-red-500/60 group-hover:bg-red-500"
-                  : "bg-gray-200/40 group-hover:bg-gray-200"
+                  ? "bg-blue-500 shadow-inner"
+                  : "bg-slate-200"
               }`}
             >
               <span
-                className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-sm transition-transform ${
+                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow-sm transition-transform duration-300 ${
                   selectedSources.includes("YOUTUBE")
                     ? "translate-x-4.5"
-                    : "translate-x-0.5"
+                    : "translate-x-1"
                 }`}
               />
             </button>

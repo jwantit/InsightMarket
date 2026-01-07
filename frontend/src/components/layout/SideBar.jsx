@@ -122,7 +122,7 @@ const SideBar = ({ onNavigate }) => {
             icon={Rocket}
             onNavigate={onNavigate}
           >
-            프로모션 관리
+            프로젝트 관리
           </SideLink>
         </div>
 

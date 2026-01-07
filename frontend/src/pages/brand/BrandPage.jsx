@@ -35,7 +35,6 @@ const BrandPage = () => {
         breadcrumb="Management / Brands"
         subtitle="현재 관리 중인 모든 브랜드 리스트입니다. 브랜드별 대시보드 권한 및 데이터를 제어할 수 있습니다."
         extra={headerExtra}
-        badge="Pro"
       />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
