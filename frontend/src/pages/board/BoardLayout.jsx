@@ -1,5 +1,5 @@
 import React from "react";
-import { Outlet, useNavigate, useSearchParams } from "react-router-dom";
+import { Outlet, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { LayoutList, Plus, List } from "lucide-react";
 import PageHeader from "../../components/common/PageHeader";
 import useBoardRouteParams from "../../hooks/common/useBoardRouteParams";
@@ -7,7 +7,11 @@ import useBoardRouteParams from "../../hooks/common/useBoardRouteParams";
 const BoardLayout = () => {
   const { brandId } = useBoardRouteParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
+
+  // 현재 경로가 목록 페이지인지 확인 (/read/, /add, /modify/가 없으면 목록 페이지)
+  const isListPage = !location.pathname.match(/\/read\/|\/add|\/modify\//);
 
   const goList = () => {
     const query = searchParams.toString();
@@ -18,13 +22,15 @@ const BoardLayout = () => {
 
   const headerExtra = (
     <div className="flex items-center gap-2">
-      <button
-        onClick={goList}
-        className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 rounded-xl transition-all border border-slate-200"
-      >
-        <List size={18} />
-        목록
-      </button>
+      {!isListPage && (
+        <button
+          onClick={goList}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 rounded-xl transition-all border border-slate-200"
+        >
+          <List size={18} />
+          목록
+        </button>
+      )}
       <button
         onClick={goAdd}
         className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow-md active:scale-95"

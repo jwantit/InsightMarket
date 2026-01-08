@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { getPlaceDetail, getSaturationColor, getErrorMessage } from "../../api/marketBotApi";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import {
+  getPlaceDetail,
+  getSaturationColor,
+  getErrorMessage,
+} from "../../api/marketBotApi";
 
 const PlaceDetailModal = ({ isOpen, placeId, placeName, onClose }) => {
   const [detailData, setDetailData] = useState(null);
@@ -42,7 +54,9 @@ const PlaceDetailModal = ({ isOpen, placeId, placeName, onClose }) => {
         {/* 헤더 */}
         <div className="px-6 py-5 border-b flex items-center justify-between bg-white flex-shrink-0">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">상권 분석 봇 (Beta)</h2>
+            <h2 className="text-xl font-bold text-gray-900">
+              상권 분석 봇 (Beta)
+            </h2>
           </div>
           <button
             onClick={onClose}
@@ -58,7 +72,9 @@ const PlaceDetailModal = ({ isOpen, placeId, placeName, onClose }) => {
             <div className="flex items-center justify-center py-12">
               <div className="flex flex-col items-center gap-3">
                 <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-sm text-gray-600">데이터를 불러오는 중...</span>
+                <span className="text-sm text-gray-600">
+                  데이터를 불러오는 중...
+                </span>
               </div>
             </div>
           )}
@@ -68,7 +84,9 @@ const PlaceDetailModal = ({ isOpen, placeId, placeName, onClose }) => {
               <div className="flex items-start gap-3">
                 <span className="text-red-600 text-lg">⚠️</span>
                 <div className="flex-1">
-                  <div className="text-sm font-semibold text-red-700 mb-1">오류 발생</div>
+                  <div className="text-sm font-semibold text-red-700 mb-1">
+                    오류 발생
+                  </div>
                   <div className="text-sm text-red-700">{error}</div>
                 </div>
               </div>
@@ -78,29 +96,41 @@ const PlaceDetailModal = ({ isOpen, placeId, placeName, onClose }) => {
           {detailData && !loading && (
             <>
               <div className="mb-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-2">[📊 상권 정밀 분석]</h3>
-                <p className="text-sm text-gray-600 mb-4">{detailData.placeName}</p>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  📊 상권 정밀 분석
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  {detailData.placeName}
+                </p>
 
                 <div className="space-y-3">
                   {/* 유동인구 피크 */}
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-semibold text-gray-700">1. 유동인구 피크:</span>
+                    <span className="text-sm font-semibold text-gray-700">
+                      1. 유동인구 피크:
+                    </span>
                     <span className="text-sm text-gray-800">
-                      {detailData.trafficPeak.start} ~ {detailData.trafficPeak.end}
+                      {detailData.trafficPeak.start} ~{" "}
+                      {detailData.trafficPeak.end}
                     </span>
                   </div>
 
                   {/* 주요 연령층 */}
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-semibold text-gray-700">2. 주요 연령층:</span>
+                    <span className="text-sm font-semibold text-gray-700">
+                      2. 주요 연령층:
+                    </span>
                     <span className="text-sm text-gray-800">
-                      {detailData.mainAgeGroup.label} ({Math.round(detailData.mainAgeGroup.ratio * 100)}%)
+                      {detailData.mainAgeGroup.label} (
+                      {Math.round(detailData.mainAgeGroup.ratio * 100)}%)
                     </span>
                   </div>
 
                   {/* 업종 과포화도 */}
                   <div className="flex items-center gap-3">
-                    <span className="text-sm font-semibold text-gray-700">3. 업종 과포화도:</span>
+                    <span className="text-sm font-semibold text-gray-700">
+                      3. 업종 과포화도:
+                    </span>
                     <span
                       className={`px-3 py-1 rounded-lg text-xs font-bold border ${getSaturationColor(
                         detailData.saturation.level
@@ -114,10 +144,15 @@ const PlaceDetailModal = ({ isOpen, placeId, placeName, onClose }) => {
 
               {/* 유동인구 그래프 */}
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                <h4 className="text-sm font-bold text-gray-700 mb-4">유동인구 그래프</h4>
+                <h4 className="text-sm font-bold text-gray-700 mb-4">
+                  유동인구 그래프
+                </h4>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={detailData.trafficSeries} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                    <LineChart
+                      data={detailData.trafficSeries}
+                      margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
+                    >
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                       <XAxis
                         dataKey="label"
@@ -143,7 +178,12 @@ const PlaceDetailModal = ({ isOpen, placeId, placeName, onClose }) => {
                         dataKey="value"
                         stroke="#3b82f6"
                         strokeWidth={3}
-                        dot={{ r: 5, fill: "#3b82f6", stroke: "#fff", strokeWidth: 2 }}
+                        dot={{
+                          r: 5,
+                          fill: "#3b82f6",
+                          stroke: "#fff",
+                          strokeWidth: 2,
+                        }}
                         activeDot={{ r: 7 }}
                       />
                     </LineChart>
@@ -159,4 +199,3 @@ const PlaceDetailModal = ({ isOpen, placeId, placeName, onClose }) => {
 };
 
 export default PlaceDetailModal;
-

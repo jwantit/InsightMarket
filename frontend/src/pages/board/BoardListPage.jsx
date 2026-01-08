@@ -33,11 +33,16 @@ const BoardListPage = () => {
   };
 
   const onChangePage = (nextPage) => {
-    setSearchParams({ page: nextPage, size });
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('page', String(nextPage));
+    setSearchParams(newParams);
   };
 
   const onChangeSize = (nextSize) => {
-    setSearchParams({ page: 1, size: nextSize });
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('size', String(nextSize));
+    newParams.set('page', '1');
+    setSearchParams(newParams);
   };
 
   return (
