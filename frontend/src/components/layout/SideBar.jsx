@@ -9,7 +9,7 @@ import {
   BarChart3,
   PieChart,
   BrainCircuit,
-  MessageSquare,
+  Navigation,
   ShoppingBag,
   History,
   Users,
@@ -164,10 +164,10 @@ const SideBar = ({ onNavigate }) => {
 
           <SideLink
             to={`/app/${brandId}/ai/marketbot`}
-            icon={MessageSquare}
+            icon={Navigation}
             onNavigate={onNavigate}
           >
-            상권 분석 봇
+            상권 분석
           </SideLink>
 
           <SideLink

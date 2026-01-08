@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Search, Navigation, MapPin } from "lucide-react";
 
 const LocationMap = ({ onLocationChange, onAddressChange }) => {
   // 카카오 맵 관련
@@ -113,36 +114,37 @@ const LocationMap = ({ onLocationChange, onAddressChange }) => {
     setError(null);
 
     // 장소 검색
-    placesRef.current.keywordSearch(
-      searchQuery,
-      (data, status) => {
-        setIsSearching(false);
+    placesRef.current.keywordSearch(searchQuery, (data, status) => {
+      setIsSearching(false);
 
-        if (status === kakao.maps.services.Status.OK) {
-          // 첫 번째 검색 결과 사용
-          const place = data[0];
-          const lat = parseFloat(place.y);
-          const lon = parseFloat(place.x);
+      if (status === kakao.maps.services.Status.OK) {
+        // 첫 번째 검색 결과 사용
+        const place = data[0];
+        const lat = parseFloat(place.y);
+        const lon = parseFloat(place.x);
 
-          updateLocation({
-            lat,
-            lng: lon,
-            map: mapInstanceRef.current,
-          });
+        updateLocation({
+          lat,
+          lng: lon,
+          map: mapInstanceRef.current,
+        });
 
-          // 주소 우선 설정
-          if (place.address_name && onAddressChange) {
-            onAddressChange(place.address_name);
-          }
-
-          console.log("[LocationMap] 검색 결과:", place.place_name, place.address_name);
-        } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
-          setError("검색 결과가 없습니다.");
-        } else {
-          setError("검색 중 오류가 발생했습니다.");
+        // 주소 우선 설정
+        if (place.address_name && onAddressChange) {
+          onAddressChange(place.address_name);
         }
+
+        console.log(
+          "[LocationMap] 검색 결과:",
+          place.place_name,
+          place.address_name
+        );
+      } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
+        setError("검색 결과가 없습니다.");
+      } else {
+        setError("검색 중 오류가 발생했습니다.");
       }
-    );
+    });
   };
 
   // Enter 키로 검색
@@ -175,94 +177,38 @@ const LocationMap = ({ onLocationChange, onAddressChange }) => {
   };
 
   return (
-    <div>
-      <label className="block text-sm font-bold text-gray-700 mb-3">
-        위치 선택 <span className="text-red-500">*</span>
-      </label>
-
-      {/* 검색창 - 라벨 아래 */}
-      <div className="mb-3">
-        <div className="flex gap-2">
+    <div className="w-full h-full relative group">
+      {/* 플로팅 검색바 */}
+      <div className="absolute bottom-8 left-4 right-4 z-10 md:left-auto md:right-8 md:w-80">
+        <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 p-2 flex items-center gap-2 group-focus-within:border-blue-500 transition-all">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={handleSearchKeyPress}
-            placeholder="장소, 주소 검색"
-            className="flex-1 px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+            placeholder="장소 또는 주소 검색"
+            className="flex-1 px-3 py-2 text-sm font-bold text-slate-700 outline-none bg-transparent"
           />
           <button
             onClick={handleSearch}
-            disabled={isSearching || !searchQuery.trim()}
-            className={`px-5 py-2.5 bg-blue-600 text-white rounded-lg shadow-sm hover:bg-blue-700 transition-all font-semibold text-sm flex items-center gap-2 ${
-              isSearching || !searchQuery.trim()
-                ? "opacity-50 cursor-not-allowed"
-                : ""
-            }`}
+            className="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center hover:bg-blue-600 transition-all active:scale-90"
           >
-            {isSearching ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>검색 중</span>
-              </>
-            ) : (
-              <>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
-                  <path d="m20 20-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-                <span>검색</span>
-              </>
-            )}
+            <Search size={18} />
           </button>
         </div>
       </div>
 
-      <div className="relative">
-        <div
-          ref={mapRef}
-          className="w-full h-96 rounded-xl overflow-hidden border border-gray-200"
-        />
+      {/* 현재 위치 버튼 */}
+      <button
+        onClick={handleCurrentLocation}
+        className="absolute top-32 right-6 z-10 w-12 h-12 bg-white border border-slate-200 rounded-2xl shadow-xl flex items-center justify-center text-slate-600 hover:text-blue-600 hover:shadow-blue-100 transition-all active:scale-95"
+      >
+        <Navigation size={20} fill="currentColor" />
+      </button>
 
-        {/* 현재 위치 버튼 - 우측 하단, 지도보다 위로 */}
-        <button
-          onClick={handleCurrentLocation}
-          className="absolute bottom-4 right-4 z-10 w-12 h-12 bg-white border border-gray-300 rounded-full shadow-lg hover:bg-gray-50 flex items-center justify-center transition-all"
-          title="현재 위치로 이동"
-        >
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle cx="12" cy="12" r="3" fill="#333" stroke="#333" strokeWidth="1.5" />
-            <circle cx="12" cy="12" r="8" stroke="#333" strokeWidth="1.5" fill="none" />
-            <line x1="12" y1="4" x2="12" y2="6" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="12" y1="18" x2="12" y2="20" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="4" y1="12" x2="6" y2="12" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="18" y1="12" x2="20" y2="12" stroke="#333" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-        </button>
-      </div>
-
-      {error && (
-        <p className="text-xs text-red-500 mt-2">{error}</p>
-      )}
-
-      <p className="text-xs text-gray-500 mt-2">
-        검색창에 장소를 입력하거나, 지도를 클릭하거나 현재 위치 아이콘을 눌러 위치를 선택하세요.
-      </p>
+      <div ref={mapRef} className="w-full h-full rounded-[2rem]" />
     </div>
   );
 };
 
 export default LocationMap;
-
