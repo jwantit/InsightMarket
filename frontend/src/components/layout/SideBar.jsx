@@ -18,6 +18,7 @@ import {
   ChevronDown,
   ShoppingCart,
   LayoutList,
+  Image as ImageIcon,
 } from "lucide-react";
 
 const cx = (...arr) => arr.filter(Boolean).join(" ");
@@ -167,6 +168,14 @@ const SideBar = ({ onNavigate }) => {
             onNavigate={onNavigate}
           >
             상권 분석 봇
+          </SideLink>
+
+          <SideLink
+            to={`/app/${brandId}/ai/image-analysis`}
+            icon={ImageIcon}
+            onNavigate={onNavigate}
+          >
+            광고 이미지 분석
           </SideLink>
         </Section>
 

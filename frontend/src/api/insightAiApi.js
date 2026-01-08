@@ -123,3 +123,48 @@ export async function getFreeReportCount(brandId) {
   );
   return res.data; // Long 타입으로 반환
 }
+
+export async function analyzeImageContent({
+  brandId,
+  imageFile,
+  provider = "ollama",
+  traceId,
+} = {}) {
+  console.log("[analyzeImageContent] request", {
+    brandId,
+    imageSize: imageFile?.size,
+    imageType: imageFile?.type,
+    provider,
+  });
+
+  // FormData 생성
+  const formData = new FormData();
+  formData.append("image", imageFile);
+  if (provider) {
+    formData.append("provider", provider);
+  }
+
+  const headers = {
+    "Content-Type": "multipart/form-data",
+  };
+  if (traceId) {
+    headers["X-Trace-Id"] = traceId;
+  }
+
+  const res = await jwtAxios.post(
+    `/api/${Number(brandId)}/ai/image/analyze`,
+    formData,
+    { headers }
+  );
+
+  console.log("[analyzeImageContent] response status", res.status);
+  console.log(
+    "[analyzeImageContent] response traceId header",
+    res.headers?.["x-trace-id"]
+  );
+
+  return {
+    data: res.data,
+    traceId: res.headers?.["x-trace-id"] || traceId,
+  };
+}

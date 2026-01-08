@@ -12,6 +12,7 @@ from app.api.routes.strategy import router as strategy_router
 from app.api.routes.collect import api_router as collect_router
 from app.api.routes.analyze import router as analyze_router
 from app.api.routes.location import router as location_router
+from app.api.routes.image import router as image_router
 
 
 class TraceIdFilter(logging.Filter):
@@ -75,3 +76,4 @@ app.include_router(strategy_router, tags=["strategy"])
 app.include_router(collect_router, tags=["collect"])
 app.include_router(analyze_router, tags=["analyze"])
 app.include_router(location_router, tags=["location"])
+app.include_router(image_router, tags=["image"])

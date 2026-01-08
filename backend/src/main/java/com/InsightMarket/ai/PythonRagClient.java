@@ -31,6 +31,9 @@ public class PythonRagClient {
     @Value("${python.rag.timeout-sec:650}")
     private long timeoutSec;
 
+    @Value("${python.rag.image-timeout-sec:3600}")
+    private long imageTimeoutSec;  // 이미지 분석용 타임아웃 (기본 3600초 = 60분)
+
 
     //분석 파이프라인 요청 -------------------------------------------------------
     public JsonNode analyze(String filePath, Long brandId, String traceId) {
@@ -313,5 +316,76 @@ public class PythonRagClient {
                 .bodyToMono(LocationLLmResponseDTO.class)
                 .timeout(Duration.ofSeconds(timeoutSec))
                 .block();
+    }
+
+    // 이미지 콘텐츠 분석 요청 -------------------------------------------------------
+    public JsonNode analyzeImage(String base64Image, Long brandId, String provider, String traceId) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("base64Image", base64Image);
+        if (brandId != null) {
+            body.put("brandId", brandId);
+        }
+        // provider가 null이거나 빈 문자열이면 "openai" 기본값 사용
+        if (provider != null && !provider.isBlank()) {
+            body.put("provider", provider);
+        } else {
+            body.put("provider", "openai");
+        }
+
+        // 요청 body 크기 계산 (Base64 이미지는 크므로)
+        try {
+            String requestBodyJson = objectMapper.writeValueAsString(body);
+            int requestSizeBytes = requestBodyJson.getBytes("UTF-8").length;
+            log.info("[PythonRagClient] call POST /api/image/analyze traceId={} baseUrl={} brandId={} provider={} imageSize={} bytes ({} KB / {} MB) timeoutSec={}",
+                    traceId, pythonBaseUrl, brandId, provider, requestSizeBytes, requestSizeBytes / 1024.0, requestSizeBytes / (1024.0 * 1024.0), imageTimeoutSec);
+        } catch (Exception e) {
+            log.warn("[PythonRagClient] 요청 body 크기 계산 실패: {}", e.getMessage());
+        }
+
+        // 큰 이미지와 긴 응답을 처리하기 위해 maxInMemorySize 설정 (20MB)
+        ExchangeStrategies strategies = ExchangeStrategies.builder()
+                .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(20 * 1024 * 1024))
+                .build();
+
+        try {
+            JsonNode response = webClientBuilder
+                    .baseUrl(pythonBaseUrl)
+                    .exchangeStrategies(strategies)
+                    .build()
+                    .post()
+                    .uri("/api/image/analyze")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header("X-Trace-Id", traceId)
+                    .bodyValue(body)
+                    .retrieve()
+                    .bodyToMono(JsonNode.class)
+                    .timeout(Duration.ofSeconds(imageTimeoutSec))
+                    .block();
+
+            // 응답 크기 계산
+            if (response != null) {
+                try {
+                    String responseJson = objectMapper.writeValueAsString(response);
+                    int responseSizeBytes = responseJson.getBytes("UTF-8").length;
+                    log.info("[PythonRagClient] analyzeImage 응답 수신 완료 traceId={} responseSize={} bytes ({} KB)",
+                            traceId, responseSizeBytes, responseSizeBytes / 1024.0);
+                } catch (Exception e) {
+                    log.warn("[PythonRagClient] 응답 크기 계산 실패: {}", e.getMessage());
+                }
+            } else {
+                log.warn("[PythonRagClient] analyzeImage 응답이 null입니다. traceId={}", traceId);
+            }
+
+            return response;
+        } catch (org.springframework.web.reactive.function.client.WebClientException e) {
+            log.error("[PythonRagClient] analyzeImage 요청 실패 traceId={} baseUrl={} error={}",
+                    traceId, pythonBaseUrl, e.getMessage(), e);
+            throw new RuntimeException("Python 이미지 분석 서버 연결 실패: " + e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("[PythonRagClient] analyzeImage 요청 중 예외 발생 traceId={} baseUrl={} error={}",
+                    traceId, pythonBaseUrl, e.getMessage(), e);
+            throw new RuntimeException("Python 이미지 분석 서버 호출 중 오류: " + e.getMessage(), e);
+        }
     }
 }

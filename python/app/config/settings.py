@@ -22,12 +22,16 @@ class Settings(BaseSettings):
     # Ollama 설정
     ollama_url: str = "http://localhost:11434/api/generate"
     ollama_model: str = "qwen3:1.7b"
-    ollama_timeout_sec: int = 600
+    ollama_timeout_sec: int = 600  # 일반 텍스트 생성용 타임아웃
+    ollama_vision_timeout_sec: int = 3600  # Vision 모델용 타임아웃 (60분, llava 같은 큰 모델 대응)
+    ollama_vision_model: str = "llava"  # 이미지 분석용 vision 모델 (llava가 moondream보다 성능 우수)
     
     # OpenAI 설정
     openai_api_key: Optional[str] = None
     openai_model: str = "gpt-4o-mini"
     openai_timeout_sec: int = 300
+    openai_vision_model: str = "gpt-4o"  # 이미지 분석용 vision 모델 (gpt-4o, gpt-4-vision-preview 등)
+    openai_vision_timeout_sec: int = 300  # OpenAI Vision API 타임아웃
     
     # Embedding 모델 설정
     embed_model_name: str = "nlpai-lab/KoE5"
