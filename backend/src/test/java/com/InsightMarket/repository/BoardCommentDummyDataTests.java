@@ -71,51 +71,35 @@ public class BoardCommentDummyDataTests {
         log.info("사용할 Member: writer1={}, writer2={}, commentWriter1={}, commentWriter2={}, commentWriter3={}",
                 writer1.getName(), writer2.getName(), commentWriter1.getName(), commentWriter2.getName(), commentWriter3.getName());
 
-        // 3) Board 5개 생성 (brand_id=1)
-        Board board1 = Board.builder()
-                .brand(brand)
-                .writer(writer1)
-                .title("첫 번째 게시글 - 댓글이 많은 게시글")
-                .content("이 게시글은 댓글이 많은 게시글입니다. 다양한 의견을 나눠보세요!")
-                .build();
-        boardRepository.save(board1);
-        log.info("Board 생성: id={}, title={}", board1.getId(), board1.getTitle());
-
-        Board board2 = Board.builder()
-                .brand(brand)
-                .writer(writer2)
-                .title("두 번째 게시글 - 댓글이 적은 게시글")
-                .content("이 게시글은 댓글이 적은 게시글입니다.")
-                .build();
-        boardRepository.save(board2);
-        log.info("Board 생성: id={}, title={}", board2.getId(), board2.getTitle());
-
-        Board board3 = Board.builder()
-                .brand(brand)
-                .writer(writer1)
-                .title("세 번째 게시글 - 댓글이 없는 게시글")
-                .content("이 게시글은 댓글이 없는 게시글입니다.")
-                .build();
-        boardRepository.save(board3);
-        log.info("Board 생성: id={}, title={}", board3.getId(), board3.getTitle());
-
-        Board board4 = Board.builder()
-                .brand(brand)
-                .writer(writer2)
-                .title("네 번째 게시글 - 여러 댓글과 대댓글")
-                .content("이 게시글은 여러 댓글과 대댓글이 있는 게시글입니다.")
-                .build();
-        boardRepository.save(board4);
-        log.info("Board 생성: id={}, title={}", board4.getId(), board4.getTitle());
-
-        Board board5 = Board.builder()
-                .brand(brand)
-                .writer(commentWriter1)
-                .title("다섯 번째 게시글 - 다양한 댓글")
-                .content("마지막 게시글입니다. 다양한 댓글을 확인해보세요.")
-                .build();
-        boardRepository.save(board5);
-        log.info("Board 생성: id={}, title={}", board5.getId(), board5.getTitle());
+        // 3) Board 100개 이상 생성 (brand_id=1)
+        int targetBoardCount = 100;
+        Board[] boards = new Board[targetBoardCount];
+        
+        // Member 리스트를 순환하여 사용
+        for (int i = 0; i < targetBoardCount; i++) {
+            Member writer = members.get(i % members.size()); // Member 순환 사용
+            
+            Board board = Board.builder()
+                    .brand(brand)
+                    .writer(writer)
+                    .title(String.format("게시글 %d번 - 더미 데이터", i + 1))
+                    .content(String.format("이것은 %d번째 게시글입니다. 더미 데이터 생성 테스트용입니다.", i + 1))
+                    .build();
+            boardRepository.save(board);
+            boards[i] = board;
+            
+            if ((i + 1) % 10 == 0) {
+                log.info("Board 생성 진행: {}/{}", i + 1, targetBoardCount);
+            }
+        }
+        
+        log.info("Board {}개 생성 완료", targetBoardCount);
+        
+        // 댓글 생성을 위한 참조용 Board (첫 5개)
+        Board board1 = boards[0];
+        Board board2 = boards[1];
+        Board board4 = boards[3];
+        Board board5 = boards[4];
 
         // 4) Board1에 댓글/대댓글 생성
         Comment parent1_1 = Comment.builder()
@@ -284,7 +268,7 @@ public class BoardCommentDummyDataTests {
 
         log.info("=== 더미 데이터 생성 완료 ===");
         log.info("Brand: 1개 (id={})", brand.getId());
-        log.info("Board: {}개 (전체), 5개 생성됨", boardCount);
+        log.info("Board: {}개 (전체), {}개 생성됨", boardCount, targetBoardCount);
         log.info("Comment: {}개 (전체)", commentCount);
         log.info("부모 댓글: {}개 (생성된 Board 기준)", parentCommentCount);
         log.info("대댓글: {}개 (추정)", commentCount - parentCommentCount);
