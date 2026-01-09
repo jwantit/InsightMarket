@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 public class DashBoardController {
 
     private final DashBoardService dashBoardService;
+     // 추가: Redis 서비스 주입
+    private final TrendsRedisService trendsRedisService;
 
 
     @GetMapping("/mention/analysis")
@@ -66,7 +68,20 @@ public class DashBoardController {
         return ResponseEntity.ok(response);
     }
 
+    // 브랜드별 실시간 구글 연관 검색어 트렌드 조회
+    @GetMapping("/trends")
+    public ResponseEntity<PythonTrendResponseDTO> getBrandTrends(DashBoardRequestDTO requestDTO) {
+        log.info("실시간 트렌드 조회 요청 - BrandID: {}", requestDTO.getBrandId());
 
+        // Redis에서 최신 데이터를 가져옴
+        PythonTrendResponseDTO response = trendsRedisService.getTrendData(requestDTO.getBrandId());
 
+        if (response == null) {
+            // 아직 데이터가 수집되지 않은 경우 204 No Content 또는 빈 객체 반환
+            log.warn("Brand {} 에 대한 트렌드 데이터가 Redis에 없습니다.", requestDTO.getBrandId());
+            return ResponseEntity.noContent().build();
+        }
 
+        return ResponseEntity.ok(response);
+    }
 }

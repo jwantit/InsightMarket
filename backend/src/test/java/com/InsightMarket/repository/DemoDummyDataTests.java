@@ -828,7 +828,7 @@ public class DemoDummyDataTests {
     }
 
     private void createBoardsForBrand(Brand brand, List<Member> brandMembers, String brandName) {
-        int targetBoardCount = 100;
+        int targetBoardCount = 150;
         
         // 기존 게시글 확인
         long existingBoardCount = boardRepository.findByBrandIdAndDeletedAtIsNull(

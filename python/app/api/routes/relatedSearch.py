@@ -12,16 +12,16 @@ log = logging.getLogger(__name__)
 
 # 구글 트렌드 설정 (글로벌 세션)
 pytrends = TrendReq(hl='ko-KR', tz=360)
-router = APIRouter(prefix="/api/search", tags=["related_search"])
+router = APIRouter(prefix="/api/trends", tags=["related_search"])
 
 @router.post("/generate-related")
 async def generate_related_search(request: Request):
 
-    log.info("진입성공")
+    log.info("Google Trends 수집 요청 진입")
 
     # 1. Java 백엔드 데이터 수신
     body = await request.json()
-    keyword = body.get("brandName", "") # 기본값 아이폰 설정
+    keyword = body.get("brandName", "")
     brandId = body.get("brandId", "")
 
     try:
@@ -39,17 +39,17 @@ async def generate_related_search(request: Request):
         # 4. RISING (급상승) 데이터 가공 + 'Breakout' 처리
         rising_list = []
         if target_data.get('rising') is not None:
-            # Rising 데이터에서 'Breakout' 글자를 5000(성장률 5000%)으로 치환
-            df_rising = target_data['rising'].head(20)
+            # Rising 데이터에서 'Breakout' 글자를 "5000"(성장률 5000%)으로 치환하고 모든 값을 문자열로 변환
+            df_rising = target_data['rising'].head(20).copy()
             df_rising['value'] = df_rising['value'].apply(
-                lambda x: 5000 if x == 'Breakout' else x
+                lambda x: "5000" if x == 'Breakout' else str(x)
             )
             rising_list = df_rising.to_dict(orient='records')
 
         return {
             "keyword": keyword,
             "brandId": brandId,
-            "collectedAt": datetime.now().strftime("%Y-%m-%d"),
+            "collectedAt": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "data": {
                 "top": top_list,
                 "rising": rising_list
