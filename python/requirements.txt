@@ -36,3 +36,6 @@ konlpy>=0.6.0
 
 # CORS middleware (included in FastAPI but explicitly noted)
 # Using FastAPI's CORSMiddleware
+
+# Data Analysis
+pytrends>=4.9.2

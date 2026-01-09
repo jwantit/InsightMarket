@@ -388,4 +388,25 @@ public class PythonRagClient {
             throw new RuntimeException("Python 이미지 분석 서버 호출 중 오류: " + e.getMessage(), e);
         }
     }
+//    public TestDTO generateSe(Long brandId, String brandName, String traceId ) {
+//
+//        Map<String, Object> data = new HashMap<>();
+//
+//        data.put("brandId", brandId );
+//        data.put("brandName",brandName);
+//
+//        return webClientBuilder
+//                .baseUrl(pythonBaseUrl)
+//                .build()
+//                .post()
+//                .uri("/api/search/generate-related")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .header("X-Trace-Id", traceId)
+//                .bodyValue(data)
+//                .retrieve()
+//                .bodyToMono(TestDTO.class)
+//                .timeout(Duration.ofSeconds(timeoutSec))
+//                .block();
+//    }
 }

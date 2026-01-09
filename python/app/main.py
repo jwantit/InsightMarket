@@ -13,7 +13,8 @@ from app.api.routes.collect import api_router as collect_router
 from app.api.routes.analyze import router as analyze_router
 from app.api.routes.location import router as location_router
 from app.api.routes.image import router as image_router
-
+# 연관 검색어 라우터
+from app.api.routes.relatedSearch import router as related_search_router
 
 class TraceIdFilter(logging.Filter):
     """로그 포맷에 traceId가 항상 들어가도록 보정"""
@@ -77,3 +78,5 @@ app.include_router(collect_router, tags=["collect"])
 app.include_router(analyze_router, tags=["analyze"])
 app.include_router(location_router, tags=["location"])
 app.include_router(image_router, tags=["image"])
+# 연관 검색어 라우터 등록
+app.include_router(related_search_router, tags=["related_search"])

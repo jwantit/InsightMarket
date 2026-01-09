@@ -269,6 +269,7 @@ const JoinComponent = () => {
             <input
               type="email"
               name="email"
+              placeholder="example@email.com"
               value={joinParam.email}
               onChange={handleChange}
               className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-sm font-medium focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all"
@@ -284,7 +285,11 @@ const JoinComponent = () => {
           <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">
             비밀번호
           </label>
-          <div className="relative">
+          <span className="text-[10px] text-slate-400 font-medium">
+             * 10자 이상, 특수문자 포함
+          </span>
+          
+            <div className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2">
               <Lock size={18} className="text-slate-400" />
             </div>

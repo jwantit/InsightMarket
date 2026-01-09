@@ -1,11 +1,13 @@
 package com.InsightMarket.service;
 
 
+import com.InsightMarket.ai.PythonRagClient;
 import com.InsightMarket.ai.locationchatbot.dto.LocationRequestDTO;
 import com.InsightMarket.ai.locationchatbot.dto.comparison.LocationComparisonResponseDTO;
 import com.InsightMarket.ai.locationchatbot.dto.llm.LocationLLmResponseDTO;
 import com.InsightMarket.ai.locationchatbot.service.LocationService;
 import com.InsightMarket.ai.locationchatbot.service.LocationServiceImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
@@ -17,6 +19,7 @@ import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,11 +34,13 @@ public class LocationServiceImplTests {
     private LocationService locationService;
     @Autowired
     private LocationServiceImpl locationServiceImpl;
-
+    @Autowired
+    private PythonRagClient pythonRagClient;
 
 
     @Autowired
     private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
+
     @Test
     @Transactional
     @Commit
@@ -116,7 +121,9 @@ public class LocationServiceImplTests {
 
         log.info(locationLLmResponseDTO);
     }
-    }
+
+
+}
 
 
 
