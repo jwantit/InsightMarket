@@ -91,6 +91,7 @@ def clean_text(text: str, use_soynlp: bool = True) -> str:
     텍스트 정제
     - HTML 태그 제거
     - URL 제거
+    - 날짜 패턴 제거 (2025-12-28, 2025-12-28-2 등)
     - 반복 이모티콘 정규화 (ㅋㅋㅋㅋ -> ㅋㅋ, ㅠㅠㅠㅠ -> ㅠㅠ)
     - 특수문자 정리
     - 연속된 공백 제거
@@ -107,6 +108,12 @@ def clean_text(text: str, use_soynlp: bool = True) -> str:
     
     # 이메일 제거
     text = re.sub(r'\S+@\S+', '', text)
+    
+    # 날짜 패턴 제거 (2025-12-28, 2025-12-28-2, 20251228 등)
+    text = re.sub(r'\d{4}-\d{1,2}-\d{1,2}(?:-\d+)?', ' ', text)  # 2025-12-28-2 형식
+    text = re.sub(r'\d{4}\.\d{1,2}\.\d{1,2}', ' ', text)  # 2025.12.28 형식
+    text = re.sub(r'\d{4}/\d{1,2}/\d{1,2}', ' ', text)  # 2025/12/28 형식
+    text = re.sub(r'\d{8}', ' ', text)  # 20251228 형식
     
     # 반복 이모티콘 정규화
     if use_soynlp and _SOYNLP_AVAILABLE:
@@ -128,11 +135,73 @@ def clean_text(text: str, use_soynlp: bool = True) -> str:
     return text
 
 
+def is_valid_token(token: str) -> bool:
+    """
+    토큰 유효성 검사
+    - 최소 길이 체크
+    - 숫자만 있는 토큰 제거
+    - 특수문자만 있는 토큰 제거
+    - 불완전한 한글 형태소 제거 (예: '아ㄴ데', 'ㅂ니다', 'ㅋㅋ')
+    - 날짜 패턴 제거
+    """
+    if not token or len(token) < 2:
+        return False
+    
+    # 숫자만 있는 토큰 제거 (예: '2025', '123')
+    if token.isdigit():
+        return False
+    
+    # 날짜 패턴 포함 토큰 제거 (예: '2025-12-28-2', '2025-12-28', '20251228')
+    if re.search(r'\d{4}[-.]?\d{1,2}[-.]?\d{1,2}', token):
+        return False
+    
+    # 특수문자만 있는 토큰 제거 (예: '---', '...')
+    if re.match(r'^[^\w가-힣]+$', token):
+        return False
+    
+    # 불완전한 한글 형태소 제거
+    # 완성형 한글이 하나도 없고, 자음/모음만 있으면 제거
+    # 예: 'ㅋㅋ', 'ㅂ니다', 'ㅠㅠ'
+    
+    # 완성형 한글 추출
+    complete_hangul_chars = re.findall(r'[가-힣]', token)
+    # 자음/모음 추출
+    jamo_chars = re.findall(r'[ㄱ-ㅎㅏ-ㅣ]', token)
+    
+    # 완성형 한글이 없고 자음/모음만 있으면 제거
+    if not complete_hangul_chars and jamo_chars:
+        return False
+    
+    # 자음/모음이 포함된 토큰은 형태소 분석 오류일 가능성이 높으므로 제거
+    # 예: '아ㄴ데', '이ㅂ니다', 'ㅋㅋ', 'ㅂ니다' 등
+    # 완성형 한글과 자음/모음이 혼재하는 것은 비정상적임
+    if jamo_chars:
+        return False
+    
+    return True
+
+
 def remove_stopwords(tokens: List[str]) -> List[str]:
     """
-    불용어 제거
+    불용어 제거 및 토큰 필터링
     """
-    return [token for token in tokens if token not in STOPWORDS and len(token) > 1]
+    filtered = []
+    for token in tokens:
+        # 토큰 유효성 검사
+        if not is_valid_token(token):
+            continue
+        
+        # 불용어 제거
+        if token in STOPWORDS:
+            continue
+        
+        # 최소 길이 체크 (이미 is_valid_token에서 체크하지만 추가 보장)
+        if len(token) < 2:
+            continue
+        
+        filtered.append(token)
+    
+    return filtered
 
 
 def simple_tokenize(text: str) -> List[str]:
@@ -165,13 +234,40 @@ def tokenize_with_morphology(text: str) -> List[str]:
             tokens = _hannanum.morphs(text)
             # 빈 토큰 제거 및 공백 문자 제거
             tokens = [t.strip() for t in tokens if t.strip()]
-            return tokens
+            # 불완전한 토큰 제거 (한글 자음/모음만 있는 것)
+            filtered_tokens = []
+            for token in tokens:
+                # 불완전한 한글 형태소 제거 (자음/모음만 있는 경우)
+                if re.match(r'^[ㄱ-ㅎㅏ-ㅣ]+$', token) and not re.search(r'[가-힣]', token):
+                    continue
+                # 숫자만 있는 토큰 제거
+                if token.isdigit():
+                    continue
+                # 날짜 패턴 제거
+                if re.match(r'\d{4}[-.]?\d{1,2}[-.]?\d{1,2}', token):
+                    continue
+                filtered_tokens.append(token)
+            return filtered_tokens
         except Exception as e:
             print(f"[토큰화 경고] Hannanum 형태소 분석 실패: {e}. 간단한 토큰화 사용")
             return simple_tokenize(text)
     else:
         # fallback: 간단한 토큰화
-        return simple_tokenize(text)
+        tokens = simple_tokenize(text)
+        # 간단 토큰화에서도 어미/조사 패턴 제거 시도
+        filtered = []
+        for token in tokens:
+            # 어미/조사 패턴 제거 (예: "었어", "에요", "겠습니다" 등)
+            if re.match(r'^(었|었어|었습니다|었죠|었네요)$', token):
+                continue
+            if re.match(r'^(에요|예요|아요|어요|이에요|이예요)$', token):
+                continue
+            if re.match(r'^(겠습니다|겠어요|겠죠|겠네요|겠어)$', token):
+                continue
+            if re.match(r'^(에게도|에게|께도|한테도)$', token):
+                continue
+            filtered.append(token)
+        return filtered
 
 
 def preprocess_data(
