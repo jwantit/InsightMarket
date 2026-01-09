@@ -66,11 +66,10 @@ public class SolutionRepositoryTests {
     public void SolutionTests() {
 
         // 🔹 이미 존재하는 프로젝트 2개 불러오기
-        Project project1 = projectRepository.findById(1L)
+        Project project1 = projectRepository.findById(2L)
                 .orElseThrow(() -> new RuntimeException("project1 없음"));
 
-        Project project2 = projectRepository.findById(2L)
-                .orElseThrow(() -> new RuntimeException("project2 없음"));
+
 //---------------------------------------------------------------------------------------------------------
         // 🔹 전략 4개 생성
         Strategy strategyA = strategyRepository.save(
@@ -103,6 +102,63 @@ public class SolutionRepositoryTests {
             solutionRepository.save(
                     Solution.builder()
                             .strategy(strategyA)
+                            .isPurchased(false)
+                            .project(project1)
+                            .title("A전략 솔루션 " + i)
+                            .price(1000 * i)
+                            .description("A전략 기반 솔루션 " + i)
+                            .deleted(false)
+                            .build()
+            );
+        }
+
+// 🔹 strategyB → project1
+        for (int i = 1; i <= 4; i++) {
+            solutionRepository.save(
+                    Solution.builder()
+                            .strategy(strategyB)
+                            .isPurchased(false)
+                            .project(project1)
+                            .title("B전략 솔루션 " + i)
+                            .price(2000 * i)
+                            .description("B전략 기반 솔루션 " + i)
+                            .build()
+            );
+        }
+
+// 🔹 strategyC → project2
+        for (int i = 1; i <= 4; i++) {
+            solutionRepository.save(
+                    Solution.builder()
+                            .strategy(strategyC)
+                            .project(project1)
+                            .isPurchased(false)
+                            .title("C전략 솔루션 " + i)
+                            .price(3000 * i)
+                            .description("C전략 기반 솔루션 " + i)
+                            .build()
+            );
+        }
+
+// 🔹 strategyD → project2
+        for (int i = 1; i <= 4; i++) {
+            solutionRepository.save(
+                    Solution.builder()
+                            .strategy(strategyD)
+                            .project(project1)
+                            .isPurchased(false)
+                            .title("D전략 솔루션 " + i)
+                            .price(4000 * i)
+                            .description("D전략 기반 솔루션 " + i)
+                            .build()
+            );
+        }
+        System.out.println("=== 테스트 완료 ===");
+
+        for (int i = 1; i <= 4; i++) {
+            solutionRepository.save(
+                    Solution.builder()
+                            .strategy(strategyA)
                             .project(project1)
                             .title("A전략 솔루션 " + i)
                             .price(1000 * i)
@@ -130,7 +186,7 @@ public class SolutionRepositoryTests {
             solutionRepository.save(
                     Solution.builder()
                             .strategy(strategyC)
-                            .project(project2)
+                            .project(project1)
                             .title("C전략 솔루션 " + i)
                             .price(3000 * i)
                             .description("C전략 기반 솔루션 " + i)
@@ -143,7 +199,7 @@ public class SolutionRepositoryTests {
             solutionRepository.save(
                     Solution.builder()
                             .strategy(strategyD)
-                            .project(project2)
+                            .project(project1)
                             .title("D전략 솔루션 " + i)
                             .price(4000 * i)
                             .description("D전략 기반 솔루션 " + i)
