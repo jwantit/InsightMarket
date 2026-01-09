@@ -109,7 +109,7 @@ public interface AnalyticsKeywordDailyStatsRepository extends JpaRepository<Anal
             @Param("competitorId") Long competitorId,
             @Param("source") String source,
             @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDat
+            @Param("endDate") LocalDate endDate
     );
 }
 

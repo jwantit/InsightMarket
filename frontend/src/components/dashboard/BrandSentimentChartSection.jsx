@@ -8,13 +8,16 @@ const BrandSentimentChartSection = ({ brandId, appliedChannels, unit = 'day' }) 
 
     useEffect(() => {
         const fetchChartData = async () => {
+            if (!brandId) return;
             setLoading(true);
             try {
                 // 부모로부터 받은 unit(기본값 'day')을 사용하여 데이터 호출
                 const response = await getBrandSentimentChart(brandId, appliedChannels, unit);
-                setData(response.sentiment || []); 
+                const sentimentData = response.sentiment || [];
+                setData(sentimentData); 
             } catch (error) {
                 console.error("데이터 로드 실패:", error);
+                setData([]);
             } finally {
                 setLoading(false);
             }
@@ -53,7 +56,7 @@ const BrandSentimentChartSection = ({ brandId, appliedChannels, unit = 'day' }) 
     };
 
     return (
-        <div className="w-full h-full flex flex-col">
+        <div className="w-full flex flex-col">
             {/* 상단 헤더: 버튼 탭을 제거하고 텍스트만 남김 */}
             <div className="flex items-center justify-between mb-6">
                 <div>
@@ -67,42 +70,51 @@ const BrandSentimentChartSection = ({ brandId, appliedChannels, unit = 'day' }) 
             </div>
 
             {/* 차트 영역 */}
-            <div className="flex-1 w-full relative min-h-[220px]">
+            <div className="w-full relative" style={{ minHeight: '220px', height: '220px' }}>
                 {loading && (
                     <div className="absolute inset-0 bg-white/40 backdrop-blur-[1px] flex items-center justify-center z-20">
                         <div className="w-6 h-6 border-2 border-blue-100 border-t-blue-500 rounded-full animate-spin" />
                     </div>
                 )}
                 
-                <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={data} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#f1f5f9" />
-                        <XAxis 
-                            dataKey="date" 
-                            axisLine={false} 
-                            tickLine={false} 
-                            tick={{ fontSize: 10, fill: '#94a3b8' }} 
-                            dy={8}
-                        />
-                        <YAxis 
-                            axisLine={false} 
-                            tickLine={false} 
-                            tick={{ fontSize: 10, fill: '#94a3b8' }} 
-                        />
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc', opacity: 0.4 }} />
-                        <Legend 
-                            verticalAlign="top" 
-                            align="right"
-                            iconType="circle"
-                            iconSize={6}
-                            wrapperStyle={{ fontSize: '10px', fontWeight: 600, paddingBottom: '15px' }} 
-                        />
-                        
-                        <Bar dataKey="positive" name="긍정" stackId="a" fill="#6366f1" barSize={32} />
-                        <Bar dataKey="neutral" name="중립" stackId="a" fill="#fde047" />
-                        <Bar dataKey="negative" name="부정" stackId="a" fill="#fb7185" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                </ResponsiveContainer>
+                {!loading && (!data || data.length === 0) && (
+                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                        <p className="text-sm text-gray-400">데이터가 없습니다.</p>
+                    </div>
+                )}
+                
+                {!loading && data && data.length > 0 && (
+                    <div style={{ width: '100%', height: '220px' }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={data} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
+                                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#f1f5f9" />
+                                <XAxis 
+                                    dataKey="date" 
+                                    axisLine={false} 
+                                    tickLine={false} 
+                                    tick={{ fontSize: 10, fill: '#94a3b8' }} 
+                                    dy={8}
+                                />
+                                <YAxis 
+                                    axisLine={false} 
+                                    tickLine={false} 
+                                    tick={{ fontSize: 10, fill: '#94a3b8' }} 
+                                />
+                                <Tooltip content={<CustomTooltip />} cursor={{ fill: '#f8fafc', opacity: 0.4 }} />
+                                <Legend 
+                                    verticalAlign="top" 
+                                    align="right"
+                                    iconType="circle"
+                                    iconSize={6}
+                                    wrapperStyle={{ fontSize: '10px', fontWeight: 600, paddingBottom: '15px' }} 
+                                />
+                                <Bar dataKey="positive" name="긍정" stackId="a" fill="#6366f1" barSize={32} />
+                                <Bar dataKey="neutral" name="중립" stackId="a" fill="#fde047" />
+                                <Bar dataKey="negative" name="부정" stackId="a" fill="#fb7185" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -30,6 +30,7 @@ public interface AnalyticsKeywordSentimentDailyStatsRepository extends JpaReposi
             "WHERE s.brandId = :brandId " +
             "AND (:projectId IS NULL OR s.projectId = :projectId) " +
             "AND (:keywordId IS NULL OR s.keywordId = :keywordId) " +
+            "AND (:competitorId IS NULL OR s.competitorId = :competitorId) " +
             "AND (:source IS NULL OR s.source = :source) " +
             "AND (:startDate IS NULL OR s.statDate >= :startDate) " +
             "AND (:endDate IS NULL OR s.statDate <= :endDate) " +

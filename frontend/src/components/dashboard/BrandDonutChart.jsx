@@ -2,7 +2,9 @@ import React from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 const BrandDonutChart = ({ sentimentData }) => {
-  if (!sentimentData) return null;
+  if (!sentimentData) {
+    return null;
+  }
 
   const chartData = [
     { name: "긍정", value: Number(sentimentData.posValue) || 0 },
@@ -10,16 +12,31 @@ const BrandDonutChart = ({ sentimentData }) => {
     { name: "부정", value: Number(sentimentData.negValue) || 0 },
   ];
 
+  // 차트 데이터 합계 확인
+  const total = chartData.reduce((sum, item) => sum + item.value, 0);
+  
+  // 데이터가 모두 0이면 메시지 표시
+  if (total === 0) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center min-h-[300px]">
+        <h3 className="text-sm font-bold text-gray-700 mb-4">
+          긍 · 부정 차트
+        </h3>
+        <p className="text-sm text-gray-400">데이터가 없습니다.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex-1 w-full flex flex-col">
-      <h3 className="text-sm font-bold text-gray-700 self-start mb-auto">
+    <div className="w-full flex flex-col flex-1">
+      <h3 className="text-sm font-bold text-gray-700 mb-4">
         긍 · 부정 차트
       </h3>
 
-      <div className="flex-1 relative min-h-[220px] flex items-center justify-center">
-        <div className="absolute flex flex-col items-center justify-center pointer-events-none z-10">
+      <div className="relative w-full flex-1" style={{ minHeight: '220px', height: '220px' }}>
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
           <span className="text-4xl font-black text-[#FF0055] leading-none">
-            {sentimentData.negValue}%
+            {sentimentData.negValue || 0}%
           </span>
           <span className="text-[10px] font-black text-[#FF0055] mt-2 uppercase tracking-widest">
             부정 비율
@@ -63,19 +80,19 @@ const BrandDonutChart = ({ sentimentData }) => {
         {[
           {
             label: "긍정",
-            val: sentimentData.posValue,
+            val: sentimentData.posValue || 0,
             color: "bg-[#3B82F6]",
             text: "text-[#3B82F6]",
           },
           {
             label: "중립",
-            val: sentimentData.neuValue,
+            val: sentimentData.neuValue || 0,
             color: "bg-yellow-400",
             text: "text-yellow-600",
           },
           {
             label: "부정",
-            val: sentimentData.negValue,
+            val: sentimentData.negValue || 0,
             color: "bg-[#FF0055]",
             text: "text-[#FF0055]",
           },

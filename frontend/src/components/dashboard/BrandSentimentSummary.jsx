@@ -99,7 +99,7 @@ const BrandSentimentSummary = ({ brandId, appliedChannels, wordData }) => {
         <BrandWordTableBlock wordData={wordData} />
       </div>
 
-      <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm min-h-[420px] hover:shadow-lg transition-shadow">
+      <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm min-h-[420px] h-full flex flex-col hover:shadow-lg transition-shadow">
         <BrandDonutChart sentimentData={sentimentData} />
       </div>
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactWordcloud from 'react-wordcloud';
 
-const BrandWordCloudBlock = ( { wordData } ) => {
+const BrandWordCloudBlock = ({ wordData = null }) => {
 
     if (!wordData || wordData.length === 0) {
         return (
