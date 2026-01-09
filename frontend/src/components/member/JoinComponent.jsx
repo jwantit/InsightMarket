@@ -29,6 +29,12 @@ const JoinComponent = () => {
   const [joinParam, setJoinParam] = useState({ ...initState });
   const [companies, setCompanies] = useState([]);
 
+
+//1/08일 - 패스워드 유효성 검사를 위해  이메일 형식 제한----------------------------------
+  const [passwordError, setPasswordError] = useState('');
+  const [emailError, setEmailError] = useState('');
+//----------------------------------
+
   const { moveToLogin } = useCustomLogin();
 
   //브랜드 생성 부분--------------------------------------------------------
@@ -76,8 +82,24 @@ const JoinComponent = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    //비밀번호 제약  01/08
+    if(name == "password"){
+      const passwordValue = value;
+      let errorMsg = '';
+      if(passwordValue.length < 10){
+        errorMsg = "비밀번호는 10자 이상이여야 합니다."
+      }else if(!/[!@#$%^&*(),.?":{}|<>]/.test(passwordValue)){
+        errorMsg = "비밀번호는 특수문자를 포함해야 합니다."
+      }
+      setPasswordError(errorMsg); 
+      setJoinParam({
+        ...joinParam,
+        [name]: passwordValue,
+    });
+    }else if(name == "businessNumber"){
+
     // 사업자 번호 필드일 때만 특수 로직 적용
-    if (name === "businessNumber") {
+     
       // 1. 숫자만 남기고 나머지 문자 제거
       const onlyNums = value.replace(/[^0-9]/g, "");
 
@@ -93,13 +115,23 @@ const JoinComponent = () => {
           5
         )}-${onlyNums.slice(5, 10)}`;
       }
-
       // 포맷팅된 값을 상태에 저장
       setJoinParam({
         ...joinParam,
         [name]: formatted,
       });
-    } else {
+    }else if(name == "email"){ //이메일 제약 01/08
+      const emailValue = value;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      let errorMsg = '';
+      if(!emailRegex.test(emailValue)){
+        errorMsg = "이메일 형식에 맞지 않습니다."
+      }
+      setEmailError(errorMsg); 
+      setJoinParam({
+        ...joinParam,
+        [name]: emailValue,
+    })}else {
       // 나머지 필드(이름, 이메일 등)는 기존 방식 그대로 유지
       setJoinParam({
         ...joinParam,
@@ -113,6 +145,17 @@ const JoinComponent = () => {
       alert("이름, 이메일, 비밀번호는 필수입니다.");
       return;
     }
+
+    if (passwordError) {
+      alert("비밀번호 형식이 맞지 않습니다.");
+      return;
+    }
+
+    if (emailError) {
+      alert("잘못된 이메일");
+      return;
+    }
+
     if (joinParam.joinType === "NEW_COMPANY" && !joinParam.companyName) {
       alert("새 회사명을 입력해주세요.");
       return;
@@ -231,6 +274,9 @@ const JoinComponent = () => {
               className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-sm font-medium focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all"
             />
           </div>
+          {emailError && ( // 에러 메시지가 있을 경우에만 표시
+            <p className="text-red-500 text-xs mt-2">{emailError}</p>
+            )}
         </div>
 
         {/* Password */}
@@ -250,6 +296,9 @@ const JoinComponent = () => {
               className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-sm font-medium focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all"
             />
           </div>
+          {passwordError && ( // 에러 메시지가 있을 경우에만 표시
+            <p className="text-red-500 text-xs mt-2">{passwordError}</p>
+            )}
         </div>
 
         {/* Join Type */}
