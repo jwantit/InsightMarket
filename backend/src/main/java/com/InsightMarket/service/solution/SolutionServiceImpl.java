@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 
 
 import java.time.format.DateTimeFormatter;
@@ -35,55 +36,30 @@ public class SolutionServiceImpl implements SolutionService {
     private final ProjectRepository projectRepository;
     private final PaymentRepository paymentRepository;
 
+    StopWatch stopWatch = new StopWatch();
+
+
     @Override//프로젝트 단위 모든 솔루션 상품조회
     public PageResponseDTO<SolutionDTO> getSolutionsByProjectId(PageRequestDTO pageRequestDTO) {
 
         log.info("SolutionServiceImpl 진입 페이징처리 + DB솔루션 조회중");
 
-//    //프로젝트 단위 모든 솔루션 상품조회
-//        public class PageRequestDTO {
-//            private int page = 1;
-//            private int size = 10;
-//            Long projectid;
-//        }
         Pageable pageable = PageRequest.of(
                 pageRequestDTO.getPage() - 1,  //페이지 시작 번호가 0부터 시작하므로
                 pageRequestDTO.getSize(),
                 Sort.by("id").descending()); //id는 솔루션의 고류PK 오름차 내림차 설정
                                                                                  //프로젝트 , 페이징
-        Page<Solution> result = solutionRepository.getSolutionsByProjectId(pageRequestDTO.getProjectid(), pageable);
-        //Page{
-        //solution 10개 2페이지면 10개 건너뛰고
-        //getTotalElements 전체개수 (조회한 기준)
-        //totalPages 전체페이지수 54개면 6페이지
-        //number 현재페이지번호 1페이지
-        //size 10개
-        //Sort 정렬설정
-        //hasNext 다음 페이지 존재 여부 boolean
-        //isFirst 첫 페이지 여부 boolean
-        // }
+        stopWatch.start("solution list");
 
-        List<SolutionDTO> dtoList = result.getContent().stream()
-                .map(solution -> SolutionDTO.builder()
-                        .solutionid(solution.getId())
-                        .title(solution.getTitle())
-                        .price(solution.getPrice())
-                        .description(solution.getDescription())
-                        .projectname(solution.getProject().getName())
-                        .strategyId(solution.getStrategy().getId())
-                        .strategytitle(solution.getStrategy().getTitle())
-                        .projectId(solution.getProject().getId())
-                        .deleted(solution.isDeleted())
-                        .createdAt( solution.getCreatedAt()
-                                .format(DateTimeFormatter.ofPattern("yyyy년MM월dd일")))
-                        .build()
-                )
-                .toList();
+        Page<SolutionDTO> result = solutionRepository.getSolutionsByProjectId(pageRequestDTO.getProjectid(), pageable);
+
+        stopWatch.stop();
+        log.info(stopWatch.prettyPrint());
 
         long totalCount = result.getTotalElements();
 
         return PageResponseDTO.<SolutionDTO>withAll()
-                .dtoList(dtoList)
+                .dtoList(result.getContent())
                 .totalCount(totalCount)
                 .pageRequestDTO(pageRequestDTO)
                 .build();
@@ -128,8 +104,6 @@ public class SolutionServiceImpl implements SolutionService {
                         .strategytitle(solution.getStrategy().getTitle())
                         .projectId(solution.getProject().getId())
                         .deleted(solution.isDeleted())
-                        .createdAt( solution.getCreatedAt()
-                                .format(DateTimeFormatter.ofPattern("yyyy년MM월dd일")))
                         .build()
                 )
                 .toList();
@@ -167,8 +141,6 @@ public class SolutionServiceImpl implements SolutionService {
                 .strategytitle(solution.getStrategy().getTitle())
                 .projectId(solution.getProject().getId())
                 .deleted(solution.isDeleted())
-                .createdAt(solution.getCreatedAt()
-                        .format(DateTimeFormatter.ofPattern("yyyy년MM월dd일")))
                 .build();
     }
 }

@@ -1,6 +1,7 @@
 package com.InsightMarket.repository.solution;
 
 import com.InsightMarket.domain.solution.Solution;
+import com.InsightMarket.dto.solution.SolutionDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -14,8 +15,26 @@ import java.util.Optional;
 public interface SolutionRepository extends JpaRepository<Solution, Long> {
 
     //프로젝트 단위 모든 솔루션 상품조회  /삭제플레그 false 와 구매 플래그 false 인것만 가지고 온다
-    @Query("SELECT s FROM Solution s WHERE s.project.id = :projectId and s.isPurchased = false")
-    Page<Solution> getSolutionsByProjectId(@Param("projectId") Long projectId, Pageable pageable);
+    @Query("SELECT new com.InsightMarket.dto.solution.SolutionDTO(" +
+            "s.id, " +           // solutionid
+            "s.title, " +        // title
+            "s.price, " +        // price
+            "s.description, " +  // description
+            "st.id, " +          // strategyId
+            "st.title, " +       // strategytitle
+            "p.name, " +         // projectname
+            "s.createdAt, " +    // createdAt
+            "p.id, " +           // projectId
+            "s.deleted" +        // deleted
+            ") " +
+            "FROM Solution s " +
+            "JOIN s.project p " +
+            "JOIN s.strategy st " +
+            "WHERE p.id = :projectId AND s.isPurchased = false")
+    Page<SolutionDTO> getSolutionsByProjectId(@Param("projectId") Long projectId, Pageable pageable);
+
+
+
 
     //“특정 프로젝트에 속한 솔루션 중에서
     //createdAt 기준으로 최신 →

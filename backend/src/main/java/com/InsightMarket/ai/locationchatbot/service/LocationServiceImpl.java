@@ -144,39 +144,30 @@ public class LocationServiceImpl implements LocationService {
     //LLM-------------------------------------------------------------------------------------
     @Override
     public LocationLLmResponseDTO getConsulting(LocationRequestDTO locationRequestDTO) {
+
+        if (locationRequestDTO.getPlaceId() == null || locationRequestDTO.getWorstPlaceId() == null){
+            throw new IllegalArgumentException("Place IDs must not be null");
+        }
+
         String traceId = UUID.randomUUID().toString();
 
         LocationAllDocumentDTO categoryfilteredData = loadFromJson(locationRequestDTO);
 
-        LocationDocumentRowDTO target = categoryfilteredData.getDocuments().get(0);
-
-
-
-        if (categoryfilteredData == null || categoryfilteredData.getDocuments() == null || categoryfilteredData.getDocuments().isEmpty()) {
-            return null;
+        if (categoryfilteredData == null ||
+                categoryfilteredData.getDocuments() == null ||
+                categoryfilteredData.getDocuments().size() != 2) {
+            throw new IllegalArgumentException("Location Json null");
         }
 
-        int oneSales = target.getSalesIndex();
+        List<LocationDocumentRowDTO> sortedDocs = categoryfilteredData.getDocuments().stream()
+                .sorted(Comparator.comparingInt(LocationDocumentRowDTO::getSalesIndex))
+                .collect(Collectors.toList());
 
-        categoryfilteredData.getDocuments().forEach(doc -> {
-            if (doc.getSalesIndex() >= oneSales) {
-                doc.setContenttype("BEST");
-            } else {
-                doc.setContenttype("WORST");
-            }
-        });
+        LocationDocumentRowDTO worstStore = sortedDocs.get(0);
+        worstStore.setContenttype("WORST");
 
-        List<LocationDocumentRowDTO> finalStores = categoryfilteredData.getDocuments();
-
-        LocationDocumentRowDTO bestStore = finalStores.stream()
-                .filter(s -> "BEST".equals(s.getContenttype()))
-                .findFirst()
-                .orElse(null);
-
-        LocationDocumentRowDTO worstStore = finalStores.stream()
-                .filter(s -> "WORST".equals(s.getContenttype()))
-                .findFirst()
-                .orElse(null);
+        LocationDocumentRowDTO bestStore = sortedDocs.get(sortedDocs.size() - 1);
+        bestStore.setContenttype("BEST");
 
         LocationLLmResponseDTO locationLLmResponseDTO = pythonRagClient.generateLocationReport(bestStore,worstStore,traceId,locationRequestDTO.getRadius());
 
@@ -209,11 +200,7 @@ public class LocationServiceImpl implements LocationService {
             if (worstId != null) targetIds.add(worstId);
 
 
-            if (placeId != null && !placeId.isEmpty()) {
-                filteredList = allDocs.stream()
-                        .filter(doc -> placeId.equals(doc.getPlaceId()))
-                        .collect(Collectors.toList());
-            } else if (targetIds != null && !targetIds.isEmpty()) {
+            if (!targetIds.isEmpty()) {
                 filteredList = allDocs.stream()
                         .filter(doc -> targetIds.contains(doc.getPlaceId()))
                         .collect(Collectors.toList());
