@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Globe, Flame, TrendingUp } from "lucide-react";
 import { getBrandMentionSummary } from "../../api/dashboard/dashboard";
 import BrandMentionChartSection from "./BrandMentionChartSection";
+import BrandTrendRanking from "./BrandTrendRanking";
 import StatCard from "./StatCard";
 
 const BrandMentionSummary = ({ brandId, appliedChannels }) => {
@@ -48,37 +49,50 @@ const BrandMentionSummary = ({ brandId, appliedChannels }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatCard
-          label="Top Channel"
-          value={mentionSummary.popularChannel}
-          icon={Globe}
-          color="blue"
-          range={mentionSummary.dateRange}
-          desc="가장 언급이 활발한 채널"
-        />
-        <StatCard
-          label="Peak Analysis"
-          value={mentionSummary.peakDate}
-          icon={Flame}
-          color="orange"
-          range={mentionSummary.dateRange}
-          desc="데이터 최고점 발생일"
-        />
-        <StatCard
-          label="Growth"
-          value={mentionSummary.weeklyGrowthRate}
-          icon={TrendingUp}
-          color="emerald"
-          range={mentionSummary.dateRange}
-          desc="전주 대비 언급량 변화"
-        />
+        {/* 첫 번째 열 (2:1 비율의 2): 요약 카드 3개 + 추이 차트  */}
+        <div className="md:col-span-2 space-y-6">
+          {/* 요약 카드 3개 - 추이 차트와 같은 폭 */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <StatCard
+              label="Top Channel"
+              value={mentionSummary.popularChannel}
+              icon={Globe}
+              color="blue"
+              range={mentionSummary.dateRange}
+              desc="가장 언급이 활발한 채널"
+            />
+            <StatCard
+              label="Peak Analysis"
+              value={mentionSummary.peakDate}
+              icon={Flame}
+              color="orange"
+              range={mentionSummary.dateRange}
+              desc="데이터 최고점 발생일"
+            />
+            <StatCard
+              label="Growth"
+              value={mentionSummary.weeklyGrowthRate}
+              icon={TrendingUp}
+              color="emerald"
+              range={mentionSummary.dateRange}
+              desc="전주 대비 언급량 변화"
+            />
+          </div>
 
-        {/* 메인 추이 차트 */}
-        <div className="md:col-span-3 bg-white p-8 md:p-10 rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-          <BrandMentionChartSection
-            brandId={brandId}
-            appliedChannels={appliedChannels}
-          />
+          {/* 추이 차트 */}
+          <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-md transition-shadow max-h-[500px] overflow-hidden">
+            <BrandMentionChartSection
+              brandId={brandId}
+              appliedChannels={appliedChannels}
+            />
+          </div>
+        </div>
+
+        {/* 두 번째 열 (2:1 비율의 1): 연관 검색어 */}
+        <div className="md:col-span-1 flex">
+          <div className="w-full" style={{ maxHeight: "500px" }}>
+            <BrandTrendRanking brandId={brandId} />
+          </div>
         </div>
       </div>
     </div>
