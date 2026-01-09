@@ -183,7 +183,7 @@ def run_analysis_pipeline(
         
         # 2. 전처리
         print("[파이프라인] 2단계: 전처리")
-        preprocessed_data = preprocess_data(raw_data, use_morphology=False)
+        preprocessed_data = preprocess_data(raw_data, use_morphology=True)
         if not preprocessed_data:
             return {
                 "status": "error",

@@ -28,5 +28,11 @@ markdown>=3.4.0
 # Image processing (for image analysis)
 Pillow>=10.0.0
 
+# Text normalization (for emoticon normalization)
+soynlp>=0.0.493
+
+# Korean NLP (for morphological analysis)
+konlpy>=0.6.0
+
 # CORS middleware (included in FastAPI but explicitly noted)
 # Using FastAPI's CORSMiddleware
