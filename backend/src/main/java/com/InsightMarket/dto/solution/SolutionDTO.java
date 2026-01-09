@@ -1,6 +1,5 @@
 package com.InsightMarket.dto.solution;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -18,9 +17,9 @@ public class SolutionDTO {
     private Long strategyId;
     private String strategytitle;
     private String projectname;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년MM월dd일", timezone = "Asia/Seoul")
-    private LocalDateTime createdAt;
+    private String createdAt;
     private Long projectId;
+    private String imageurl; //확장
     private boolean deleted;
 
 }

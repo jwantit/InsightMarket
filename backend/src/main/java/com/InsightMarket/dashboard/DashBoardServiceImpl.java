@@ -14,7 +14,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StopWatch;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -27,7 +26,7 @@ import java.util.stream.Collectors;
 @Service
 @Log4j2
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 class DashBoardServiceImpl implements DashBoardService {
     //인사이트
     private final AnalyticsKeywordInsightResultRepository analyticsKeywordInsightResultRepository;
@@ -38,66 +37,104 @@ class DashBoardServiceImpl implements DashBoardService {
     //워드클라우드
     private final AnalyticsKeywordTokenSentimentStatsRepository analyticsKeywordTokenSentimentStatsRepository;
 
-
     @Override
     public BrandMentionSummaryResponseDTO getBrandDailyAnalysis(DashBoardRequestDTO dashBoardRequestDTO) {
+
         //브랜드PK
         Long brandId = dashBoardRequestDTO.getBrandId();
         //[YOUTUBE,NAVER]
         List<String> contentChannel = dashBoardRequestDTO.getContentChannel();
         //데이터 범위 6일
-        LocalDate startDate = LocalDate.now().minusDays(6);
+        LocalDate sevenDayStats = LocalDate.now().minusDays(6);
         //오늘
         LocalDate endDate = LocalDate.now();
+
 
         //인사이트 텍스트 가져오기(함수)------------------------------
         String insightMessage = insightMessage(brandId);
         //-------------------------------------------------
 
-        //가장 언급량 많은 소스----------
-        String popularChannel = analyticsKeywordDailyStatsRepository
-                .findMentionTopSourceForDashboard(brandId, startDate, endDate, contentChannel)
-                .orElse("데이터 없음"); // 데이터가 없을 때의 기본값 설정
-        //---------------------------
-        //데이터 최고점 발생 날짜---------------------------
-        String peakDateStr = analyticsKeywordDailyStatsRepository
-                .findMentionTopDateDashboard(brandId, startDate, endDate, contentChannel)
-                .map(LocalDate::toString)
-                .orElse("데이터 없음");
 
-        //이번주 총합을 계산하고 저번 주 총합을 계산하여 상승 하락
-        Long thisWeekSum = analyticsKeywordDailyStatsRepository
-                .sumTotalMentionCount(brandId,startDate,endDate,contentChannel);
-        thisWeekSum = (thisWeekSum != null) ? thisWeekSum : 0L;
 
-        //저저번주 -> 저번주
-        LocalDate lastEndDate = startDate.minusDays(1);
-        LocalDate lastStartDate = lastEndDate.minusDays(6);
+        //언급량 많았던 날짜 7일-----------------------------------------------------------
+        //sevenDayStats 7일전 ~ 오늘 endDate
+        List<AnalyticsKeywordDailyStats> allStats = analyticsKeywordDailyStatsRepository
+                .findStatsForDashboard(brandId,sevenDayStats,endDate,contentChannel);
+        //------------------------------------------------------
 
-        Long lastWeekSum = analyticsKeywordDailyStatsRepository
-                .sumTotalMentionCount(brandId, lastStartDate, lastEndDate, contentChannel);
-        lastWeekSum = (lastWeekSum != null) ? lastWeekSum : 0L;
-
-        double rate = 0.0;
-        if (lastWeekSum > 0) {
-            rate = ((double)(thisWeekSum - lastWeekSum) / lastWeekSum) * 100;
-        } else if (lastWeekSum == 0 && thisWeekSum > 0) {
-            rate = 100.0; // 지난주 데이터가 0인데 이번주에 생겼다면 100% 상승으로 표시
-        }
-        String weeklyGrowthRate = String.format("%+.1f%%", rate);
 
         //총 범위 날짜 텍스트---------------------------------------
         //2025-10-01 ~ 2025-10-07
-        String dateRange = startDate.toString() + " ~ " + endDate.toString();
+        String dateRange = sevenDayStats.toString() + " ~ " + endDate.toString();
         //------------------------------------------------------
 
-        return  BrandMentionSummaryResponseDTO.builder()
-                .weeklyGrowthRate(weeklyGrowthRate) //전년도 대비
+
+        //이번주 언급량 총합 계산-------------------------
+        long currentTotalCount = allStats.stream()
+                .mapToLong(s -> s.getMentionCount().longValue())
+                .sum();
+        //--------------------------------------------
+
+        //함수호출 -> 이번주 언급량 총합을 던지고 함수에서 저번주 총합을 계산하여 상승률과 하락률을 계산
+        //WeeklyGrowth = +35.4 또는 -44 등
+        String WeeklyGrowth = calculateWeeklyGrowth(brandId,contentChannel, currentTotalCount);
+        //-------------------------------------------------------------------------------------
+
+
+        //가장언급량 많았던 날짜--------------------------------------------------------------------------
+        //중복없음
+        Map<LocalDate, Long> dailyTotalMap = new HashMap<>();
+
+        for (AnalyticsKeywordDailyStats stats : allStats) {
+            LocalDate date = stats.getStatDate();
+            long count = stats.getMentionCount().longValue();
+
+            // 해당 날짜의 기존 합계에 현재 수치를 더함
+            dailyTotalMap.put(date, dailyTotalMap.getOrDefault(date, 0L) + count);
+        }
+
+// 2. 합산된 값 중 가장 큰 값을 가진 날짜(Key) 찾기
+        LocalDate peakDate = null;
+        long maxMention = -1;
+                                                  //<202.. , 444 소스카운트 합계 또는 개별 언급량 카운트>
+        for (Map.Entry<LocalDate, Long> entry : dailyTotalMap.entrySet()) {
+            if (entry.getValue() > maxMention) {
+                maxMention = entry.getValue();
+                peakDate = entry.getKey();
+            }
+        }
+        String peakDateStr = (peakDate != null) ? peakDate.toString() : "데이터 없음";
+        //----------------------------------------------------------------------------------
+
+        //가장 언급량 많았던 소스----------------------------------------------------------------------------------
+        String popularChannel = allStats.stream()
+                .collect(java.util.stream.Collectors.groupingBy(
+                        AnalyticsKeywordDailyStats::getSource,
+                        java.util.stream.Collectors.summingLong(s -> s.getMentionCount().longValue())
+                ))
+                .entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse("데이터 없음");
+        //----------------------------------------------------------------------------------
+
+// 최종 결과 확인
+        System.out.println("가장 높은 언급량: " + maxMention);
+        System.out.println("피크 날짜: " + peakDateStr);
+
+
+
+
+
+        BrandMentionSummaryResponseDTO dashBoardResponseDTO = BrandMentionSummaryResponseDTO.builder()
+                .weeklyGrowthRate(WeeklyGrowth) //전년도 대비
                 .insightMessage(insightMessage) //요약 증가했습니다.
                 .peakDate(peakDateStr) //언급량 많았던 날짜 7일
                 .popularChannel(popularChannel) //인기채널 7일
                 .dateRange(dateRange) //조회범위 문자열
                 .build();
+
+        return dashBoardResponseDTO;
     }
 
     //인사이트 함수-----------------------------------------------------------------------------------
@@ -108,13 +145,51 @@ class DashBoardServiceImpl implements DashBoardService {
     }
     //-----------------------------------------------------------------------------------
 
+    //저번주 계산-----------------------------------------------------------------------------------
+    private String calculateWeeklyGrowth(Long brandId, List<String> contentChannel, long currentTotalCount) {
+        // 1. 날짜 설정
+        LocalDate currentStart = LocalDate.now().minusDays(6);
+        LocalDate lastWeekStart = currentStart.minusDays(7); // 13일 전
+        LocalDate lastWeekEnd = currentStart.minusDays(1);   // 7일 전
+
+        // 2. 지난주 데이터 조회 (수정된 Repository 파라미터 순서 적용)
+        // 순서: brandId, startDate, endDate, sources
+        List<AnalyticsKeywordDailyStats> lastWeekStats =
+                analyticsKeywordDailyStatsRepository.findStatsForDashboard(brandId, lastWeekStart, lastWeekEnd, contentChannel);
+
+        // 3. 지난주 총합 (쿼리에서 이미 날짜를 맞춰왔으므로 필터링 없이 바로 합산)
+        long lastWeekTotalCount = lastWeekStats.stream()
+                .mapToLong(s -> s.getMentionCount().longValue())
+                .sum();
+
+        // 4. 증감률 계산 로직
+        if (lastWeekTotalCount == 0) {
+            return (currentTotalCount > 0) ? "+100%" : "0%";
+        }
+
+        double growth = ((double) (currentTotalCount - lastWeekTotalCount) / lastWeekTotalCount) * 100;
+
+        // 소수점 한자리까지 포맷팅 (예: +15.2%, -5.0%)
+        return String.format("%+1.1f%%", growth);
+    }
+
+
+
+
+
+    //언급량 차트-----------------------------------------------------------------------------------
+//    public class DashBoardRequestDTO {
+//
+//        private Long brandId; //브랜드 아이디
+//        private List<String> contentChannel; //선택한 채널
+//        private String unit; //일별 주별 월별
+//    }
 
     @Override
     public BrandAllChartResponseDTO getBrandMentionChart(DashBoardRequestDTO dashBoardRequestDTO) {
         //일별 주별 월별
         String unit = (dashBoardRequestDTO.getUnit() == null) ? "day" : dashBoardRequestDTO.getUnit();
         List<BrandMentionChartDataDTO> chartData;
-
 
         switch (unit) {
             case "week":
@@ -126,7 +201,6 @@ class DashBoardServiceImpl implements DashBoardService {
                 unit = "day"; // default로 들어온 경우를 대비해 unit 이름도 day로 명시
                 break;
         }
-
 
         return BrandAllChartResponseDTO.builder()
                 .unit(unit)

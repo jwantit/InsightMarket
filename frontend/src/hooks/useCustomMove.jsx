@@ -22,7 +22,7 @@ const useCustomMove = (projectId, filter) => {
 
   //현재 쿼리에서 가져온다 없으면 page=1&size=5 가 기본값으로 들어간다.
   const page = getNum(queryParams.get('page'), 1)
-  const size = getNum(queryParams.get('size'),10)
+  const size = getNum(queryParams.get('size'),5)
 
   //?page=1&size=5
   const queryDefault = createSearchParams({page, size}).toString() 
