@@ -1,6 +1,6 @@
 package com.InsightMarket.service.project;
 
-import com.InsightMarket.ai.PythonRagClient;
+import com.InsightMarket.ai.PythonClient;
 import com.InsightMarket.common.exception.ApiException;
 import com.InsightMarket.common.exception.ErrorCode;
 import com.InsightMarket.domain.brand.Brand;
@@ -32,7 +32,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final BrandRepository brandRepository;
     private final ProjectKeywordRepository projectKeywordRepository;
-    private final PythonRagClient pythonRagClient;
+    private final PythonClient pythonClient;
 
     @Override
     public Long create(Long brandId, ProjectRequestDTO req) {
@@ -172,7 +172,7 @@ public class ProjectServiceImpl implements ProjectService {
             
             // 프로젝트 키워드 생성 시에만 재수집 호출
             if (isNew) {
-                pythonRagClient.recollect("PROJECT", pk.getId(), pk.getKeyword(), brand.getId(), brand.getName(), projectId);
+                pythonClient.recollect("PROJECT", pk.getId(), pk.getKeyword(), brand.getId(), brand.getName(), projectId);
             }
         }
 

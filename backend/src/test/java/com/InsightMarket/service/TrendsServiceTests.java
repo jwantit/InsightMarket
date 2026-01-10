@@ -1,9 +1,9 @@
 package com.InsightMarket.service;
 
-import com.InsightMarket.dashboard.TrendsRedisService;
-import com.InsightMarket.dashboard.TrendsService;
-import com.InsightMarket.dashboard.dto.PythonTrendResponseDTO;
-import com.InsightMarket.dashboard.dto.TrendItemDTO;
+import com.InsightMarket.ai.dto.trends.PythonTrendResponseDTO;
+import com.InsightMarket.ai.dto.trends.TrendItemDTO;
+import com.InsightMarket.ai.service.trends.TrendsRedisService;
+import com.InsightMarket.ai.service.trends.TrendsService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

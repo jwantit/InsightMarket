@@ -1,8 +1,7 @@
 package com.InsightMarket.service;
 
-
-import com.InsightMarket.dashboard.DashBoardService;
-import com.InsightMarket.dashboard.dto.*;
+import com.InsightMarket.dto.dashboard.*;
+import com.InsightMarket.service.dashboard.DashBoardService;
 import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.DisplayName;

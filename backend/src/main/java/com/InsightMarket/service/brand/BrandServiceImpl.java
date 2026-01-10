@@ -1,6 +1,6 @@
 package com.InsightMarket.service.brand;
 
-import com.InsightMarket.ai.PythonRagClient;
+import com.InsightMarket.ai.PythonClient;
 import com.InsightMarket.common.exception.ApiException;
 import com.InsightMarket.common.exception.ErrorCode;
 import com.InsightMarket.domain.brand.Brand;
@@ -33,7 +33,7 @@ public class BrandServiceImpl implements BrandService {
     private final BrandRepository brandRepository;
     private final BrandMemberRepository brandMemberRepository;
     private final CompetitorRepository competitorRepository;
-    private final PythonRagClient pythonRagClient;
+    private final PythonClient pythonClient;
 
     //브랜드 생성 + 생성자 BRAND_ADMIN 매핑
     @Override
@@ -59,7 +59,7 @@ public class BrandServiceImpl implements BrandService {
         brandMemberRepository.save(brandMember);
         
         // 브랜드 생성 시 재수집 호출
-        pythonRagClient.recollect("BRAND", brand.getId(), brand.getName(), brand.getId(), brand.getName());
+        pythonClient.recollect("BRAND", brand.getId(), brand.getName(), brand.getId(), brand.getName());
 
         return brand.getId();
     }
@@ -242,7 +242,7 @@ public class BrandServiceImpl implements BrandService {
             
             // 신규 생성 시에만 재수집 호출
             if (isNew) {
-                pythonRagClient.recollect("COMPETITOR", competitor.getId(), competitor.getName(), brand.getId(), brand.getName());
+                pythonClient.recollect("COMPETITOR", competitor.getId(), competitor.getName(), brand.getId(), brand.getName());
             }
         }
     }
