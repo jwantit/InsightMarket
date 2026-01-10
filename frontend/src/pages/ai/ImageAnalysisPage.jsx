@@ -26,7 +26,7 @@ import {
 } from "../../api/insightAiApi";
 import { getErrorMessage } from "../../util/errorUtil";
 import { ImageAnalysisStorage } from "../../util/storageUtil";
-import useFileUpload from "../../hooks/common/useFileUpload";
+import useFileUpload from "../../hooks/file/useFileUpload";
 import PageHeader from "../../components/common/PageHeader";
 import ImageUploadZone from "../../components/ai/ImageUploadZone";
 import ImageAnalysisResult from "../../components/ai/ImageAnalysisResult";

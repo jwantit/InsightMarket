@@ -9,10 +9,10 @@ import {
   Shield,
   ExternalLink,
 } from "lucide-react";
-import useCustomLogin from "../../hooks/useCustomLogin";
-import { useBrand } from "../../hooks/useBrand";
-import useMyBrands from "../../hooks/useMyBrands";
-import TopBarBrandSelectComponent from "./TopBarBrandSelectComponent";
+import useCustomLogin from "../hooks/login/useCustomLogin";
+import { useBrand } from "../hooks/brand/useBrand";
+import useMyBrands from "../hooks/brand/useMyBrands";
+import TopBarBrandSelect from "./TopBarBrandSelect";
 
 const TopBar = ({ onToggleSidebar }) => {
   const [open, setOpen] = useState(false);
@@ -72,7 +72,7 @@ const TopBar = ({ onToggleSidebar }) => {
           <div className="h-6 w-px bg-slate-200 mx-2 hidden sm:block" />
 
           <div className="hidden md:block">
-            <TopBarBrandSelectComponent brands={brands} />
+            <TopBarBrandSelect />
           </div>
         </div>
 
@@ -141,3 +141,4 @@ const TopBar = ({ onToggleSidebar }) => {
 };
 
 export default TopBar;
+

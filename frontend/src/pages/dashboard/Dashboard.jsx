@@ -6,7 +6,7 @@ import PageHeader from "../../components/common/PageHeader";
 import DashboardFilter from "../../components/dashboard/DashboardFilter";
 import BrandMentionSummary from "../../components/dashboard/BrandMentionSummary";
 import BrandSentimentSummary from "../../components/dashboard/BrandSentimentSummary";
-import { getBrandWordCloudData } from "../../api/dashboard/dashboard";
+import { getBrandWordCloudData } from "../../api/dashboardApi";
 
 const Dashboard = () => {
   const { brandId } = useParams();

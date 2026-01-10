@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { getBrandSentimentChart } from '../../api/dashboard/dashboard';
+import { getBrandSentimentChart } from '../../api/dashboardApi';
 
 const BrandSentimentChartSection = ({ brandId, appliedChannels, unit = 'day' }) => {
     const [data, setData] = useState([]);

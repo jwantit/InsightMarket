@@ -1,7 +1,6 @@
 import { lazy } from "react";
 
 const BoardLayout = lazy(() => import("../pages/board/BoardLayout"));
-const StrategyBoard = lazy(() => import("../pages/board/StrategyBoard"));
 const BoardListPage   = lazy(() => import("../pages/board/BoardListPage"));
 const BoardReadPage   = lazy(() => import("../pages/board/BoardReadPage"));
 const BoardAddPage    = lazy(() => import("../pages/board/BoardAddPage"));

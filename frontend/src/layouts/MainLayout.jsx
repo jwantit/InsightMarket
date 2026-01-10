@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
-import TopBar from "../components/layout/TopBar";
-import SideBar from "../components/layout/SideBar";
-import useMyBrands from "../hooks/useMyBrands";
+import TopBar from "./TopBar";
+import SideBar from "./SideBar";
+import useMyBrands from "../hooks/brand/useMyBrands";
 
 const MainLayout = () => {
   const { brands, loading } = useMyBrands();

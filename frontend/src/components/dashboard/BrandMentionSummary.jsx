@@ -1,7 +1,7 @@
 // src/components/dashboard/BrandMentionSummary.jsx
 import React, { useState, useEffect } from "react";
 import { Globe, Flame, TrendingUp } from "lucide-react";
-import { getBrandMentionSummary } from "../../api/dashboard/dashboard";
+import { getBrandMentionSummary } from "../../api/dashboardApi";
 import BrandMentionChartSection from "./BrandMentionChartSection";
 import BrandTrendRanking from "./BrandTrendRanking";
 import StatCard from "./StatCard";

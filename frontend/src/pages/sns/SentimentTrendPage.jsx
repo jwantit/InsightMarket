@@ -37,7 +37,7 @@ import {
   sentimentLabel,
   sentimentColor,
   badgeStyle,
-} from "../../components/sns/SentimentTrend/utils";
+} from "../../util/sentimentTrendUtil";
 
 ChartJS.register(
   CategoryScale,

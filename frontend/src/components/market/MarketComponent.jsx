@@ -6,11 +6,11 @@ import {
   removeSolution,
 } from "../../api/solutionApi";
 import PageComponentA from "./PageComponentA";
-import useCustomMove from "../../hooks/useCustomMove";
+import useCustomMove from "../../hooks/market/useCustomMove";
 import FetchingModal from "../common/FetchingModal";
-import useCustomCart from "../../hooks/useCustomCart"; // useCustomCart 임포트
-import usePayment from "../../hooks/common/payment/useCustomPayment";
-import { useBrand } from "../../hooks/useBrand";
+import useCustomCart from "../../hooks/cart/useCustomCart"; // useCustomCart 임포트
+import usePayment from "../../hooks/payment/useCustomPayment";
+import { useBrand } from "../../hooks/brand/useBrand";
 
 const initState = {
   dtoList: [],
@@ -24,8 +24,8 @@ const initState = {
   totalPage: 0,
   current: 0,
 };
-//MaketLsit에서 전달받은 projectid = n , filter = ALL 또는 RECENT
-const MaketComponent = ({ projectId, filter }) => {
+//MarketList에서 전달받은 projectid = n , filter = ALL 또는 RECENT
+const MarketComponent = ({ projectId, filter }) => {
   const { page, size, refresh, moveToList } = useCustomMove(projectId, filter);
   const [serverData, setServerData] = useState(initState);
   const [loading, setLoading] = useState(false);
@@ -292,4 +292,4 @@ const MaketComponent = ({ projectId, filter }) => {
   );
 };
 
-export default MaketComponent;
+export default MarketComponent;

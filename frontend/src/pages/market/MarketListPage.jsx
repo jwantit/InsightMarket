@@ -2,8 +2,8 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { ShoppingBag } from "lucide-react";
 import PageHeader from "../../components/common/PageHeader";
-import MaketComponent from "../../components/maket/MaketComponent";
-import SolutionToolbar from "../../components/maket/SolutionToolbar";
+import MarketComponent from "../../components/market/MarketComponent";
+import SolutionToolbar from "../../components/market/SolutionToolbar";
 import { getProjectsByTenant } from "../../api/selectProjectApi";
 
 const MarketListPage = () => {
@@ -139,7 +139,7 @@ const MarketListPage = () => {
       />
 
       {/* 상품 리스트 */}
-      {projectId && <MaketComponent projectId={projectId} filter={filter} />}
+      {projectId && <MarketComponent projectId={projectId} filter={filter} />}
     </div>
   );
 };

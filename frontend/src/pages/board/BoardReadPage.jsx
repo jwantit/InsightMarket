@@ -13,7 +13,7 @@ import {
   fetchBoardDetail,
   selectBoardDetail,
 } from "../../store/slices/boardSlice";
-import useBoardRouteParams from "../../hooks/common/useBoardRouteParams";
+import useBoardRouteParams from "../../hooks/board/useBoardRouteParams";
 import CommentSection from "../../components/comment/CommentSection";
 import { formatDateTime } from "../../util/dateUtil";
 import { getCurrentMember } from "../../api/memberApi";

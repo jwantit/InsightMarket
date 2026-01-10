@@ -1,5 +1,5 @@
-import { prepareOrder, delOrder, verifyPayment } from "../../../api/paymentApi";
-import { getErrorMessage } from "../../../util/errorUtil";
+import { prepareOrder, delOrder, verifyPayment } from "../../api/paymentApi";
+import { getErrorMessage } from "../../util/errorUtil";
 
 const useCustomPayment = () => {
   //결제버튼 -> 호출______________________________________________________________________________________

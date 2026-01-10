@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Mail, Lock, LogIn, Sparkles } from "lucide-react";
-import useCustomLogin from "../../hooks/useCustomLogin";
+import useCustomLogin from "../../hooks/login/useCustomLogin";
 import KakaoLoginComponent from "./KakaoLoginComponent";
 
 const initState = {

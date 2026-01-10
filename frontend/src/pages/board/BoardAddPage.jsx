@@ -3,9 +3,9 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Save, X, FileText, Image as ImageIcon } from "lucide-react";
 import { createBoardThunk } from "../../store/slices/boardSlice";
-import useBoardRouteParams from "../../hooks/common/useBoardRouteParams";
-import useFileUpload from "../../hooks/common/useFileUpload";
-import useImagePasteToContent from "../../hooks/common/useImagePasteToContent";
+import useBoardRouteParams from "../../hooks/board/useBoardRouteParams";
+import useFileUpload from "../../hooks/file/useFileUpload";
+import useImagePasteToContent from "../../hooks/file/useImagePasteToContent";
 import FileUploadZone from "../../components/common/FileUploadZone";
 
 const BoardAddPage = () => {

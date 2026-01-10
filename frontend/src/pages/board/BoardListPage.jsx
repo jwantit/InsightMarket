@@ -2,8 +2,8 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {fetchBoardList,selectBoardList} from "../../store/slices/boardSlice";
-import useBoardRouteParams from "../../hooks/common/useBoardRouteParams";
-import BoardList from "../../components/board/BoardList";
+import useBoardRouteParams from "../../hooks/board/useBoardRouteParams";
+import BoardListComponent from "../../components/board/BoardListComponent";
 import PageComponent from "../../components/common/PageComponent";
 
 const BoardListPage = () => {
@@ -47,7 +47,7 @@ const BoardListPage = () => {
 
   return (
     <div className="space-y-4">
-      <BoardList items={listResponse?.dtoList || []} onClickItem={moveRead} />
+      <BoardListComponent items={listResponse?.dtoList || []} onClickItem={moveRead} />
       <PageComponent
         pageResponse={listResponse}
         onChangePage={onChangePage}

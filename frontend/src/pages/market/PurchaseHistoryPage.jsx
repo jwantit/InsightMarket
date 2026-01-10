@@ -1,5 +1,5 @@
-import PurchaseFilterSection from "../../components/maket/PurchaseFilterSection";
-import PurchaseComponent from "../../components/maket/PurchaseComponent";
+import PurchaseFilterSection from "../../components/market/PurchaseFilterSection";
+import PurchaseComponent from "../../components/market/PurchaseComponent";
 import { useSearchParams } from "react-router-dom";
 import { History } from "lucide-react";
 import PageHeader from "../../components/common/PageHeader";

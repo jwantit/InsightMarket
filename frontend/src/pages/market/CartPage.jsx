@@ -2,8 +2,8 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
 import PageHeader from "../../components/common/PageHeader";
-import SolutionToolbar from "../../components/maket/SolutionToolbar";
-import CartComponent from "../../components/maket/CartComponent";
+import SolutionToolbar from "../../components/market/SolutionToolbar";
+import CartComponent from "../../components/market/CartComponent";
 import { getProjectsByTenant } from "../../api/selectProjectApi";
 
 const CartPage = () => {

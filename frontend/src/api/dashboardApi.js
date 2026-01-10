@@ -1,5 +1,5 @@
-import { API_SERVER_HOST } from "../../api/memberApi";
-import jwtAxios from "../../util/jwtUtil";
+import { API_SERVER_HOST } from "./memberApi";
+import jwtAxios from "../util/jwtUtil";
 
 // 기본 호스트 설정 (dashboard 관련 API이므로 경로 확인 필요)
 const host = `${API_SERVER_HOST}/api/dashboard`;
@@ -76,3 +76,4 @@ export {
   getBrandSentimentChart,
   getBrandTrends,
 };
+

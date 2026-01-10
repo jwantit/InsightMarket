@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { modifyMember } from "../../api/memberApi";
 import { getCompanies } from "../../api/companyApi";
-import useCustomLogin from "../../hooks/useCustomLogin";
+import useCustomLogin from "../../hooks/login/useCustomLogin";
 import ResultModal from "../common/ResultModal";
 
 const Pill = ({ children, className = "" }) => (

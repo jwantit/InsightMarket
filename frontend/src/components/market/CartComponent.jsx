@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import CartItemComponent from "./CartItemComponent";
-import useCustomCart from "../../hooks/useCustomCart";
-import usePayment from "../../hooks/common/payment/useCustomPayment";
-import { useBrand } from "../../hooks/useBrand";
+import useCustomCart from "../../hooks/cart/useCustomCart";
+import usePayment from "../../hooks/payment/useCustomPayment";
+import { useBrand } from "../../hooks/brand/useBrand";
 
 const CartComponent = ({ projectId }) => {
   const { cartState, removeCartItem, refreshCart, addCartItem } =

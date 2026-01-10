@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check, Building2, Plus } from "lucide-react";
-import useMyBrands from "../../hooks/useMyBrands";
-import { useBrand } from "../../hooks/useBrand";
-import { useBrandNavigate } from "../../hooks/useBrandNavigate";
+import useMyBrands from "../hooks/brand/useMyBrands";
+import { useBrand } from "../hooks/brand/useBrand";
+import { useBrandNavigate } from "../hooks/brand/useBrandNavigate";
 
-const TopBarBrandSelectComponent = () => {
+const TopBarBrandSelect = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { brands, loading } = useMyBrands();
   const { brandId } = useBrand();
@@ -130,4 +130,5 @@ const TopBarBrandSelectComponent = () => {
   );
 };
 
-export default TopBarBrandSelectComponent;
+export default TopBarBrandSelect;
+

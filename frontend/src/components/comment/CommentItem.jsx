@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import { formatDateTime } from "../../util/dateUtil";
 import FileItem from "../common/FileItem";
-import useKeepFiles from "../../hooks/common/useKeepFiles";
+import useKeepFiles from "../../hooks/file/useKeepFiles";
 
 const CommentItem = ({
   comment,

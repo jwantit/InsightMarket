@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { useBrand } from "../../hooks/useBrand";
+import { useBrand } from "../hooks/brand/useBrand";
 import { useSelector } from "react-redux";
 import {
   LayoutDashboard,
@@ -263,3 +263,4 @@ const SideBar = ({ onNavigate }) => {
 };
 
 export default SideBar;
+

@@ -1,6 +1,6 @@
 import { useSelector, useDispatch } from "react-redux";
 import { useCallback } from "react"; // useCallback 임포트 추가
-import { getCartItemsAsync, addSolutionToCartAsync, removeCartItemAsync } from "../store/slices/cartSlice";
+import { getCartItemsAsync, addSolutionToCartAsync, removeCartItemAsync } from "../../store/slices/cartSlice";
 
 const useCustomCart = (projectId) => {
 

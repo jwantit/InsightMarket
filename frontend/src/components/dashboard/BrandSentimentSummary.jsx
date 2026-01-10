@@ -1,7 +1,7 @@
 // src/components/dashboard/BrandSentimentSummary.jsx
 import React, { useState, useEffect } from "react";
 import { Shield, Smile, Zap } from "lucide-react";
-import { getBrandSentimentSummary } from "../../api/dashboard/dashboard";
+import { getBrandSentimentSummary } from "../../api/dashboardApi";
 import BrandDonutChart from "./BrandDonutChart";
 import BrandWordCloudBlock from "./BrandWordCloudBlock";
 import BrandWordTableBlock from "./BrandWordTableBlock";

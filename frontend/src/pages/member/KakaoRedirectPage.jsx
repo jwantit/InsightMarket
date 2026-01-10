@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { getAccessToken, getMemberWithAccessToken } from "../../api/kakaoApi";
 import { login } from "../../store/slices/loginSlice";
 import { useDispatch } from "react-redux";
-import useCustomLogin from "../../hooks/useCustomLogin";
+import useCustomLogin from "../../hooks/login/useCustomLogin";
 
 const KakaoRedirectPage = () => {
   const [searchParams] = useSearchParams();

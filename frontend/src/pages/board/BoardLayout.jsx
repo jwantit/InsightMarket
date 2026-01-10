@@ -2,7 +2,7 @@ import React from "react";
 import { Outlet, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { LayoutList, Plus, List } from "lucide-react";
 import PageHeader from "../../components/common/PageHeader";
-import useBoardRouteParams from "../../hooks/common/useBoardRouteParams";
+import useBoardRouteParams from "../../hooks/board/useBoardRouteParams";
 
 const BoardLayout = () => {
   const { brandId } = useBoardRouteParams();

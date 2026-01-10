@@ -8,7 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { getBrandMentionChart } from "../../api/dashboard/dashboard";
+import { getBrandMentionChart } from "../../api/dashboardApi";
 
 const BrandMentionChartSection = ({ brandId, appliedChannels }) => {
   const [data, setData] = useState([]);

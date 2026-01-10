@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { joinMember } from "../../api/memberApi";
 import { getCompanies } from "../../api/companyApi";
-import useCustomLogin from "../../hooks/useCustomLogin";
+import useCustomLogin from "../../hooks/login/useCustomLogin";
 import { getErrorMessage } from "../../util/errorUtil";
 import BrandRegistrationModal from "./BrandRegistrationModal";
 

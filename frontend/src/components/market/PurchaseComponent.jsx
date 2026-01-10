@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import useCustomMove from "../../hooks/useCustomMove";
+import useCustomMove from "../../hooks/market/useCustomMove";
 import PageComponentA from "./PageComponentA";
 import { findMember } from "../../api/paymentApi";
 import PurchaseFetchingModal from "./PurchaseFetchingModal";
-import { useBrand } from "../../hooks/useBrand";
+import { useBrand } from "../../hooks/brand/useBrand";
 
 const initState = {
   dtoList: [],

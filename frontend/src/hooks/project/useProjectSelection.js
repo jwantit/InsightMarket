@@ -6,8 +6,8 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { getProjectsByTenant } from "../api/selectProjectApi";
-import { getErrorMessage } from "../util/errorUtil";
+import { getProjectsByTenant } from "../../api/selectProjectApi";
+import { getErrorMessage } from "../../util/errorUtil";
 
 /**
  * 프로젝트 선택 공통 hook

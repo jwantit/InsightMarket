@@ -1,4 +1,4 @@
-// import useCustomLogin from "../../hooks/useCustomLogin";
+// import useCustomLogin from "../../hooks/login/useCustomLogin";
 
 // const LogoutComponent = () => {
 //   const { doLogout, moveToPath } = useCustomLogin();
@@ -45,7 +45,7 @@ import {
   BrainCircuit,
   Zap,
 } from "lucide-react";
-import useCustomLogin from "../../hooks/useCustomLogin";
+import useCustomLogin from "../../hooks/login/useCustomLogin";
 import KakaoLoginComponent from "./KakaoLoginComponent";
 
 const initState = {

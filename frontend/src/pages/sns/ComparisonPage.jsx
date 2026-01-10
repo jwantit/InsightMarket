@@ -34,7 +34,7 @@ import {
   sentimentLabel,
   sentimentColor,
   badgeStyle,
-} from "../../components/sns/SentimentTrend/utils";
+} from "../../util/sentimentTrendUtil";
 
 // 대시보드와 동일한 아이콘
 const Icons = {

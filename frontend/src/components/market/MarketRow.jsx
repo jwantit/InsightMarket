@@ -1,6 +1,6 @@
 
 
-const MaketRow = ({ solutions }) => {
+const MarketRow = ({ solutions }) => {
     return (
       <div className="grid grid-cols-4 gap-4 px-4 py-3 items-center border-t text-sm">
         {/* No */}
@@ -36,5 +36,5 @@ const MaketRow = ({ solutions }) => {
     );
   };
   
-  export default MaketRow;
+  export default MarketRow;
   

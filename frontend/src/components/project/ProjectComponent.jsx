@@ -8,7 +8,7 @@ import {
 } from "../../api/projectApi";
 import ProjectListComponent from "./ProjectListComponent";
 import ProjectModalComponent from "./ProjectModalComponent";
-import { useBrand } from "../../hooks/useBrand";
+import { useBrand } from "../../hooks/brand/useBrand";
 
 const ProjectComponent = () => {
     const { brandId } = useBrand();

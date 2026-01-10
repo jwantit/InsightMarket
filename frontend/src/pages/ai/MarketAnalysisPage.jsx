@@ -1,6 +1,6 @@
 // src/pages/ai/MarketAnalysisPage.jsx
 import React, { useState } from "react";
-import { useBrand } from "../../hooks/useBrand";
+import { useBrand } from "../../hooks/brand/useBrand";
 import {
   MapPin,
   Sparkles,

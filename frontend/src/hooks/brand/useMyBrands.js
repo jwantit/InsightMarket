@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { getBrandList } from "../api/brandApi";
+import { getBrandList } from "../../api/brandApi";
 import { useDispatch, useSelector } from "react-redux";
-import { setBrandList } from "../store/slices/brandSlice";
+import { setBrandList } from "../../store/slices/brandSlice";
 
 const useMyBrands = () => {
   const dispatch = useDispatch();

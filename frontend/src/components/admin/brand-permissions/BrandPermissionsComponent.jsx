@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useBrand } from "../../../hooks/useBrand";
+import { useBrand } from "../../../hooks/brand/useBrand";
 import {
   addBrandMember,
   getBrandMembers,

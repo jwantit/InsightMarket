@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useBrand } from "../../hooks/useBrand";
+import { useBrand } from "../../hooks/brand/useBrand";
 
 const PurchaseFetchingModal = ({ order, onClose }) => {
   const navigate = useNavigate();

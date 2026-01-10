@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setBrand } from "../store/slices/brandSlice";
+import { setBrand } from "../../store/slices/brandSlice";
 
 // 이 useBrand hook을 /app/:brandId 아래의 컴포넌트에서만 쓸것.
 export const useBrand = () => {

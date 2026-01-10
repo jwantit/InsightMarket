@@ -3,7 +3,7 @@ import { formatDateTime } from "../../util/dateUtil";
 import { API_SERVER_HOST } from "../../api/memberApi";
 import { FileText, MessageCircle, Paperclip } from "lucide-react";
 
-const BoardList = ({ items = [], onClickItem }) => {
+const BoardListComponent = ({ items = [], onClickItem }) => {
   const handleFileDownload = (e, fileId) => {
     e.stopPropagation();
     window.open(`${API_SERVER_HOST}/api/files/${fileId}`, "_blank");
@@ -130,5 +130,5 @@ const BoardList = ({ items = [], onClickItem }) => {
   );
 };
 
-export default BoardList;
+export default BoardListComponent;
 

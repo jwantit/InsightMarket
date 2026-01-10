@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Building2, LogOut, ChevronRight, Loader2 } from "lucide-react";
-import useCustomLogin from "../../hooks/useCustomLogin";
-import useMyBrands from "../../hooks/useMyBrands";
+import useCustomLogin from "../../hooks/login/useCustomLogin";
+import useMyBrands from "../../hooks/brand/useMyBrands";
 
 const BrandSelectPage = () => {
   const navigate = useNavigate();

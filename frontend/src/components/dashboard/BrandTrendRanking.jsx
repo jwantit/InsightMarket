@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { TrendingUp, MoreVertical, Download, Code, Share2 } from "lucide-react";
-import { getBrandTrends } from "../../api/dashboard/dashboard";
+import { getBrandTrends } from "../../api/dashboardApi";
 
 const BrandTrendRanking = ({ brandId }) => {
   const [trendData, setTrendData] = useState(null);

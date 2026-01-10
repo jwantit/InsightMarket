@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, FileText, Package, Calendar, Tag } from "lucide-react";
-import { useBrand } from "../../hooks/useBrand";
+import { useBrand } from "../../hooks/brand/useBrand";
 import { getPurchasedSolutionDetail } from "../../api/solutionApi";
 
 const ReportDetailPage = () => {
