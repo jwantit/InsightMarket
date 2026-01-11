@@ -1,6 +1,7 @@
 package com.InsightMarket.controller;
 
 import com.InsightMarket.ai.dto.trends.PythonTrendResponseDTO;
+import com.InsightMarket.ai.service.trends.TrendsPerformanceService;
 import com.InsightMarket.ai.service.trends.TrendsRedisService;
 import com.InsightMarket.dto.dashboard.*;
 import com.InsightMarket.service.dashboard.DashBoardService;
@@ -18,6 +19,7 @@ public class DashBoardController {
     private final DashBoardService dashBoardService;
      // 추가: Redis 서비스 주입
     private final TrendsRedisService trendsRedisService;
+    private final TrendsPerformanceService trendsPerformanceService;
 
 
     @GetMapping("/mention/analysis")
@@ -86,6 +88,21 @@ public class DashBoardController {
         }
 
         return ResponseEntity.ok(response);
+    }
+
+    // DB 조회 vs Redis 조회 성능 비교 테스트
+    @GetMapping("/trends/performance")
+    public ResponseEntity<String> compareTrendsPerformance(DashBoardRequestDTO requestDTO) {
+        log.info("성능 비교 테스트 요청 - BrandID: {}", requestDTO.getBrandId());
+
+        try {
+            trendsPerformanceService.comparePerformance(requestDTO.getBrandId());
+            return ResponseEntity.ok("성능 비교 완료. 로그를 확인하세요.");
+        } catch (Exception e) {
+            log.error("성능 비교 테스트 실패 - BrandID: {}", requestDTO.getBrandId(), e);
+            return ResponseEntity.internalServerError()
+                    .body("성능 비교 테스트 실패: " + e.getMessage());
+        }
     }
 }
 
