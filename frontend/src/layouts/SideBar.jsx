@@ -76,7 +76,7 @@ const Section = ({ title, open, onToggle, children }) => (
   </div>
 );
 
-const SideBar = ({ onNavigate }) => {
+const SideBar = ({ isOpen, onNavigate }) => {
   const { brandId } = useBrand();
   const location = useLocation();
 
@@ -100,9 +100,36 @@ const SideBar = ({ onNavigate }) => {
   if (!brandId) return null;
 
   return (
-    <aside className="w-72 lg:w-64 shrink-0 border-r border-slate-200 bg-white h-[calc(100vh-56px)] sticky top-14 overflow-y-auto scrollbar-hide">
-      <div className="p-4">
-        {/* 상단 기본 메뉴 */}
+    <>
+      <aside
+        className={cx(
+          "shrink-0 border-r border-slate-200 bg-white overflow-y-auto scrollbar-hide transform-gpu z-[60]",
+          "w-72 min-[1441px]:w-64",
+          // 애니메이션: 오직 transform(가로 이동)만 300ms 동안 작동하도록 설정
+          "max-[1440px]:transition-transform max-[1440px]:duration-300 max-[1440px]:ease-in-out",
+          // PC 모드 (1441px 이상)
+          "min-[1441px]:sticky min-[1441px]:top-14 min-[1441px]:h-[calc(100vh-56px)] min-[1441px]:translate-x-0",
+          // 모바일 모드 (1440px 이하) - top과 left를 0으로 고정하여 수직 이동 방지
+          "max-[1440px]:fixed max-[1440px]:!top-0 max-[1440px]:!left-0 max-[1440px]:h-full max-[1440px]:shadow-2xl",
+          isOpen ? "max-[1440px]:translate-x-0" : "max-[1440px]:-translate-x-full"
+        )}
+        style={{ willChange: 'transform' }}
+      >
+        <div className="p-4">
+          {/* 1440px 이하일 때 로고와 닫기 버튼 */}
+          <div className="min-[1441px]:hidden flex items-center justify-between mb-8 px-2">
+            <span className="font-black text-xl tracking-tight text-slate-900">
+              Insight<span className="text-blue-600">Market</span>
+            </span>
+            <button
+              onClick={onNavigate}
+              className="p-2 hover:bg-slate-100 rounded-xl text-slate-400"
+            >
+              <ChevronDown size={20} className="rotate-90" />
+            </button>
+          </div>
+
+          {/* 상단 기본 메뉴 */}
         <div className="mt-2 space-y-1">
           <SideLink
             to={`/app/${brandId}/dashboard`}
@@ -257,8 +284,9 @@ const SideBar = ({ onNavigate }) => {
             © {new Date().getFullYear()} InsightMarket
           </p>
         </div>
-      </div>
-    </aside>
+        </div>
+      </aside>
+    </>
   );
 };
 

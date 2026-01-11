@@ -53,8 +53,8 @@ const BrandMentionSummary = ({ brandId, appliedChannels }) => {
         
         {/* 왼쪽 영역: 카드 + 차트 */}
         <div className="min-[1440px]:col-span-2 flex flex-col gap-6">
-          {/* 요약 카드 3개 - 1440px 미만에서 1,2번 카드는 가로 배치, 3번은 아래 배치 */}
-          <div className="grid grid-cols-2 min-[1440px]:grid-cols-3 gap-6">
+          {/* 요약 카드 3개 - 1440px 미만(태블릿)에서 1,2번 카드는 가로 배치, 3번은 아래 배치. 600px 이하(모바일)는 모두 세로. */}
+          <div className="grid grid-cols-1 min-[601px]:grid-cols-2 min-[1440px]:grid-cols-3 gap-6">
             <StatCard
               label="Top Channel"
               value={mentionSummary.popularChannel}
@@ -71,7 +71,7 @@ const BrandMentionSummary = ({ brandId, appliedChannels }) => {
               range={mentionSummary.dateRange}
               desc="데이터 최고점 발생일"
             />
-            <div className="col-span-2 min-[1440px]:col-span-1">
+            <div className="col-span-1 min-[601px]:col-span-2 min-[1440px]:col-span-1">
               <StatCard
                 label="Growth"
                 value={mentionSummary.weeklyGrowthRate}
@@ -83,7 +83,7 @@ const BrandMentionSummary = ({ brandId, appliedChannels }) => {
             </div>
           </div>
 
-          <div className="bg-white p-6 sm:p-8 md:p-10 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-md transition-shadow h-[350px] sm:h-[450px] overflow-hidden">
+          <div className="bg-white p-6 min-[601px]:p-8 md:p-10 rounded-[1.5rem] min-[601px]:rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-md transition-shadow h-[350px] min-[601px]:h-[450px] overflow-hidden">
             <BrandMentionChartSection
               brandId={brandId}
               appliedChannels={appliedChannels}
@@ -92,7 +92,7 @@ const BrandMentionSummary = ({ brandId, appliedChannels }) => {
         </div>
 
         {/* 오른쪽 영역: 연관 검색어 */}
-        <div className="min-[1440px]:col-span-1 relative h-[450px] sm:h-[500px] min-[1440px]:h-auto min-[1440px]:min-h-0">
+        <div className="min-[1440px]:col-span-1 relative h-[450px] min-[601px]:h-[500px] min-[1440px]:h-auto min-[1440px]:min-h-0">
           <div className="min-[1440px]:absolute min-[1440px]:inset-0 w-full h-full">
             <BrandTrendRanking brandId={brandId} />
           </div>

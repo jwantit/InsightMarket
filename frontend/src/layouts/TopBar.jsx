@@ -46,21 +46,35 @@ const TopBar = ({ onToggleSidebar }) => {
     <header className="h-14 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
       <div className="h-full px-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
+          {/* 1440px 이하에서만 보이는 햄버거 버튼 */}
+          <button
+            onClick={onToggleSidebar}
+            className="min-[1441px]:hidden p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-600"
+          >
+            <div className="space-y-1.5 w-5">
+              <div className="h-0.5 bg-current rounded-full" />
+              <div className="h-0.5 bg-current rounded-full" />
+              <div className="h-0.5 bg-current rounded-full" />
+            </div>
+          </button>
+
           <Link
             to={`/app/${brandId}/dashboard`}
             className="flex items-center gap-2"
           >
-            <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
+            <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200 shrink-0">
               <span className="text-white font-black text-lg">I</span>
             </div>
-            <span className="font-black text-xl tracking-tight text-slate-900 hidden sm:block">
+            {/* 600px 이하에서는 로고 텍스트 숨김 */}
+            <span className="font-black text-xl tracking-tight text-slate-900 hidden min-[601px]:block">
               Insight<span className="text-blue-600">Market</span>
             </span>
           </Link>
 
-          <div className="h-6 w-px bg-slate-200 mx-2 hidden sm:block" />
+          <div className="h-6 w-px bg-slate-200 mx-2 hidden min-[601px]:block" />
 
-          <div className="hidden md:block">
+          {/* 브랜드 선택칸은 항상 유지 (단, 600px 이하에서는 여백 조절) */}
+          <div className="block">
             <TopBarBrandSelect />
           </div>
         </div>

@@ -34,7 +34,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 min-[1440px]:px-10 xl:px-12 space-y-10 xl:space-y-16 pb-20 animate-in fade-in duration-700">
+    <div className="max-w-[1400px] mx-auto px-4 min-[601px]:px-6 min-[1440px]:px-10 xl:px-12 space-y-10 xl:space-y-16 pb-20 animate-in fade-in duration-700">
       {/* 1. 세련된 통합 헤더 (필터 포함) */}
       <PageHeader
         icon={LayoutDashboard}

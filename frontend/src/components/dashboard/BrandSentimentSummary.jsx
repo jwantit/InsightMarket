@@ -38,8 +38,8 @@ const BrandSentimentSummary = ({ brandId, appliedChannels, wordData }) => {
 
   return (
     <div className="grid grid-cols-1 min-[1440px]:grid-cols-3 gap-6">
-      {/* 1, 2번 카드는 1440px 미만에서 가로 배치 (grid-cols-2) */}
-      <div className="grid grid-cols-2 min-[1440px]:grid-cols-2 min-[1440px]:contents gap-6 col-span-1 min-[1440px]:col-span-2">
+      {/* 1, 2번 카드는 태블릿 모드(601px~1440px)에서 가로 배치 (grid-cols-2), 모바일 모드(600px 이하)에서는 세로 배치 */}
+      <div className="grid grid-cols-1 min-[601px]:grid-cols-2 min-[1440px]:contents gap-6 col-span-1 min-[1440px]:col-span-2">
         <StatCard
           label="Main Source"
           value={sentimentData.topSource}
