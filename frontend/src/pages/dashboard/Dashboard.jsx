@@ -34,7 +34,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="max-w-[1400px] mx-auto p-6 space-y-10 pb-20 animate-in fade-in duration-700">
+    <div className="max-w-[1400px] mx-auto px-4 sm:px-6 min-[1440px]:px-10 xl:px-12 space-y-10 xl:space-y-16 pb-20 animate-in fade-in duration-700">
       {/* 1. 세련된 통합 헤더 (필터 포함) */}
       <PageHeader
         icon={LayoutDashboard}
@@ -49,14 +49,14 @@ const Dashboard = () => {
         }
       />
 
-      <div className="space-y-14">
+      <div className="space-y-10 min-[1440px]:space-y-14">
         {/* 2. 언급량 분석 섹션 */}
         <section className="space-y-6">
           <div className="flex items-center gap-3 px-2">
             <div className="p-2 bg-blue-50 text-blue-600 rounded-xl border border-blue-100 shadow-sm">
               <Activity size={20} />
             </div>
-            <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">
+            <h3 className="text-lg min-[1440px]:text-xl font-black text-slate-900 italic tracking-tight uppercase">
               언급량 분석
             </h3>
             <div className="h-px flex-1 bg-slate-200 opacity-50" />
@@ -73,7 +73,7 @@ const Dashboard = () => {
             <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100 shadow-sm">
               <Heart size={20} />
             </div>
-            <h3 className="text-xl font-black text-slate-900 italic tracking-tight uppercase">
+            <h3 className="text-lg min-[1440px]:text-xl font-black text-slate-900 italic tracking-tight uppercase">
               긍 · 부정 분석
             </h3>
             <div className="h-px flex-1 bg-slate-200 opacity-50" />

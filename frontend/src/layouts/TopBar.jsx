@@ -46,17 +46,6 @@ const TopBar = ({ onToggleSidebar }) => {
     <header className="h-14 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
       <div className="h-full px-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button
-            onClick={onToggleSidebar}
-            className="lg:hidden p-2 hover:bg-slate-100 rounded-lg"
-          >
-            <div className="space-y-1.5 w-5">
-              <div className="h-0.5 bg-slate-600 rounded-full" />
-              <div className="h-0.5 bg-slate-600 rounded-full" />
-              <div className="h-0.5 bg-slate-600 rounded-full" />
-            </div>
-          </button>
-
           <Link
             to={`/app/${brandId}/dashboard`}
             className="flex items-center gap-2"

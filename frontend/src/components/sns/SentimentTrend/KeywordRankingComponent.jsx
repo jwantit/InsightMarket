@@ -24,11 +24,11 @@ const KeywordRankingComponent = ({ wordCloudData }) => {
           </h3>
           <p className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1 font-medium">
             <span className="w-1 h-1 bg-blue-500 rounded-full animate-pulse" />
-            인기 키워드 TOP {wordCloudData.length}
+            인기 키워드 TOP {wordCloudData?.length || 0}
           </p>
         </div>
       </div>
-      {wordCloudData.length > 0 ? (
+      {wordCloudData && wordCloudData.length > 0 ? (
         <div className="h-[360px] overflow-y-auto border border-gray-200 rounded-lg bg-white">
           <table className="w-full text-xs">
             <thead className="bg-gray-50 sticky top-0 z-10">

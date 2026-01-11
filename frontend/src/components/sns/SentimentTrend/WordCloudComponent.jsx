@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import ReactWordcloud from "react-wordcloud";
-import { cx, sentimentColor, sentimentLabel, badgeStyle } from "./utils";
+import { cx, sentimentColor, sentimentLabel, badgeStyle } from "../../../util/sentimentTrendUtil";
 
 const WordCloudComponent = ({
   wordCloudData,

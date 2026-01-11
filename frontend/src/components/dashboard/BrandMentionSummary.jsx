@@ -48,11 +48,13 @@ const BrandMentionSummary = ({ brandId, appliedChannels }) => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* 첫 번째 열 (2:1 비율의 2): 요약 카드 3개 + 추이 차트  */}
-        <div className="md:col-span-2 space-y-6">
-          {/* 요약 카드 3개 - 추이 차트와 같은 폭 */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* PC(1440px 이상)에서 가로 배치, 그 미만은 세로로 자동 배치 */}
+      <div className="grid grid-cols-1 min-[1440px]:grid-cols-3 gap-6 items-stretch">
+        
+        {/* 왼쪽 영역: 카드 + 차트 */}
+        <div className="min-[1440px]:col-span-2 flex flex-col gap-6">
+          {/* 요약 카드 3개 - 1440px 이상에서 가로 배치, 그 이하는 세로 배치 */}
+          <div className="grid grid-cols-1 min-[1440px]:grid-cols-3 gap-6">
             <StatCard
               label="Top Channel"
               value={mentionSummary.popularChannel}
@@ -79,8 +81,7 @@ const BrandMentionSummary = ({ brandId, appliedChannels }) => {
             />
           </div>
 
-          {/* 추이 차트 */}
-          <div className="bg-white p-8 md:p-10 rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-md transition-shadow max-h-[500px] overflow-hidden">
+          <div className="bg-white p-6 sm:p-8 md:p-10 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-md transition-shadow h-[350px] sm:h-[450px] overflow-hidden">
             <BrandMentionChartSection
               brandId={brandId}
               appliedChannels={appliedChannels}
@@ -88,9 +89,9 @@ const BrandMentionSummary = ({ brandId, appliedChannels }) => {
           </div>
         </div>
 
-        {/* 두 번째 열 (2:1 비율의 1): 연관 검색어 */}
-        <div className="md:col-span-1 flex">
-          <div className="w-full" style={{ maxHeight: "500px" }}>
+        {/* 오른쪽 영역: 연관 검색어 */}
+        <div className="min-[1440px]:col-span-1 relative h-[450px] sm:h-[500px] min-[1440px]:h-auto min-[1440px]:min-h-0">
+          <div className="min-[1440px]:absolute min-[1440px]:inset-0 w-full h-full">
             <BrandTrendRanking brandId={brandId} />
           </div>
         </div>

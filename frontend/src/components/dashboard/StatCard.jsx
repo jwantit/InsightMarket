@@ -13,32 +13,32 @@ const StatCard = ({ label, value, icon: Icon, color, range, desc }) => {
   };
 
   return (
-    <div className="group bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 hover:border-blue-300 transition-all duration-300 relative overflow-hidden">
+    <div className="group bg-white p-5 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 hover:border-blue-300 transition-all duration-300 relative overflow-hidden">
       <div className="relative z-10 flex flex-col justify-between h-full">
-        <div className="flex justify-between items-start mb-6">
+        <div className="flex justify-between items-start mb-4 sm:mb-6">
           <span
-            className={`px-2.5 py-1 ${colorMap[color]} text-[10px] font-black rounded-lg border uppercase tracking-tighter`}
+            className={`px-2 py-0.5 sm:px-2.5 sm:py-1 ${colorMap[color]} text-[9px] sm:text-[10px] font-black rounded-lg border uppercase tracking-tighter`}
           >
             {label}
           </span>
           <div
-            className={`p-2.5 rounded-xl ${colorMap[color]} border shadow-inner`}
+            className={`p-2 sm:p-2.5 rounded-xl ${colorMap[color]} border shadow-inner`}
           >
-            <Icon size={18} />
+            <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
         </div>
 
         <div>
-          <p className="text-[11px] text-slate-400 font-bold mb-1">{range}</p>
-          <p className="text-sm font-bold text-slate-600 mb-2">{desc}</p>
-          <p className="text-3xl font-black text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors">
+          <p className="text-[10px] sm:text-[11px] text-slate-400 font-bold mb-1">{range}</p>
+          <p className="text-xs sm:text-sm font-bold text-slate-600 mb-1 sm:mb-2">{desc}</p>
+          <p className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors truncate">
             {value}
           </p>
         </div>
       </div>
 
       {/* 배경 장식 원 */}
-      <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-slate-50 rounded-full blur-2xl group-hover:bg-blue-50 transition-colors duration-500" />
+      <div className="absolute -bottom-6 -right-6 w-20 sm:w-24 h-20 sm:h-24 bg-slate-50 rounded-full blur-2xl group-hover:bg-blue-50 transition-colors duration-500" />
     </div>
   );
 };

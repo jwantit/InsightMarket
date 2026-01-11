@@ -37,7 +37,7 @@ const BrandSentimentSummary = ({ brandId, appliedChannels, wordData }) => {
   if (!sentimentData) return null;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 min-[1440px]:grid-cols-3 gap-6">
       <StatCard
         label="Main Source"
         value={sentimentData.topSource}
@@ -104,7 +104,7 @@ const BrandSentimentSummary = ({ brandId, appliedChannels, wordData }) => {
       </div>
 
       {/* 하단 전체 영역 감성 추이 차트 */}
-      <div className="md:col-span-3 bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-sm min-h-[350px] hover:shadow-lg transition-shadow">
+      <div className="min-[1440px]:col-span-3 bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-sm min-h-[350px] hover:shadow-lg transition-shadow">
         <BrandSentimentChartSection
           brandId={brandId}
           appliedChannels={appliedChannels}
