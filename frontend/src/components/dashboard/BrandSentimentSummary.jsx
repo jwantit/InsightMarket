@@ -38,25 +38,28 @@ const BrandSentimentSummary = ({ brandId, appliedChannels, wordData }) => {
 
   return (
     <div className="grid grid-cols-1 min-[1440px]:grid-cols-3 gap-6">
-      <StatCard
-        label="Main Source"
-        value={sentimentData.topSource}
-        icon={Shield}
-        color="blue"
-        range={sentimentData.dateRange}
-        desc="감성 활성 채널"
-      />
-      <StatCard
-        label="Brand Sentiment"
-        value={sentimentData.averagePositiveRatio}
-        icon={Smile}
-        color="indigo"
-        range={sentimentData.dateRange}
-        desc="평균 브랜드 긍정도"
-      />
+      {/* 1, 2번 카드는 1440px 미만에서 가로 배치 (grid-cols-2) */}
+      <div className="grid grid-cols-2 min-[1440px]:grid-cols-2 min-[1440px]:contents gap-6 col-span-1 min-[1440px]:col-span-2">
+        <StatCard
+          label="Main Source"
+          value={sentimentData.topSource}
+          icon={Shield}
+          color="blue"
+          range={sentimentData.dateRange}
+          desc="감성 활성 채널"
+        />
+        <StatCard
+          label="Brand Sentiment"
+          value={sentimentData.averagePositiveRatio}
+          icon={Smile}
+          color="indigo"
+          range={sentimentData.dateRange}
+          desc="평균 브랜드 긍정도"
+        />
+      </div>
 
-      {/* 피크 분석 특수 카드 */}
-      <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col justify-between group hover:border-rose-400 transition-all">
+      {/* 피크 분석 특수 카드 - 1440px 미만에서 아래로 내려오며 전체 너비 차지 */}
+      <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col justify-between group hover:border-rose-400 transition-all min-[1440px]:col-span-1">
         <div className="flex justify-between items-start mb-4">
           <span className="px-2.5 py-1 bg-rose-50 text-rose-600 text-[10px] font-black rounded-lg border border-rose-100 uppercase tracking-tighter">
             Peak Analysis
@@ -85,7 +88,7 @@ const BrandSentimentSummary = ({ brandId, appliedChannels, wordData }) => {
         </div>
       </div>
 
-      {/* 시각화 도구 블록들 */}
+      {/* 시각화 도구 블록들 - 여기서부터는 기존처럼 한 줄씩 */}
       <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm min-h-[420px] hover:shadow-lg transition-shadow">
         <BrandWordCloudBlock wordData={wordData} />
       </div>

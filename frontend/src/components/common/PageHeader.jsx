@@ -26,10 +26,10 @@ const PageHeader = ({
         )}
       </nav>
 
-      {/* 2. 메인 헤더 본체 */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* 2. 메인 헤더 본체 - 1440px 기준 반응형 */}
+      <div className="flex flex-col min-[1440px]:flex-row min-[1440px]:items-center justify-between gap-6">
         <div className="flex items-center gap-5">
-          {/* 아이콘 컨테이너 */}
+          {/* 아이콘 컨테이너 - 기존 디자인 유지 */}
           <div
             className={`
             w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border transition-all duration-300
@@ -67,8 +67,8 @@ const PageHeader = ({
           </div>
         </div>
 
-        {/* 3. 우측 액션 영역 */}
-        {extra && <div className="flex items-center gap-3">{extra}</div>}
+        {/* 3. 우측 액션 영역 (필터 등) - 1440px 미만에서 전체 영역 차지 */}
+        {extra && <div className="flex items-center gap-3 w-full min-[1440px]:w-auto">{extra}</div>}
       </div>
     </div>
   );

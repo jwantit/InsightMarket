@@ -53,8 +53,8 @@ const BrandMentionSummary = ({ brandId, appliedChannels }) => {
         
         {/* 왼쪽 영역: 카드 + 차트 */}
         <div className="min-[1440px]:col-span-2 flex flex-col gap-6">
-          {/* 요약 카드 3개 - 1440px 이상에서 가로 배치, 그 이하는 세로 배치 */}
-          <div className="grid grid-cols-1 min-[1440px]:grid-cols-3 gap-6">
+          {/* 요약 카드 3개 - 1440px 미만에서 1,2번 카드는 가로 배치, 3번은 아래 배치 */}
+          <div className="grid grid-cols-2 min-[1440px]:grid-cols-3 gap-6">
             <StatCard
               label="Top Channel"
               value={mentionSummary.popularChannel}
@@ -71,14 +71,16 @@ const BrandMentionSummary = ({ brandId, appliedChannels }) => {
               range={mentionSummary.dateRange}
               desc="데이터 최고점 발생일"
             />
-            <StatCard
-              label="Growth"
-              value={mentionSummary.weeklyGrowthRate}
-              icon={TrendingUp}
-              color="emerald"
-              range={mentionSummary.dateRange}
-              desc="전주 대비 언급량 변화"
-            />
+            <div className="col-span-2 min-[1440px]:col-span-1">
+              <StatCard
+                label="Growth"
+                value={mentionSummary.weeklyGrowthRate}
+                icon={TrendingUp}
+                color="emerald"
+                range={mentionSummary.dateRange}
+                desc="전주 대비 언급량 변화"
+              />
+            </div>
           </div>
 
           <div className="bg-white p-6 sm:p-8 md:p-10 rounded-[1.5rem] sm:rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-md transition-shadow h-[350px] sm:h-[450px] overflow-hidden">
