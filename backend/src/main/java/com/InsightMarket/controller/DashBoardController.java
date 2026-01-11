@@ -5,10 +5,13 @@ import com.InsightMarket.ai.service.trends.TrendsPerformanceService;
 import com.InsightMarket.ai.service.trends.TrendsRedisService;
 import com.InsightMarket.dto.dashboard.*;
 import com.InsightMarket.service.dashboard.DashBoardService;
+import com.InsightMarket.service.sse.TrendSseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Slf4j
 @RestController
@@ -17,9 +20,9 @@ import org.springframework.web.bind.annotation.*;
 public class DashBoardController {
 
     private final DashBoardService dashBoardService;
-     // 추가: Redis 서비스 주입
     private final TrendsRedisService trendsRedisService;
     private final TrendsPerformanceService trendsPerformanceService;
+    private final TrendSseService trendSseService;
 
 
     @GetMapping("/mention/analysis")
@@ -103,6 +106,15 @@ public class DashBoardController {
             return ResponseEntity.internalServerError()
                     .body("성능 비교 테스트 실패: " + e.getMessage());
         }
+    }
+    
+    // 브랜드별 실시간 구글 연관 검색어 트렌드 SSE 스트림 구독
+    @GetMapping(value = "/trends/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamTrends(@RequestParam Long brandId) {
+        log.info("[SSE] 브랜드 {} 트렌드 SSE 스트림 구독 요청", brandId);
+
+        // SSE 연결 생성, 등록 및 초기 데이터 전송 (서비스에서 처리)
+        return trendSseService.subscribeWithInitialData(brandId);
     }
 }
 

@@ -45,8 +45,5 @@ public class LocationController {
 
         return ResponseEntity.ok(result);
     }
-
-    public static class DataR {
-    }
 }
 

@@ -1,8 +1,10 @@
 package com.InsightMarket.ai.service.trends;
 
 import com.InsightMarket.ai.PythonClient;
+import com.InsightMarket.common.event.TrendDataUpdatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -13,6 +15,7 @@ public class TrendsServiceImpl implements TrendsService {
     private final PythonClient pythonClient;
     private final TrendsRedisService trendsRedisService;
     private final TrendsDbService trendsDbService;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * PythonRagClient를 사용하여 비동기로 Python 서버에 트렌드 데이터를 요청합니다.
@@ -48,6 +51,10 @@ public class TrendsServiceImpl implements TrendsService {
                         } catch (Exception e) {
                             log.error("브랜드 {} 트렌드 데이터 DB 저장 실패: {}", brandId, e.getMessage(), e);
                         }
+                        
+                        // SSE 브로드캐스트를 위한 이벤트 발행
+                        eventPublisher.publishEvent(new TrendDataUpdatedEvent(this, brandId, data));
+                        log.info("브랜드 {} 트렌드 데이터 업데이트 이벤트 발행", brandId);
                     } else {
                         log.warn("브랜드 {} 트렌드 데이터가 null이거나 data 필드가 없습니다.", brandId);
                     }

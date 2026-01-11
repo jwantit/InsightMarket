@@ -1,32 +1,23 @@
-import React, { useState, useEffect } from "react";
-import { TrendingUp, MoreVertical, Download, Code, Share2 } from "lucide-react";
-import { getBrandTrends } from "../../api/dashboardApi";
+import React, { useState } from "react";
+import { TrendingUp } from "lucide-react";
+import { useTrendSse } from "../../hooks/dashboard/useTrendSse";
 
 const BrandTrendRanking = ({ brandId }) => {
-  const [trendData, setTrendData] = useState(null);
   const [selectedType, setSelectedType] = useState("rising");
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchTrendData = async () => {
-      if (!brandId) return;
-      setLoading(true);
-      try {
-        const data = await getBrandTrends(brandId);
-        setTrendData(data);
-      } catch (error) {
-        console.error("트렌드 데이터 로드 실패:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTrendData();
-  }, [brandId]);
+  const { trendData, loading, error } = useTrendSse(brandId);
 
   if (loading && !trendData) {
     return (
       <div className="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm h-full flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-blue-100 border-t-blue-500 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm h-full flex items-center justify-center text-red-400">
+        <p className="text-sm">연결 오류: {error}</p>
       </div>
     );
   }

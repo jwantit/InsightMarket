@@ -2,7 +2,6 @@ package com.InsightMarket.security.filter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -69,11 +68,50 @@ public class JWTCheckFilter extends OncePerRequestFilter {
 
         log.info("------------------------JWTCheckFilter------------------");
 
+        String accessToken = null;
+
+        // 1. Authorization 헤더에서 JWT 추출 (기존 방식, 일반 API용)
         String authHeaderStr = request.getHeader("Authorization");
+        if (authHeaderStr != null && authHeaderStr.startsWith("Bearer ")) {
+            accessToken = authHeaderStr.substring(7);
+            log.info("JWT found in Authorization header");
+        }
+
+        // 2. Authorization 헤더가 없으면 쿠키에서 JWT 추출 (SSE용)
+        if (accessToken == null) {
+            jakarta.servlet.http.Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (jakarta.servlet.http.Cookie cookie : cookies) {
+                    if ("accessToken".equals(cookie.getName())) {
+                        accessToken = cookie.getValue();
+                        log.info("JWT found in cookie");
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 3. 쿠키에도 없으면 쿼리 파라미터에서 추출 (SSE용, 보안상 권장하지 않지만 EventSource 제약으로 인해 필요)
+        if (accessToken == null) {
+            accessToken = request.getParameter("token");
+            if (accessToken != null) {
+                log.info("JWT found in query parameter");
+            }
+        }
+
+        // JWT가 없으면 에러 응답
+        if (accessToken == null) {
+            log.error("JWT not found in Authorization header, cookie, or query parameter");
+            Gson gson = new Gson();
+            String msg = gson.toJson(Map.of("error", "ERROR_ACCESS_TOKEN"));
+            response.setContentType("application/json");
+            PrintWriter printWriter = response.getWriter();
+            printWriter.println(msg);
+            printWriter.close();
+            return;
+        }
 
         try {
-            // Bearer accestoken...
-            String accessToken = authHeaderStr.substring(7);
             Map<String, Object> claims = JWTUtil.validateToken(accessToken);
 
             log.info("JWT claims: " + claims);
