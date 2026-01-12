@@ -1,5 +1,6 @@
 package com.InsightMarket.service.member;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -39,7 +41,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Transactional
     @Override
-    public void join(MemberJoinRequestDTO dto) {
+    public MemberJoinResponseDTO join(MemberJoinRequestDTO dto, MultipartFile brandImageFile) {
 
         //이메일 중복 체크
         if (memberRepository.existsByEmail(dto.getEmail())) {
@@ -108,12 +110,18 @@ public class MemberServiceImpl implements MemberService {
         try {
             //회원가입시 브랜드 등록-------------------------------------------
             Member memberData = memberRepository.save(member);
+            List<Long> brandIds = new ArrayList<>();
+            
             if (dto.getJoinType() == JoinType.NEW_COMPANY && dto.getBrands() != null){
-
                 for (BrandRequestDTO brandRequestDTO : dto.getBrands()){
-                    brandService.createBrand(brandRequestDTO, memberData, company, null);
+                    // 첫 번째 브랜드에만 이미지 파일 전달 (일반적으로 회원가입 시 브랜드는 1개)
+                    MultipartFile imageFile = (brandIds.isEmpty() && brandImageFile != null) ? brandImageFile : null;
+                    Long brandId = brandService.createBrand(brandRequestDTO, memberData, company, imageFile);
+                    brandIds.add(brandId);
                 }
             }
+            
+            return new MemberJoinResponseDTO(brandIds);
         } catch (DataIntegrityViolationException e) {
             throw new ApiException(ErrorCode.MEMBER_EMAIL_DUPLICATED);
         }

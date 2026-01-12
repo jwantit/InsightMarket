@@ -27,10 +27,24 @@ export const modifyMember = async (member) => {
 };
 
 //회원 가입
-export const joinMember = async (joinParam) => {
-
+export const joinMember = async (joinParam, brandImageFile = null) => {
+  const formData = new FormData();
+  
+  // JSON 데이터를 Blob으로 감싸서 추가
+  const json = JSON.stringify(joinParam);
+  formData.append("request", new Blob([json], { type: "application/json" }));
+  
+  // 브랜드 이미지 파일이 있으면 추가
+  if (brandImageFile) {
+    formData.append("brandImageFile", brandImageFile);
+  }
+  
   console.log("API Request Data:", joinParam);
-  const res = await axios.post(`${host}/join`, joinParam);
+  const res = await axios.post(`${host}/join`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return res.data;
 };
 

@@ -4,14 +4,17 @@ import com.InsightMarket.domain.member.Member;
 import com.InsightMarket.dto.member.MemberApproveRequestDTO;
 import com.InsightMarket.dto.member.MemberDTO;
 import com.InsightMarket.dto.member.MemberJoinRequestDTO;
+import com.InsightMarket.dto.member.MemberJoinResponseDTO;
 import com.InsightMarket.dto.member.MemberResponseDTO;
 import com.InsightMarket.repository.member.MemberRepository;
 import com.InsightMarket.service.member.MemberService;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -26,10 +29,12 @@ public class MemberJoinController {
     private final MemberRepository memberRepository;
 
     //회원 가입
-    @PostMapping("/join")
-    public ResponseEntity<?> join(@RequestBody MemberJoinRequestDTO request) {
-        memberService.join(request);
-        return ResponseEntity.ok().build();
+    @PostMapping(value = "/join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<MemberJoinResponseDTO> join(
+            @RequestPart("request") MemberJoinRequestDTO request,
+            @RequestPart(value = "brandImageFile", required = false) MultipartFile brandImageFile) {
+        MemberJoinResponseDTO response = memberService.join(request, brandImageFile);
+        return ResponseEntity.ok(response);
     }
 
     //가입 승인

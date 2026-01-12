@@ -14,6 +14,8 @@ const initForm = {
 
 const BrandRegistrationModal = ({ show, onClose, onSave, brands = [] }) => {
   const [form, setForm] = useState(initForm);
+  const [imageFile, setImageFile] = useState(null);
+  const [removeImage, setRemoveImage] = useState(false);
 
   // brands 데이터를 form 형식으로 변환
   useEffect(() => {
@@ -26,9 +28,13 @@ const BrandRegistrationModal = ({ show, onClose, onSave, brands = [] }) => {
           ? [{ competitorId: null, name: brand.competitorName, enabled: true }]
           : [],
       });
+      setImageFile(null);
+      setRemoveImage(false);
     } else if (show) {
       // 모달이 열릴 때 빈 폼으로 초기화
       setForm(initForm);
+      setImageFile(null);
+      setRemoveImage(false);
     }
   }, [show, brands]);
 
@@ -47,6 +53,7 @@ const BrandRegistrationModal = ({ show, onClose, onSave, brands = [] }) => {
         brandName: form.name,
         brandDescription: form.description || "",
         competitorName: form.competitors[0]?.name || "",
+        brandImageFile: imageFile, // 이미지 파일 추가 (brandImageFile로 명명)
       },
     ];
 
@@ -55,6 +62,8 @@ const BrandRegistrationModal = ({ show, onClose, onSave, brands = [] }) => {
 
   const handleCancel = () => {
     setForm(initForm);
+    setImageFile(null);
+    setRemoveImage(false);
     onClose();
   };
 
@@ -86,6 +95,10 @@ const BrandRegistrationModal = ({ show, onClose, onSave, brands = [] }) => {
             canSubmit={canSubmit}
             form={form}
             setForm={setForm}
+            imageFile={imageFile}
+            setImageFile={setImageFile}
+            removeImage={removeImage}
+            setRemoveImage={setRemoveImage}
             onCancel={handleCancel}
             onSubmit={handleSubmit}
             isModal={true}

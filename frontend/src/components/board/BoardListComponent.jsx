@@ -63,31 +63,31 @@ const BoardListComponent = ({ items = [], onClickItem }) => {
                 <tr
                   key={item.id}
                   onClick={() => onClickItem?.(item.id)}
-                  className="hover:bg-blue-50/30 cursor-pointer transition-colors group"
+                  className="hover:bg-blue-50/30 cursor-pointer transition-colors group h-16"
                 >
                   <td className="px-6 py-4 text-sm font-medium text-slate-600">
                     {item.id}
                   </td>
                   <td className="px-6 py-4">
-                    {firstImageFile ? (
-                      <div className="flex items-center">
-                        <img
-                          src={`${API_SERVER_HOST}/api/files/${firstImageFile.id}/thumbnail`}
-                          alt="썸네일"
-                          className="w-16 h-16 object-cover rounded-xl border border-slate-200"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleFileDownload(e, firstImageFile.id);
-                          }}
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                          }}
-                          style={{ cursor: 'pointer' }}
-                        />
-                      </div>
-                    ) : (
-                      <span className="text-slate-300 text-xs">-</span>
-                    )}
+                    <div className="flex items-center justify-center h-full">
+                      {firstImageFile ? (
+                        <div className="w-12 h-12 rounded-lg overflow-hidden border border-slate-200">
+                          <img
+                            src={`${API_SERVER_HOST}/api/files/${firstImageFile.id}/thumbnail`}
+                            alt="썸네일"
+                            className="w-full h-full object-cover"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleFileDownload(e, firstImageFile.id);
+                            }}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                            style={{ cursor: 'pointer' }}
+                          />
+                        </div>
+                      ) : null}
+                    </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">

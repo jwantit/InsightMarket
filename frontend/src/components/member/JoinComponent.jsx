@@ -45,6 +45,7 @@ const JoinComponent = () => {
       brandName: "",
       brandDescription: "",
       competitorName: "",
+      imageFile: null, // 이미지 파일 추가
     },
   ]); //테스트
 
@@ -192,6 +193,9 @@ const JoinComponent = () => {
           },
         ]
       : [];
+    
+    // 이미지 파일은 별도로 저장 (회원가입 후 업로드용)
+    const brandImageFile = hasValidBrand ? brand.brandImageFile : null;
 
     //브랜드 폼
     const finalData = {
@@ -212,7 +216,7 @@ const JoinComponent = () => {
     //회원가입
     //------------------------------------------------------
     try {
-      await joinMember(finalData);
+      const response = await joinMember(finalData, brandImageFile);
       await showAlert("회원가입 요청이 완료되었습니다!", "success");
       moveToLogin();
     } catch (e) {

@@ -3,6 +3,7 @@ package com.InsightMarket.service.member;
 import com.InsightMarket.domain.member.SystemRole;
 import com.InsightMarket.dto.member.*;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.InsightMarket.domain.member.Member;
 
@@ -11,7 +12,7 @@ import java.util.List;
 @Transactional
 public interface MemberService {
 
-    void join(MemberJoinRequestDTO dto);
+    MemberJoinResponseDTO join(MemberJoinRequestDTO dto, MultipartFile brandImageFile);
 
     void approve(Long targetMemberId, MemberDTO currentUser);
 
