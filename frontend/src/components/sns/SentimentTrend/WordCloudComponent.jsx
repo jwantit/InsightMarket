@@ -1,6 +1,14 @@
 import React, { useMemo } from "react";
 import ReactWordcloud from "react-wordcloud";
-import { cx, sentimentColor, sentimentLabel, badgeStyle } from "../../../util/sentimentTrendUtil";
+
+// [무한스크롤 추가] 무한스크롤 공통 컴포넌트 import
+import InfiniteScrollWrapper from "../../common/InfiniteScrollWrapper";
+import {
+  cx,
+  sentimentColor,
+  sentimentLabel,
+  badgeStyle,
+} from "../../../util/sentimentTrendUtil";
 
 const WordCloudComponent = ({
   wordCloudData,
@@ -12,6 +20,12 @@ const WordCloudComponent = ({
   selectedToken,
   setSelectedToken,
   tokenStats,
+  // [무한스크롤 추가] 무한스크롤 토글을 위한 prop 추가
+  enableInfiniteScroll = true,
+  initialDisplayCount = 20,
+  loadMoreCount = 20,
+  // [레이아웃 안정화] 레이아웃 안정화 토글을 위한 prop 추가
+  enableLayoutStabilization = true,
 }) => {
   return (
     <div className="w-full h-full flex flex-col">
@@ -116,14 +130,23 @@ const WordCloudComponent = ({
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-h-[300px]">
+      {/* [레이아웃 안정화] enableLayoutStabilization에 따라 고정 높이 적용 여부 결정 */}
+      <div
+        className={`flex-1 ${
+          enableLayoutStabilization
+            ? "min-h-[360px] h-[360px]"
+            : "min-h-[300px]"
+        }`}
+      >
         {!wordCloudData || wordCloudData.length === 0 ? (
-          <div className="py-10 text-center text-gray-400">
-            <p className="text-sm font-medium">표시할 키워드가 없습니다.</p>
-            <p className="text-xs text-gray-400 mt-1">
-              토큰 통계 데이터: {tokenStats?.length || 0}개 / 필터 조건을
-              확인하세요.
-            </p>
+          <div className="h-full py-10 text-center text-gray-400 flex items-center justify-center">
+            <div>
+              <p className="text-sm font-medium">표시할 키워드가 없습니다.</p>
+              <p className="text-xs text-gray-400 mt-1">
+                토큰 통계 데이터: {tokenStats?.length || 0}개 / 필터 조건을
+                확인하세요.
+              </p>
+            </div>
           </div>
         ) : wordView === "cloud" ? (
           <WordCloudChart
@@ -131,63 +154,85 @@ const WordCloudComponent = ({
             activeSentiments={activeSentiments}
             selectedToken={selectedToken}
             setSelectedToken={setSelectedToken}
+            enableLayoutStabilization={enableLayoutStabilization}
           />
         ) : (
-          <div className="h-[300px] overflow-y-auto border border-gray-200 rounded-lg bg-white">
-            <table className="w-full text-xs">
-              <thead className="bg-gray-50 sticky top-0">
-                <tr>
-                  <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                    단어
-                  </th>
-                  <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                    감성
-                  </th>
-                  <th className="px-3 py-2 text-right text-[10px] font-bold text-gray-600 uppercase">
-                    언급량
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {(
-                  (wordCloudData || []).filter((w) =>
-                    activeSentiments.includes(w.sentiment)
-                  ) || []
-                ).map((w, idx) => {
-                  const b = badgeStyle(w.sentiment);
-                  const isSelected = selectedToken === w.text;
-                  return (
-                    <tr
-                      key={`${w.text}-${idx}`}
-                      className={cx(
-                        "hover:bg-gray-50 transition-colors cursor-pointer",
-                        isSelected ? "bg-blue-50" : ""
-                      )}
-                      onClick={() =>
-                        setSelectedToken((prev) =>
-                          prev === w.text ? null : w.text
-                        )
-                      }
-                    >
-                      <td className="px-3 py-2 font-medium text-gray-900">
-                        {w.text}
-                      </td>
-                      <td className="px-3 py-2">
-                        <span
-                          className="px-2 py-0.5 rounded text-[10px] font-semibold"
-                          style={{ background: b.bg, color: b.text }}
-                        >
-                          {sentimentLabel(w.sentiment)}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2 text-right font-semibold tabular-nums text-gray-700">
-                        {w.value.toLocaleString()}
-                      </td>
+          // [무한스크롤 추가] scrollableTarget을 위한 id 추가
+          // [레이아웃 안정화] enableLayoutStabilization에 따라 고정 높이 적용 여부 결정
+          <div
+            id="wordcloud-table-scroll"
+            className={`${
+              enableLayoutStabilization ? "h-[360px]" : "h-[300px]"
+            } overflow-y-auto border border-gray-200 rounded-lg bg-white`}
+          >
+            {/* [무한스크롤 추가] InfiniteScrollWrapper로 기존 테이블 감싸기 */}
+            <InfiniteScrollWrapper
+              enabled={enableInfiniteScroll}
+              data={
+                // [무한스크롤 추가] 기존 필터링 로직은 그대로 유지
+                (wordCloudData || []).filter((w) =>
+                  activeSentiments.includes(w.sentiment)
+                ) || []
+              }
+              initialCount={initialDisplayCount}
+              loadMoreCount={loadMoreCount}
+              scrollableTarget="wordcloud-table-scroll"
+              enableLayoutStabilization={enableLayoutStabilization}
+            >
+              {(displayedData) => (
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50 sticky top-0">
+                    <tr>
+                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                        단어
+                      </th>
+                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                        감성
+                      </th>
+                      <th className="px-3 py-2 text-right text-[10px] font-bold text-gray-600 uppercase">
+                        언급량
+                      </th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {/* [무한스크롤 추가] 기존 필터링된 데이터 대신 displayedData 사용 (기존 로직은 그대로 유지) */}
+                    {displayedData.map((w, idx) => {
+                      const b = badgeStyle(w.sentiment);
+                      const isSelected = selectedToken === w.text;
+                      return (
+                        <tr
+                          key={`${w.text}-${idx}`}
+                          className={cx(
+                            "hover:bg-gray-50 transition-colors cursor-pointer",
+                            isSelected ? "bg-blue-50" : ""
+                          )}
+                          onClick={() =>
+                            setSelectedToken((prev) =>
+                              prev === w.text ? null : w.text
+                            )
+                          }
+                        >
+                          <td className="px-3 py-2 font-medium text-gray-900">
+                            {w.text}
+                          </td>
+                          <td className="px-3 py-2">
+                            <span
+                              className="px-2 py-0.5 rounded text-[10px] font-semibold"
+                              style={{ background: b.bg, color: b.text }}
+                            >
+                              {sentimentLabel(w.sentiment)}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 text-right font-semibold tabular-nums text-gray-700">
+                            {w.value.toLocaleString()}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </InfiniteScrollWrapper>
           </div>
         )}
       </div>
@@ -201,6 +246,8 @@ const WordCloudChart = ({
   activeSentiments,
   selectedToken,
   setSelectedToken,
+  // [레이아웃 안정화] 레이아웃 안정화 토글을 위한 prop 추가
+  enableLayoutStabilization = true,
 }) => {
   // activeSentiments에 따라 필터링된 데이터
   const filteredData = useMemo(() => {
@@ -259,8 +306,23 @@ const WordCloudChart = ({
   }
 
   return (
-    <div className="h-[360px] w-full border border-gray-200 rounded-xl bg-white overflow-hidden">
-      <ReactWordcloud words={words} options={options} callbacks={callbacks} />
+    // [레이아웃 안정화] enableLayoutStabilization에 따라 레이아웃 안정화 적용 여부 결정
+    <div
+      className={`h-[360px] w-full border border-gray-200 rounded-xl bg-white overflow-hidden ${
+        enableLayoutStabilization ? "relative" : ""
+      }`}
+    >
+      {enableLayoutStabilization ? (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <ReactWordcloud
+            words={words}
+            options={options}
+            callbacks={callbacks}
+          />
+        </div>
+      ) : (
+        <ReactWordcloud words={words} options={options} callbacks={callbacks} />
+      )}
     </div>
   );
 };
