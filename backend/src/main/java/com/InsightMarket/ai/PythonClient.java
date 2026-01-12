@@ -338,11 +338,30 @@ public class PythonClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(body)
                 .retrieve()
-                .bodyToMono(PythonTrendResponseDTO.class)
+                .bodyToMono(String.class) // 먼저 String으로 받음
                 .timeout(Duration.ofSeconds(timeoutSec))
+                .map(jsonString -> {
+                    log.info("[PythonRagClient] 트렌드 수집 응답 원본: brandId={}, response={}", brandId, jsonString);
+                    
+                    // 에러 응답 체크
+                    if (jsonString.contains("\"status\":\"error\"") || jsonString.contains("\"status\": \"error\"")) {
+                        log.error("[PythonRagClient] Python API 에러 응답: brandId={}, response={}", brandId, jsonString);
+                        throw new RuntimeException("Python API 에러: " + jsonString);
+                    }
+                    
+                    try {
+                        return objectMapper.readValue(jsonString, PythonTrendResponseDTO.class);
+                    } catch (Exception e) {
+                        log.error("[PythonRagClient] JSON 파싱 실패: brandId={}, error={}, json={}", brandId, e.getMessage(), jsonString);
+                        throw new RuntimeException("Failed to parse response", e);
+                    }
+                })
                 .subscribe(
                         response -> {
-                            log.info("[PythonRagClient] 트렌드 수집 응답 성공: brandId={}, keyword={}", brandId, response != null ? response.getKeyword() : null);
+                            log.info("[PythonRagClient] 트렌드 수집 응답 성공: brandId={}, keyword={}, data필드={}", 
+                                    brandId, 
+                                    response != null ? response.getKeyword() : null,
+                                    response != null && response.getData() != null ? "존재" : "null");
                             if (onSuccess != null) {
                                 onSuccess.accept(response);
                             }

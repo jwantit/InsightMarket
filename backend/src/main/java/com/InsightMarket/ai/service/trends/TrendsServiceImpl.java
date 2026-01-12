@@ -30,7 +30,8 @@ public class TrendsServiceImpl implements TrendsService {
                 brandId,
                 keyword,
                 data -> {
-                    log.info("Python API 응답 수신 - Brand: {}, Data 존재: {}", brandId, data != null);
+                    log.info("Python API 응답 수신 - Brand: {}, Data 존재: {}, data필드 존재: {}", 
+                            brandId, data != null, data != null && data.getData() != null);
                     
                     // 성공 콜백
                     if (data != null && data.getData() != null) {
@@ -56,7 +57,8 @@ public class TrendsServiceImpl implements TrendsService {
                         eventPublisher.publishEvent(new TrendDataUpdatedEvent(this, brandId, data));
                         log.info("브랜드 {} 트렌드 데이터 업데이트 이벤트 발행", brandId);
                     } else {
-                        log.warn("브랜드 {} 트렌드 데이터가 null이거나 data 필드가 없습니다.", brandId);
+                        log.warn("브랜드 {} 트렌드 데이터가 null이거나 data 필드가 없습니다. 응답객체={}, data필드={}", 
+                                brandId, data != null ? "존재" : "null", data != null && data.getData() != null ? "존재" : "null");
                     }
                 },
                 error -> {
