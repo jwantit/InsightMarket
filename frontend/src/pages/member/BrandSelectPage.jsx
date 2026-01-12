@@ -41,8 +41,8 @@ const BrandSelectPage = () => {
             </div>
             <button
               onClick={async () => {
-                doLogout();
                 await showAlert("로그아웃되었습니다.", "success");
+                doLogout();
                 moveToLogin();
               }}
               className="flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition-all active:scale-95"
@@ -115,8 +115,8 @@ const BrandSelectPage = () => {
         <div className="px-8 pb-6 pt-2">
           <button
             onClick={async () => {
-              doLogout();
               await showAlert("로그아웃되었습니다.", "success");
+              doLogout();
               moveToLogin();
             }}
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors"

@@ -31,6 +31,31 @@ const SolutionDetailModal = ({ isOpen, onClose, solution }) => {
     setIsDropdownOpen(false);
   };
 
+  const handleDownloadTXT = () => {
+    // 리포트 내용에서 텍스트 추출
+    const contentElement = document.getElementById("pdf-report-content");
+    if (!contentElement) return;
+    
+    // HTML 태그 제거하고 순수 텍스트만 추출
+    const textContent = contentElement.innerText || contentElement.textContent;
+    
+    // Blob 생성
+    const blob = new Blob([textContent], { type: "text/plain;charset=utf-8" });
+    const url = window.URL.createObjectURL(blob);
+    
+    // 다운로드 링크 생성 및 클릭
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Startup_Report_${new Date().getTime()}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    
+    // 정리
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    setIsDropdownOpen(false);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -64,7 +89,10 @@ const SolutionDetailModal = ({ isOpen, onClose, solution }) => {
                   >
                     <FileText size={14} className="text-rose-500" /> PDF로 저장
                   </button>
-                  <button className="w-full px-4 py-3 text-left text-[11px] font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2">
+                  <button
+                    onClick={handleDownloadTXT}
+                    className="w-full px-4 py-3 text-left text-[11px] font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2"
+                  >
                     <FileJson size={14} className="text-blue-500" /> TXT로 저장
                   </button>
                 </div>

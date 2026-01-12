@@ -36,15 +36,15 @@ const TopBar = ({ onToggleSidebar }) => {
   }, [open]);
 
   const handleLogout = async () => {
-    doLogout();
     await showAlert("로그아웃 되었습니다.", "success");
-    moveToPath("/");
+    doLogout();
+    moveToPath("/member/login");
   };
 
   if (!brandId) return null;
 
   return (
-    <header className="h-14 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+    <header className="h-14 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-[101]">
       <div className="h-full px-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           {/* 1440px 이하에서만 보이는 햄버거 버튼 */}

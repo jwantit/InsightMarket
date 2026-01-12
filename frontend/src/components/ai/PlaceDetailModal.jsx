@@ -92,9 +92,6 @@ const PlaceDetailModal = ({ isOpen, placeId, placeName, onClose }) => {
                     <h3 className="text-2xl font-black text-slate-900 tracking-tighter">
                       {detailData.placeName}
                     </h3>
-                    <span className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase tracking-tighter">
-                      Place ID: {placeId}
-                    </span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -131,7 +128,10 @@ const PlaceDetailModal = ({ isOpen, placeId, placeName, onClose }) => {
                   </h4>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={detailData.trafficSeries}>
+                      <LineChart 
+                        data={detailData.trafficSeries}
+                        margin={{ top: 10, right: 10, bottom: 30, left: 10 }}
+                      >
                         <CartesianGrid
                           strokeDasharray="4 4"
                           vertical={false}
@@ -141,6 +141,7 @@ const PlaceDetailModal = ({ isOpen, placeId, placeName, onClose }) => {
                           dataKey="label"
                           axisLine={false}
                           tickLine={false}
+                          interval={0}
                           tick={{
                             fontSize: 11,
                             fontWeight: 700,
@@ -155,7 +156,11 @@ const PlaceDetailModal = ({ isOpen, placeId, placeName, onClose }) => {
                             border: "none",
                             boxShadow: "0 10px 20px rgba(0,0,0,0.1)",
                             fontWeight: "bold",
+                            transition: "none",
                           }}
+                          animationDuration={0}
+                          allowEscapeViewBox={{ x: false, y: false }}
+                          cursor={{ stroke: '#3b82f6', strokeWidth: 1, strokeDasharray: '4 4' }}
                           formatter={(v) => [
                             `${v.toLocaleString()}명`,
                             "유동인구",

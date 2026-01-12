@@ -3,7 +3,7 @@ import { TrendingUp } from "lucide-react";
 import { useTrendSse } from "../../hooks/dashboard/useTrendSse";
 
 const BrandTrendRanking = ({ brandId }) => {
-  const [selectedType, setSelectedType] = useState("rising");
+  const [selectedType, setSelectedType] = useState("top"); // 기본값을 인기 검색어로 변경
   const { trendData, loading, error } = useTrendSse(brandId);
 
   if (loading && !trendData) {
@@ -61,8 +61,8 @@ const BrandTrendRanking = ({ brandId }) => {
             onChange={(e) => setSelectedType(e.target.value)}
             className="px-3 py-1.5 text-[11px] font-bold text-gray-700 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
           >
-            <option value="rising">급상승</option>
             <option value="top">인기 검색어</option>
+            <option value="rising">급상승</option>
           </select>
         </div>
       </div>
@@ -109,7 +109,9 @@ const BrandTrendRanking = ({ brandId }) => {
       {currentList.length > 0 && (
         <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/30 flex-shrink-0 text-center">
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-            Top 20 Insights
+            {selectedType === "rising" 
+              ? `급상승 TOP${currentList.length}` 
+              : `인기 검색어 TOP${currentList.length}`}
           </p>
         </div>
       )}
