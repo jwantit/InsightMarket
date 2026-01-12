@@ -19,6 +19,7 @@ import com.InsightMarket.repository.FileRepository;
 import com.InsightMarket.repository.brand.BrandMemberRepository;
 import com.InsightMarket.repository.brand.BrandRepository;
 import com.InsightMarket.repository.competitor.CompetitorRepository;
+import com.InsightMarket.repository.trends.BrandTrendRepository;
 import com.InsightMarket.service.FileService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,7 @@ public class BrandServiceImpl implements BrandService {
     private final PythonClient pythonClient;
     private final FileService fileService;
     private final FileRepository fileRepository;
+    private final BrandTrendRepository brandTrendRepository;
 
     //브랜드 생성 + 생성자 BRAND_ADMIN 매핑
     @Override
@@ -199,6 +201,12 @@ public class BrandServiceImpl implements BrandService {
 
         Brand brand = brandRepository.findById(brandId)
                 .orElseThrow(() -> new ApiException(ErrorCode.BRAND_NOT_FOUND));
+
+        // BrandTrend 삭제 (트렌드 데이터)
+        brandTrendRepository.deleteByBrandId(brandId);
+
+        // 브랜드 이미지 삭제
+        deleteBrandImageHard(brandId);
 
         // Competitor 삭제
         competitorRepository.deleteByBrand(brand);

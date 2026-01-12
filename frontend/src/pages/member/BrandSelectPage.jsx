@@ -3,6 +3,7 @@ import { Building2, LogOut, ChevronRight, Loader2 } from "lucide-react";
 import useCustomLogin from "../../hooks/login/useCustomLogin";
 import useMyBrands from "../../hooks/brand/useMyBrands";
 import { showAlert } from "../../hooks/common/useAlert";
+import { getThumbnailUrl } from "../../util/fileUtil";
 
 const BrandSelectPage = () => {
   const navigate = useNavigate();
@@ -93,12 +94,22 @@ const BrandSelectPage = () => {
               className="w-full flex items-center justify-between px-5 py-4 bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 rounded-2xl transition-all active:scale-[0.98] group"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-slate-200 group-hover:border-blue-300 transition-colors">
-                  <Building2
-                    size={18}
-                    className="text-slate-600 group-hover:text-blue-600 transition-colors"
-                  />
-                </div>
+                {b.imageFileId ? (
+                  <div className="w-10 h-10 bg-white rounded-xl overflow-hidden border border-slate-200 group-hover:border-blue-300 transition-colors flex-shrink-0">
+                    <img
+                      src={getThumbnailUrl(b.imageFileId)}
+                      alt={b.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-slate-200 group-hover:border-blue-300 transition-colors flex-shrink-0">
+                    <Building2
+                      size={18}
+                      className="text-slate-600 group-hover:text-blue-600 transition-colors"
+                    />
+                  </div>
+                )}
                 <span className="font-bold text-slate-800 group-hover:text-blue-700 transition-colors">
                   {b.name}
                 </span>

@@ -13,5 +13,11 @@ public interface BrandTrendRepository extends JpaRepository<BrandTrend, Long> {
      * @return 가장 최근 BrandTrend (없을 경우 Optional.empty())
      */
     Optional<BrandTrend> findTopByBrandIdOrderByCollectedAtDesc(Long brandId);
+
+    /**
+     * 브랜드의 모든 트렌드 데이터 삭제
+     * @param brandId 브랜드 ID
+     */
+    void deleteByBrandId(Long brandId);
 }
 

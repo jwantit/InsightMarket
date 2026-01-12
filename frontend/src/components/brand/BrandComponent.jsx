@@ -84,6 +84,7 @@ const BrandComponent = forwardRef((props, ref) => {
           list.map((b) => ({
             brandId: b.brandId,
             name: b.name,
+            imageFileId: b.imageFileId || null,
           }))
         )
       );
