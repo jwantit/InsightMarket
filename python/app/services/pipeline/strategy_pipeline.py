@@ -80,6 +80,15 @@ def run_strategy_analysis(
             brand_name=brand_name,
             project_keyword_ids=project_keyword_ids
         )
+        
+        # 디버깅: 필터링된 데이터 확인
+        project_keywords_count = len(filtered_raw_data.get("projectKeywords", []))
+        total_data_count = sum(
+            len(pk.get("data", [])) 
+            for pk in filtered_raw_data.get("projectKeywords", [])
+        )
+        print(f"[strategy_pipeline] 필터링된 데이터: 프로젝트 키워드 {project_keywords_count}개, 총 데이터 {total_data_count}개")
+        
         keyword_stats = extract_keyword_stats_from_raw_data(filtered_raw_data)
         
         # sources 추출
@@ -90,9 +99,18 @@ def run_strategy_analysis(
             sources.extend(extract_sources_from_data_list(pk_data))
         
         if not keyword_stats:
+            # 더 자세한 에러 메시지 제공
+            if project_keywords_count == 0:
+                reason = f"프로젝트 ID {project_id}의 키워드(ID: {project_keyword_ids})에 해당하는 데이터가 raw_data에 없습니다. 데이터 수집이 필요합니다."
+            elif total_data_count == 0:
+                reason = f"프로젝트 키워드는 존재하지만 데이터가 비어있습니다. 데이터 수집이 필요합니다."
+            else:
+                reason = "키워드 통계 추출에 실패했습니다."
+            
+            print(f"[strategy_pipeline] 오류: {reason}")
             return {
                 "ok": False,
-                "reason": "프로젝트 키워드 데이터가 없습니다.",
+                "reason": reason,
                 "data": None,
                 "sources": []
             }

@@ -58,19 +58,46 @@ def find_today_file() -> Optional[Path]:
     today_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
     return today_files[0]
 
+def find_latest_file() -> Optional[Path]:
+    """가장 최근 raw 데이터 파일 검색 (당일 파일 우선, 없으면 최근 파일)"""
+    data_dir = Path(RAW_DATA_DIR)
+    if not data_dir.exists():
+        return None
+    
+    # 먼저 당일 파일 찾기
+    today_file = find_today_file()
+    if today_file is not None:
+        return today_file
+    
+    # 당일 파일이 없으면 모든 파일 중 가장 최근 파일 찾기
+    all_files = list(data_dir.glob("raw_data_*.json"))
+    if not all_files:
+        return None
+    
+    # 수정 시간 기준으로 정렬하여 가장 최근 파일 반환
+    all_files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    return all_files[0]
+
 def load_collected_data(file_path: Optional[Path] = None) -> Dict[str, Any]:
     """수집 데이터 파일 로드 (없으면 빈 구조 반환)"""
     if file_path is None:
-        file_path = find_today_file()
+        # 당일 파일 우선, 없으면 최근 파일 사용
+        file_path = find_latest_file()
         if file_path is None:
+            print("[load_collected_data] raw_data 파일이 없습니다. 빈 구조 반환")
             return {"brands": []}
+        print(f"[load_collected_data] 파일 로드: {file_path}")
     
     if not file_path.exists():
+        print(f"[load_collected_data] 파일이 존재하지 않습니다: {file_path}")
         return {"brands": []}
     
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
-            return json.load(f)
+            data = json.load(f)
+            brands_count = len(data.get("brands", []))
+            print(f"[load_collected_data] 파일 로드 완료: 브랜드 {brands_count}개")
+            return data
     except (json.JSONDecodeError, IOError) as e:
         print(f"[파일 로드 오류] {e}, 빈 구조로 시작")
         return {"brands": []}

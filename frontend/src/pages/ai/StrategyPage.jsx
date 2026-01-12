@@ -85,6 +85,13 @@ const StrategyPage = () => {
         question,
         topK: Number(topK),
       });
+
+      console.log("[StrategyPage] API 응답:", res);
+      console.log("[StrategyPage] res.data:", res.data);
+      console.log("[StrategyPage] res.data.ok:", res.data?.ok);
+      console.log("[StrategyPage] res.data.data:", res.data?.data);
+      console.log("[StrategyPage] res.data.report:", res.data?.report);
+
       setTraceId(res.traceId);
       setResult(res.data);
       if (res.data) {
@@ -95,6 +102,7 @@ const StrategyPage = () => {
         });
       }
     } catch (e) {
+      console.error("[StrategyPage] 에러 발생:", e);
       setError(getErrorMessage(e) || "분석 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
@@ -142,6 +150,11 @@ const StrategyPage = () => {
 
   const ok = result?.ok === true;
   const data = result?.data || null;
+
+  // 디버깅용 로그
+  console.log("[StrategyPage] result:", result);
+  console.log("[StrategyPage] ok:", ok);
+  console.log("[StrategyPage] data:", data);
 
   // --- 헤더 우측에 들어갈 무료 리포트 카운터 ---
   const headerExtra = (
@@ -231,7 +244,22 @@ const StrategyPage = () => {
                 placeholder="어떤 마케팅 인사이트가 필요하신가요?"
               />
               <button
-                onClick={onSubmit}
+                onClick={() => {
+                  console.log("[StrategyPage] 버튼 클릭됨", {
+                    projectId,
+                    question: question?.trim(),
+                    loading,
+                  });
+                  if (!projectId) {
+                    alert("프로젝트를 선택해주세요.");
+                    return;
+                  }
+                  if (!question?.trim()) {
+                    alert("분석 질문을 입력해주세요.");
+                    return;
+                  }
+                  onSubmit();
+                }}
                 disabled={loading || !projectId || !question.trim()}
                 className="absolute bottom-3 right-3 flex items-center gap-2 px-6 py-2.5 bg-slate-900 hover:bg-blue-600 disabled:bg-slate-300 text-white rounded-xl font-bold text-xs transition-all shadow-lg active:scale-95"
               >
@@ -267,6 +295,45 @@ const StrategyPage = () => {
         </div>
       )}
 
+      {/* 결과가 있지만 ok가 false인 경우 에러 표시 */}
+      {result && !ok && (
+        <div className="p-8 bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-[2rem] flex items-start gap-4 text-amber-900 animate-in fade-in slide-in-from-bottom-2 shadow-sm">
+          <div className="shrink-0 w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+            <AlertCircle size={24} className="text-amber-600" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-base font-black mb-2 text-amber-900">
+              데이터 부족
+            </h3>
+            <p className="text-sm text-amber-800 leading-relaxed mb-3">
+              {result.reason || "알 수 없는 오류가 발생했습니다."}
+            </p>
+            {result.reason &&
+              result.reason.includes("데이터 수집이 필요합니다") && (
+                <div className="mt-4 p-4 bg-white/60 rounded-xl border border-amber-200">
+                  <p className="text-xs font-bold text-amber-900 mb-2">
+                    해결 방법:
+                  </p>
+                  <ol className="text-xs text-amber-800 space-y-1 list-decimal list-inside">
+                    <li>프로젝트 설정에서 키워드를 확인해주세요</li>
+                    <li>
+                      데이터 수집 메뉴에서 해당 프로젝트의 키워드 데이터를
+                      수집해주세요
+                    </li>
+                    <li>데이터 수집 후 다시 시도해주세요</li>
+                  </ol>
+                </div>
+              )}
+            {result.traceId && (
+              <p className="text-xs text-amber-600 mt-3 font-medium">
+                추적 ID: <span className="font-mono">{result.traceId}</span>
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 정상 결과 표시 */}
       {result && ok && (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
           {/* AI 종합 진단 (Bento Style) */}

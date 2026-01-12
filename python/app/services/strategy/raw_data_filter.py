@@ -27,7 +27,7 @@ def filter_raw_data_by_brand_and_keywords(
     - brand_id: 브랜드 ID
     - brand_name: 브랜드명
     - project_keyword_ids: 프로젝트 키워드 ID 리스트
-    - raw_data: raw_data 딕셔너리 (None이면 당일 파일 자동 로드)
+    - raw_data: raw_data 딕셔너리 (None이면 최근 파일 자동 로드)
     
     [출력]
     - 필터링된 raw_data 구조:
@@ -44,7 +44,7 @@ def filter_raw_data_by_brand_and_keywords(
         ]
       }
     """
-    # raw_data가 없으면 당일 파일 로드
+    # raw_data가 없으면 최근 파일 로드 (당일 우선, 없으면 최근 파일)
     if raw_data is None:
         raw_data = load_collected_data()
     

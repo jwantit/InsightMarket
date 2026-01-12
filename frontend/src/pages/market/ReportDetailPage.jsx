@@ -59,7 +59,9 @@ const ReportDetailPage = () => {
               <FileText size={32} className="text-red-400" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-slate-900 mb-2">오류 발생</h2>
+              <h2 className="text-xl font-black text-slate-900 mb-2">
+                오류 발생
+              </h2>
               <p className="text-sm text-slate-600 mb-6">{error}</p>
               <button
                 onClick={handleBack}
@@ -83,8 +85,14 @@ const ReportDetailPage = () => {
   const formatReportContent = (content) => {
     if (!content) return "";
 
-    // 마크다운 헤더 (#, ##, ###) 처리
+    // 마크다운 코드 블록 제거 (```markdown, ```json 등)
+    // 먼저 코드 블록 전체를 제거 (언어 지정 포함)
     let formatted = content
+      .replace(/```[a-zA-Z]*\n[\s\S]*?```/g, "") // 코드 블록 전체 제거 (언어 지정 포함)
+      .replace(/```\n[\s\S]*?```/g, "") // 코드 블록 전체 제거 (언어 없음)
+      .replace(/```[a-zA-Z]*/g, "") // 남은 코드 블록 시작 제거
+      .replace(/```/g, "") // 남은 코드 블록 끝 제거
+      // 마크다운 헤더 (#, ##, ###) 처리
       .replace(
         /^### (.*$)/gim,
         '<h3 class="text-xl font-bold mt-6 mb-3 text-slate-900">$1</h3>'

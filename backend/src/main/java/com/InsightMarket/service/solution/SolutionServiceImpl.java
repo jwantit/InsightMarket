@@ -140,6 +140,7 @@ public class SolutionServiceImpl implements SolutionService {
                 .strategyId(solution.getStrategy().getId())
                 .strategytitle(solution.getStrategy().getTitle())
                 .projectId(solution.getProject().getId())
+                .createdAt(solution.getCreatedAt())
                 .deleted(solution.isDeleted())
                 .build();
     }
