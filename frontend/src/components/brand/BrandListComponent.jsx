@@ -2,6 +2,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { Plus, Search, Users, ChevronRight, LayoutGrid } from "lucide-react";
+import { getThumbnailUrl } from "../../util/fileUtil";
 
 const BrandListComponent = ({
   brands,
@@ -43,9 +44,19 @@ const BrandListComponent = ({
           >
             {/* 상단 로고 & 배지 */}
             <div className="flex justify-between items-start mb-4">
-              <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-xl font-black text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-inner font-mono">
-                {brand.name.slice(0, 1)}
-              </div>
+              {brand.imageFileId ? (
+                <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-slate-100 group-hover:border-blue-300 transition-all duration-300 shadow-sm">
+                  <img
+                    src={getThumbnailUrl(brand.imageFileId)}
+                    alt={brand.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-xl font-black text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300 shadow-inner font-mono">
+                  {brand.name.slice(0, 1)}
+                </div>
+              )}
               <div className="flex flex-col items-end gap-1">
                 <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[9px] font-black rounded-lg uppercase tracking-tight">
                   {brand.role === "BRAND_ADMIN" ? "Admin" : "Member"}

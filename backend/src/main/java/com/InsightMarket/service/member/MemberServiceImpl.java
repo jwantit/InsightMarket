@@ -111,7 +111,7 @@ public class MemberServiceImpl implements MemberService {
             if (dto.getJoinType() == JoinType.NEW_COMPANY && dto.getBrands() != null){
 
                 for (BrandRequestDTO brandRequestDTO : dto.getBrands()){
-                    brandService.createBrand(brandRequestDTO, memberData, company);
+                    brandService.createBrand(brandRequestDTO, memberData, company, null);
                 }
             }
         } catch (DataIntegrityViolationException e) {

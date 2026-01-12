@@ -3,6 +3,7 @@ import { ChevronDown, Check, Building2, Plus } from "lucide-react";
 import useMyBrands from "../hooks/brand/useMyBrands";
 import { useBrand } from "../hooks/brand/useBrand";
 import { useBrandNavigate } from "../hooks/brand/useBrandNavigate";
+import { getThumbnailUrl } from "../util/fileUtil";
 
 const TopBarBrandSelect = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,9 +52,19 @@ const TopBarBrandSelect = () => {
           }
         `}
       >
-        <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-          <Building2 size={14} />
-        </div>
+        {currentBrand?.imageFileId ? (
+          <div className="flex h-6 w-6 items-center justify-center rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
+            <img
+              src={getThumbnailUrl(currentBrand.imageFileId)}
+              alt={currentBrand.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ) : (
+          <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-slate-100 text-slate-600 flex-shrink-0">
+            <Building2 size={14} />
+          </div>
+        )}
 
         <div className="flex flex-col items-start leading-tight">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
@@ -98,18 +109,28 @@ const TopBarBrandSelect = () => {
                   `}
                 >
                   <div className="flex items-center gap-3 overflow-hidden">
-                    <div
-                      className={`
-                      flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs
-                      ${
-                        isActive
-                          ? "bg-blue-600 text-white"
-                          : "bg-slate-100 text-slate-500"
-                      }
-                    `}
-                    >
-                      {brand.name.slice(0, 1)}
-                    </div>
+                    {brand.imageFileId ? (
+                      <div className="flex-shrink-0 w-8 h-8 rounded-lg overflow-hidden bg-slate-100">
+                        <img
+                          src={getThumbnailUrl(brand.imageFileId)}
+                          alt={brand.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        className={`
+                        flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs
+                        ${
+                          isActive
+                            ? "bg-blue-600 text-white"
+                            : "bg-slate-100 text-slate-500"
+                        }
+                      `}
+                      >
+                        {brand.name.slice(0, 1)}
+                      </div>
+                    )}
                     <span className="text-sm font-semibold truncate">
                       {brand.name}
                     </span>

@@ -4,8 +4,23 @@ import { API_SERVER_HOST } from "./memberApi";
 const host = `${API_SERVER_HOST}/api/brands`;
 
 // 브랜드 생성
-export const createBrand = async (data) => {
-  const res = await jwtAxios.post(`${host}`, data);
+export const createBrand = async (data, imageFile = null) => {
+  const formData = new FormData();
+  
+  // JSON 데이터를 Blob으로 감싸서 추가
+  const json = JSON.stringify(data);
+  formData.append("request", new Blob([json], { type: "application/json" }));
+  
+  // 이미지 파일이 있으면 추가
+  if (imageFile) {
+    formData.append("imageFile", imageFile);
+  }
+  
+  const res = await jwtAxios.post(`${host}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return res.data;
 };
 
@@ -22,8 +37,23 @@ export const getBrandDetail = async (brandId) => {
 };
 
 // 브랜드 수정
-export const updateBrand = async (brandId, data) => {
-  await jwtAxios.put(`${host}/${brandId}`, data);
+export const updateBrand = async (brandId, data, imageFile = null) => {
+  const formData = new FormData();
+  
+  // JSON 데이터를 Blob으로 감싸서 추가
+  const json = JSON.stringify(data);
+  formData.append("request", new Blob([json], { type: "application/json" }));
+  
+  // 이미지 파일이 있으면 추가 (수정 시에만)
+  if (imageFile) {
+    formData.append("imageFile", imageFile);
+  }
+  
+  await jwtAxios.put(`${host}/${brandId}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };
 
 // 브랜드 삭제

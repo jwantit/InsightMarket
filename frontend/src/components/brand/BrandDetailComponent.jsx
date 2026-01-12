@@ -11,6 +11,7 @@ import {
   Info,
   Building2,
 } from "lucide-react";
+import { getThumbnailUrl } from "../../util/fileUtil";
 
 export default function BrandDetailComponent({
   loading,
@@ -38,9 +39,19 @@ export default function BrandDetailComponent({
         <div className="px-8 pt-8 pb-6 border-b border-slate-100">
           <div className="flex items-start justify-between gap-4 mb-6">
             <div className="flex items-center gap-6 flex-1">
-              <div className="w-16 h-16 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-3xl font-black shadow-lg shadow-blue-200">
-                {brand.name.slice(0, 1)}
-              </div>
+              {brand.imageFileId ? (
+                <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-slate-200 shadow-lg">
+                  <img
+                    src={getThumbnailUrl(brand.imageFileId)}
+                    alt={brand.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-16 h-16 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-3xl font-black shadow-lg shadow-blue-200">
+                  {brand.name.slice(0, 1)}
+                </div>
+              )}
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-3">
                   <h1 className="text-2xl font-black text-slate-900 tracking-tight">

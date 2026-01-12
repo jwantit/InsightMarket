@@ -10,9 +10,11 @@ import com.InsightMarket.security.util.MemberUtil;
 import com.InsightMarket.service.brand.BrandService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -27,14 +29,17 @@ public class BrandController {
     private final MemberUtil memberUtil;
 
     //Brand 추가
-    @PostMapping
-    public Long createBrand(@RequestBody BrandRequestDTO request, @AuthenticationPrincipal MemberDTO memberDTO) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Long createBrand(
+            @RequestPart("request") BrandRequestDTO request,
+            @RequestPart(value = "imageFile", required = false) MultipartFile imageFile,
+            @AuthenticationPrincipal MemberDTO memberDTO) {
 
         Member member = memberRepository.findByEmail(memberDTO.getEmail()).orElseThrow();
         Company company = member.getCompany(); // 이미 가입된 회사 기준
         log.info("company이다" + company.toString());
 
-        return brandService.createBrand(request, member, company);
+        return brandService.createBrand(request, member, company, imageFile);
     }
     
     //전체 Brands 리스트 조회
@@ -55,8 +60,12 @@ public class BrandController {
     }
 
     // 브랜드 수정 (BRAND_ADMIN만 가능)
-    @PutMapping("/{brandId}")
-    public void updateBrand(@PathVariable Long brandId, @RequestBody BrandRequestDTO request, @AuthenticationPrincipal MemberDTO memberDTO) {
+    @PutMapping(value = "/{brandId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public void updateBrand(
+            @PathVariable Long brandId,
+            @RequestPart("request") BrandRequestDTO request,
+            @RequestPart(value = "imageFile", required = false) MultipartFile imageFile,
+            @AuthenticationPrincipal MemberDTO memberDTO) {
 
         Member member = memberRepository.findByEmail(memberDTO.getEmail()).orElseThrow();
 
@@ -65,7 +74,7 @@ public class BrandController {
             throw new AccessDeniedException("권한이 없습니다. BRAND_ADMIN만 수정 가능");
         }
 
-        brandService.updateBrand(brandId, request);
+        brandService.updateBrand(brandId, request, member.getId(), imageFile);
     }
 
     //브랜드 삭제 (BRAND_ADMIN만 가능)

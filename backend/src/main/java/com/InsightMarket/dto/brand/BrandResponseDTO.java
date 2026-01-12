@@ -14,6 +14,8 @@ public class BrandResponseDTO {
     private String description;
     private String role; // BRAND_ADMIN / MARKETER
 
+    private Long imageFileId; // 브랜드 이미지 파일 ID
+
     private List<String> keywords;        // 브랜드 키워드
     private List<CompetitorResponseDTO> competitors; // 경쟁사 목록
 }

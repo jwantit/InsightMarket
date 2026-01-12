@@ -33,6 +33,9 @@ public class Brand extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "image_file_id")
+    private Long imageFileId;
+
     //cascade = ALL → Brand 삭제 시 관련 BrandMember도 자동 삭제
     //orphanRemoval = true → 부모에서 제거된 자식도 삭제
     //BrandRepository에서 delete 호출하면 FK 문제 없이 삭제 가능
@@ -48,5 +51,9 @@ public class Brand extends BaseEntity {
 
     public void changeDescription(String description) {
         this.description = description;
+    }
+
+    public void changeImageFileId(Long imageFileId) {
+        this.imageFileId = imageFileId;
     }
 }

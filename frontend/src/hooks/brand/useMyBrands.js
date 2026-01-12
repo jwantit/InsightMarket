@@ -15,6 +15,7 @@ const useMyBrands = () => {
         (data || []).map((b) => ({
           brandId: b.brandId,
           name: b.name,
+          imageFileId: b.imageFileId || null,
         }))
       )
     );

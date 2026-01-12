@@ -44,6 +44,8 @@ const BrandComponent = forwardRef((props, ref) => {
   // --- 폼 상태 ---
   const [formMode, setFormMode] = useState("CREATE"); // CREATE, EDIT
   const [form, setForm] = useState(initBrandForm);
+  const [imageFile, setImageFile] = useState(null);
+  const [removeImage, setRemoveImage] = useState(false); // 이미지 삭제 플래그
 
   // --- 로딩 및 에러 상태 ---
   const [loadingList, setLoadingList] = useState(false);
@@ -127,6 +129,8 @@ const BrandComponent = forwardRef((props, ref) => {
   const openCreate = useCallback(() => {
     setFormMode("CREATE");
     setForm(initBrandForm);
+    setImageFile(null);
+    setRemoveImage(false);
     setErrorMsg(null);
     setScreen("FORM");
   }, []);
@@ -169,7 +173,10 @@ const BrandComponent = forwardRef((props, ref) => {
         name: detail?.name ?? "",
         description: detail?.description ?? "",
         competitors: normalizedCompetitors,
+        imageFileId: detail?.imageFileId ?? null,
       });
+      setImageFile(null); // 수정 시에는 새 이미지 파일이 없으므로 null
+      setRemoveImage(false); // 이미지 삭제 플래그 초기화
       setScreen("FORM");
     } catch (e) {
       setErrorMsg(getErrorMessage(e, "수정 화면을 열지 못했어요."));
@@ -199,18 +206,25 @@ const BrandComponent = forwardRef((props, ref) => {
       description: trim(form.description),
       competitors: competitorsData,
     };
+    
+    // 수정 모드에서 이미지 삭제 플래그 추가
+    if (formMode === "EDIT" && removeImage) {
+      payload.removeImage = true;
+    }
 
     setSaving(true);
     setErrorMsg(null);
     try {
       if (formMode === "EDIT" && selectedId != null) {
-        await updateBrand(selectedId, payload);
+        // 수정 시: 이미지 파일이 있으면 전달, removeImage가 true이면 삭제, 둘 다 없으면 기존 이미지 유지
+        await updateBrand(selectedId, payload, imageFile);
         const detail = await getBrandDetail(selectedId);
         setSelectedBrand(detail);
         setScreen("DETAIL");
         await fetchList();
       } else {
-        const result = await createBrand(payload);
+        // 생성 시: 이미지 파일이 있으면 전달
+        const result = await createBrand(payload, imageFile);
         const newId = result?.brandId ?? result?.id ?? result;
         await fetchList();
         if (newId) {
@@ -226,7 +240,7 @@ const BrandComponent = forwardRef((props, ref) => {
     } finally {
       setSaving(false);
     }
-  }, [canSubmit, fetchList, form, formMode, selectedId]);
+  }, [canSubmit, fetchList, form, formMode, selectedId, imageFile, removeImage]);
 
   const handleDelete = useCallback(
     async (brandId) => {
@@ -292,6 +306,10 @@ const BrandComponent = forwardRef((props, ref) => {
           canSubmit={canSubmit}
           form={form}
           setForm={setForm}
+          imageFile={imageFile}
+          setImageFile={setImageFile}
+          removeImage={removeImage}
+          setRemoveImage={setRemoveImage}
           onCancel={() =>
             formMode === "EDIT" ? setScreen("DETAIL") : goList()
           }

@@ -13,14 +13,22 @@ import com.InsightMarket.dto.brand.BrandRequestDTO;
 import com.InsightMarket.dto.brand.BrandResponseDTO;
 import com.InsightMarket.dto.competitor.CompetitorDTO;
 import com.InsightMarket.dto.competitor.CompetitorResponseDTO;
+import com.InsightMarket.domain.files.FileTargetType;
+import com.InsightMarket.dto.community.FileResponseDTO;
+import com.InsightMarket.repository.FileRepository;
 import com.InsightMarket.repository.brand.BrandMemberRepository;
 import com.InsightMarket.repository.brand.BrandRepository;
 import com.InsightMarket.repository.competitor.CompetitorRepository;
+import com.InsightMarket.service.FileService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,10 +42,12 @@ public class BrandServiceImpl implements BrandService {
     private final BrandMemberRepository brandMemberRepository;
     private final CompetitorRepository competitorRepository;
     private final PythonClient pythonClient;
+    private final FileService fileService;
+    private final FileRepository fileRepository;
 
     //브랜드 생성 + 생성자 BRAND_ADMIN 매핑
     @Override
-    public Long createBrand(BrandRequestDTO request, Member member, Company company) {
+    public Long createBrand(BrandRequestDTO request, Member member, Company company, MultipartFile imageFile) {
 
         Brand brand = Brand.builder()
                 .name(request.getName())
@@ -46,6 +56,13 @@ public class BrandServiceImpl implements BrandService {
                 .build();
 
         brandRepository.save(brand);
+
+        // 이미지 파일 저장
+        if (imageFile != null && !imageFile.isEmpty()) {
+            Long imageFileId = saveBrandImage(brand.getId(), member.getId(), imageFile);
+            brand.changeImageFileId(imageFileId);
+            brandRepository.save(brand);
+        }
 
         //경쟁사 저장
         syncCompetitors(brand, request.getCompetitors());
@@ -106,6 +123,7 @@ public class BrandServiceImpl implements BrandService {
                             .name(bm.getBrand().getName())
                             .description(bm.getBrand().getDescription())
                             .role(bm.getBrandRole().name())
+                            .imageFileId(bm.getBrand().getImageFileId())
                             .keywords(List.of()) // 키워드 기능 제거
                             .competitors(competitorDTOs)
                             .build();
@@ -142,6 +160,7 @@ public class BrandServiceImpl implements BrandService {
                 .name(brand.getName())
                 .description(brand.getDescription())
                 .role(brandMember.getBrandRole().name())
+                .imageFileId(brand.getImageFileId())
                 .keywords(List.of()) // 키워드 기능 제거
                 .competitors(competitorDTOs)
                 .build();
@@ -149,13 +168,25 @@ public class BrandServiceImpl implements BrandService {
 
     @Transactional
     @Override
-    public void updateBrand(Long brandId, BrandRequestDTO brandRequestDTO) {
+    public void updateBrand(Long brandId, BrandRequestDTO brandRequestDTO, Long memberId, MultipartFile imageFile) {
 
         Brand brand = brandRepository.findById(brandId)
                 .orElseThrow(() -> new ApiException(ErrorCode.BRAND_NOT_FOUND));
 
         brand.changeName(brandRequestDTO.getName());
         brand.changeDescription(brandRequestDTO.getDescription());
+
+        // 이미지 파일 업데이트
+        if (imageFile != null && !imageFile.isEmpty()) {
+            // 새 이미지 저장 (saveBrandImage 내부에서 기존 이미지 삭제 처리)
+            Long imageFileId = saveBrandImage(brandId, memberId, imageFile);
+            brand.changeImageFileId(imageFileId);
+        } else if (Boolean.TRUE.equals(brandRequestDTO.getRemoveImage())) {
+            // 이미지 삭제 플래그가 true이면 실제 삭제 (hard delete)
+            deleteBrandImageHard(brandId);
+            brand.changeImageFileId(null);
+        }
+        // imageFile이 null이고 removeImage가 false/null이면 기존 이미지 유지
 
         //수정 시에도 경쟁사 동기화
         syncCompetitors(brand, brandRequestDTO.getCompetitors());
@@ -244,6 +275,56 @@ public class BrandServiceImpl implements BrandService {
             if (isNew) {
                 pythonClient.recollect("COMPETITOR", competitor.getId(), competitor.getName(), brand.getId(), brand.getName());
             }
+        }
+    }
+
+    // 브랜드 이미지 저장 (브랜드당 하나만 저장)
+    private Long saveBrandImage(Long brandId, Long memberId, MultipartFile imageFile) {
+        // 기존 이미지 실제 삭제 (hard delete)
+        deleteBrandImageHard(brandId);
+
+        // 새 이미지 저장
+        List<FileResponseDTO> savedFiles = fileService.saveFiles(
+                FileTargetType.BRAND,
+                brandId,
+                memberId,
+                List.of(imageFile)
+        );
+
+        if (savedFiles.isEmpty()) {
+            throw new RuntimeException("Failed to save brand image");
+        }
+
+        return savedFiles.get(0).getId();
+    }
+
+    // 브랜드 이미지 실제 삭제 (hard delete)
+    private void deleteBrandImageHard(Long brandId) {
+        List<com.InsightMarket.domain.files.UploadedFile> existingFiles =
+                fileRepository.findByTargetTypeAndTargetIdAndDeletedAtIsNull(
+                        FileTargetType.BRAND, brandId);
+
+        for (com.InsightMarket.domain.files.UploadedFile file : existingFiles) {
+            // 파일 시스템에서 실제 파일 삭제
+            try {
+                Path filePath = Paths.get("uploads", file.getStorageKey());
+                if (Files.exists(filePath)) {
+                    Files.delete(filePath);
+                }
+                // 썸네일도 삭제
+                if (file.getThumbnailStorageKey() != null) {
+                    Path thumbnailPath = Paths.get("uploads", file.getThumbnailStorageKey());
+                    if (Files.exists(thumbnailPath)) {
+                        Files.delete(thumbnailPath);
+                    }
+                }
+            } catch (Exception e) {
+                log.warn("[BRAND][IMAGE][DELETE] Failed to delete file from disk: {}", file.getStorageKey(), e);
+            }
+            
+            // DB에서 실제 레코드 삭제
+            fileRepository.delete(file);
+            log.info("[BRAND][IMAGE][DELETE] fileId={}, brandId={}", file.getId(), brandId);
         }
     }
 }
