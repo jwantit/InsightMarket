@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { getAdminMembers } from "../../../api/adminApi";
+import { showAlert } from "../../../hooks/common/useAlert";
 
 const cx = (...arr) => arr.filter(Boolean).join(" ");
 
@@ -22,7 +23,7 @@ const MemberSearchModal = ({
       setMembers(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error(e);
-      alert("멤버 조회 실패");
+      await showAlert("멤버 조회 실패", "error");
     } finally {
       setLoading(false);
     }

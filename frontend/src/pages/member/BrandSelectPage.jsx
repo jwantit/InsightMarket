@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Building2, LogOut, ChevronRight, Loader2 } from "lucide-react";
 import useCustomLogin from "../../hooks/login/useCustomLogin";
 import useMyBrands from "../../hooks/brand/useMyBrands";
+import { showAlert } from "../../hooks/common/useAlert";
 
 const BrandSelectPage = () => {
   const navigate = useNavigate();
@@ -39,9 +40,9 @@ const BrandSelectPage = () => {
               </p>
             </div>
             <button
-              onClick={() => {
+              onClick={async () => {
                 doLogout();
-                alert("로그아웃되었습니다.");
+                await showAlert("로그아웃되었습니다.", "success");
                 moveToLogin();
               }}
               className="flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition-all active:scale-95"
@@ -113,9 +114,9 @@ const BrandSelectPage = () => {
         {/* 푸터 */}
         <div className="px-8 pb-6 pt-2">
           <button
-            onClick={() => {
+            onClick={async () => {
               doLogout();
-              alert("로그아웃되었습니다.");
+              await showAlert("로그아웃되었습니다.", "success");
               moveToLogin();
             }}
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors"

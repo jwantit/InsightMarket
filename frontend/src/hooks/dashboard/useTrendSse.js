@@ -82,6 +82,7 @@ export const useTrendSse = (brandId) => {
           setTrendData(data);
           isInitialDataReceivedRef.current = true;
           setLoading(false);
+          console.log("📊 관련검색어 순위 초기데이터를 가져옵니다.");
         } else {
           setLoading(false);
         }
@@ -91,13 +92,14 @@ export const useTrendSse = (brandId) => {
         if (data) {
           setTrendData(data);
           
-          // 초기 데이터 이후 업데이트 시에만 로그 출력
+          // 초기 데이터 이후 업데이트 시 로그 출력
           if (isInitialDataReceivedRef.current) {
-            console.log("관련검색어 순위를 업데이트 합니다.");
+            console.log("🔄 관련검색어 순위를 업데이트 합니다.");
           } else {
-            // 초기 데이터로 처리
+            // 초기 데이터로 처리 (initial-data를 받지 못한 경우)
             isInitialDataReceivedRef.current = true;
             setLoading(false);
+            console.log("📊 관련검색어 순위 초기데이터를 가져옵니다.");
           }
         }
       },

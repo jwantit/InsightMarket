@@ -1,5 +1,6 @@
 import { prepareOrder, delOrder, verifyPayment } from "../../api/paymentApi";
 import { getErrorMessage } from "../../util/errorUtil";
+import { showAlert } from "../common/useAlert";
 
 const useCustomPayment = () => {
   //결제버튼 -> 호출______________________________________________________________________________________
@@ -26,7 +27,7 @@ const useCustomPayment = () => {
       // 결제창 띄우기 백엔드 데이터를 가지고 V2 실행-------------------------------
     } catch (error) {
       console.error("결제 준비 실패:", error);
-      alert("주문 정보를 생성하는 중 오류가 발생했습니다.");
+      await showAlert("주문 정보를 생성하는 중 오류가 발생했습니다.", "error");
     }
   };
   //______________________________________________________________________________________
@@ -54,7 +55,7 @@ const useCustomPayment = () => {
       //오류란 결제창을 종료시
       if (response.code !== undefined) {
         //결제창을 그냥 닫았거나 카드 오류로 돈이 안 나감.
-        alert(`결제 취소`);
+        await showAlert("결제 취소", "info");
         try {
           await delOrder(data.orderId); //주문서 삭제
         } catch (error) {
@@ -67,12 +68,12 @@ const useCustomPayment = () => {
         try {
           //사후검증단계 진행
           await verifyPayment(response.paymentId, data.orderId);
-          alert(`결제 성공`);
+          await showAlert("결제 성공", "success");
           return true;
         } catch (error) {
           //검증실패
           console.error("검증 실패 상세:", error);
-          alert(getErrorMessage(error, "결제 검증 중 오류가 발생했습니다."));
+          await showAlert(getErrorMessage(error, "결제 검증 중 오류가 발생했습니다."), "error");
           return false;
         }
       }
@@ -80,7 +81,7 @@ const useCustomPayment = () => {
       //조건문에도 해당하지 않는 오류를 담당
     } catch (error) {
       console.error("결제창 호출 에러:", error);
-      alert("결제창을 띄우는 중 오류가 발생했습니다.");
+      await showAlert("결제창을 띄우는 중 오류가 발생했습니다.", "error");
     }
   };
 

@@ -9,6 +9,7 @@ import {
 import ProjectListComponent from "./ProjectListComponent";
 import ProjectModalComponent from "./ProjectModalComponent";
 import { useBrand } from "../../hooks/brand/useBrand";
+import { confirmAlert } from "../../hooks/common/useAlert";
 
 const ProjectComponent = () => {
     const { brandId } = useBrand();
@@ -49,7 +50,8 @@ const ProjectComponent = () => {
     };
 
     const handleDelete = async (projectId) => {
-        if (!window.confirm("삭제할까요?")) return;
+        const confirmed = await confirmAlert("프로젝트를 정말 삭제하시겠습니까?");
+        if (!confirmed) return;
         await deleteProject(brandId, projectId);
         getProjectList(brandId).then(setProjects);
     };

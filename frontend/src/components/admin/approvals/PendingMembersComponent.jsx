@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { CheckCircle2, User, Mail } from "lucide-react";
 import { approveMember, getPendingApprovals } from "../../../api/adminApi";
+import { showAlert } from "../../../hooks/common/useAlert";
 
 const PendingMembersComponent = () => {
   const [members, setMembers] = useState([]);
@@ -12,7 +13,7 @@ const PendingMembersComponent = () => {
       const data = await getPendingApprovals();
       setMembers(Array.isArray(data) ? data : []);
     } catch (e) {
-      alert("승인 대기 회원 조회 실패");
+      await showAlert("승인 대기 회원 조회 실패", "error");
     } finally {
       setLoading(false);
     }
@@ -27,7 +28,7 @@ const PendingMembersComponent = () => {
       await approveMember(memberId);
       loadMembers();
     } catch {
-      alert("승인 실패");
+      await showAlert("승인 실패", "error");
     }
   };
 

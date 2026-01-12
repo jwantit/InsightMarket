@@ -1,6 +1,7 @@
 import React from "react";
 import { API_SERVER_HOST } from "../../api/memberApi";
 import jwtAxios from "../../util/jwtUtil";
+import { showAlert } from "../../hooks/common/useAlert";
 
 /**
  * 파일 아이템 컴포넌트
@@ -55,7 +56,7 @@ const FileItem = ({ file, size = "sm", onClick, onRemove }) => {
         window.URL.revokeObjectURL(url);
       } catch (error) {
         console.error("파일 다운로드 실패:", error);
-        alert("파일 다운로드에 실패했습니다.");
+        await showAlert("파일 다운로드에 실패했습니다.", "error");
       }
     }
   };

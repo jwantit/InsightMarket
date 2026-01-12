@@ -8,6 +8,7 @@ import {
 } from "../../../api/brandMemberApi";
 import BrandMemberAddComponent from "./BrandMemberAddComponent";
 import BrandMemberListComponent from "./BrandMemberListComponent";
+import { confirmAlert, showAlert } from "../../../hooks/common/useAlert";
 
 const BrandPermissionsComponent = () => {
   const { brandId } = useBrand();
@@ -26,7 +27,7 @@ const BrandPermissionsComponent = () => {
       setMembers(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error(e);
-      alert("브랜드 멤버 목록 조회에 실패했습니다.");
+      await showAlert("브랜드 멤버 목록 조회에 실패했습니다.", "error");
       setMembers([]);
     } finally {
       setLoading(false);
@@ -51,11 +52,11 @@ const BrandPermissionsComponent = () => {
     setAdding(true);
     try {
       await addBrandMember(brandId, { memberId, brandRole });
-      alert("멤버가 추가되었습니다.");
+      await showAlert("멤버가 추가되었습니다.", "success");
       await reload();
     } catch (e) {
       console.error(e);
-      alert("멤버 추가에 실패했습니다. (이미 포함/권한/회사 불일치 등)");
+      await showAlert("멤버 추가에 실패했습니다. (이미 포함/권한/회사 불일치 등)", "error");
     } finally {
       setAdding(false);
     }
@@ -71,7 +72,7 @@ const BrandPermissionsComponent = () => {
       );
     } catch (e) {
       console.error(e);
-      alert("역할 변경에 실패했습니다.");
+      await showAlert("역할 변경에 실패했습니다.", "error");
     } finally {
       setBusyId(null);
     }
@@ -79,7 +80,8 @@ const BrandPermissionsComponent = () => {
 
   const handleRemove = async (memberId) => {
     if (!brandId) return;
-    if (!window.confirm("정말 이 멤버를 브랜드에서 제거할까요?")) return;
+    const confirmed = await confirmAlert("정말 이 멤버를 브랜드에서 제거하시겠습니까?");
+    if (!confirmed) return;
 
     setBusyId(memberId);
     try {
@@ -87,7 +89,7 @@ const BrandPermissionsComponent = () => {
       setMembers((prev) => prev.filter((m) => m.memberId !== memberId));
     } catch (e) {
       console.error(e);
-      alert("멤버 제거에 실패했습니다.");
+      await showAlert("멤버 제거에 실패했습니다.", "error");
     } finally {
       setBusyId(null);
     }

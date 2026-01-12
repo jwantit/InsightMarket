@@ -7,6 +7,7 @@ import DashboardFilter from "../../components/dashboard/DashboardFilter";
 import BrandMentionSummary from "../../components/dashboard/BrandMentionSummary";
 import BrandSentimentSummary from "../../components/dashboard/BrandSentimentSummary";
 import { getBrandWordCloudData } from "../../api/dashboardApi";
+import { showAlert } from "../../hooks/common/useAlert";
 
 const Dashboard = () => {
   const { brandId } = useParams();
@@ -21,12 +22,12 @@ const Dashboard = () => {
     fetchWordData();
   }, [brandId, appliedChannels]);
 
-  const handleToggle = (channel) => {
+  const handleToggle = async (channel) => {
     if (appliedChannels.includes(channel)) {
       if (appliedChannels.length > 1) {
         setAppliedChannels(appliedChannels.filter((c) => c !== channel));
       } else {
-        alert("최소 하나는 선택해야 합니다.");
+        await showAlert("최소 하나는 선택해야 합니다.", "warning");
       }
     } else {
       setAppliedChannels([...appliedChannels, channel]);

@@ -4,6 +4,8 @@ import { getCurrentMember } from "../../api/memberApi";
 import useCommentFileState from "../../hooks/comment/useCommentFileState";
 import CommentItem from "./CommentItem";
 import { getErrorMessage } from "../../util/errorUtil";
+import { showAlert } from "../../hooks/common/useAlert";
+import { confirmAlert } from "../../hooks/common/useAlert";
 
 const CommentSection = ({ brandId, boardId }) => {
   const { tree, status, createComment, updateComment, deleteComment } =
@@ -68,7 +70,7 @@ const CommentSection = ({ brandId, boardId }) => {
       setParentId(null);
       clearReplyFiles(fileLookupId);
     } catch (error) {
-      alert(getErrorMessage(error, "답글 등록에 실패했습니다."));
+      await showAlert(getErrorMessage(error, "답글 등록에 실패했습니다."), "error");
     }
   };
 
@@ -125,7 +127,7 @@ const CommentSection = ({ brandId, boardId }) => {
       setEditContent("");
       clearEditFiles(editingId);
     } catch (error) {
-      alert(getErrorMessage(error, "댓글 수정에 실패했습니다."));
+      await showAlert(getErrorMessage(error, "댓글 수정에 실패했습니다."), "error");
     }
   };
 
@@ -140,6 +142,8 @@ const CommentSection = ({ brandId, boardId }) => {
   };
 
   const handleDelete = async (id) => {
+    const confirmed = await confirmAlert("댓글을 정말 삭제하시겠습니까?");
+    if (!confirmed) return;
     await deleteComment(id);
   };
 

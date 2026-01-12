@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Mail, Lock, LogIn, Sparkles } from "lucide-react";
 import useCustomLogin from "../../hooks/login/useCustomLogin";
 import KakaoLoginComponent from "./KakaoLoginComponent";
+import { showAlert } from "../../hooks/common/useAlert";
 
 const initState = {
   email: "",
@@ -24,15 +25,15 @@ const LoginComponent = () => {
       .then((data) => {
         moveToPath("/app");
       })
-      .catch((errorData) => {
+      .catch(async (errorData) => {
         console.log("ERROR DATA:", errorData);
 
         if (errorData?.error === "NOT_APPROVED") {
-          alert("관리자 승인 후 로그인 가능합니다.");
+          await showAlert("관리자 승인 후 로그인 가능합니다.", "warning");
         } else if (errorData?.error === "BAD_CREDENTIALS") {
-          alert("이메일 또는 비밀번호가 올바르지 않습니다.");
+          await showAlert("이메일 또는 비밀번호가 올바르지 않습니다.", "error");
         } else {
-          alert("로그인 실패");
+          await showAlert("로그인 실패", "error");
         }
       });
   };

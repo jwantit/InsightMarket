@@ -13,6 +13,7 @@ import { getCompanies } from "../../api/companyApi";
 import useCustomLogin from "../../hooks/login/useCustomLogin";
 import { getErrorMessage } from "../../util/errorUtil";
 import BrandRegistrationModal from "./BrandRegistrationModal";
+import { showAlert } from "../../hooks/common/useAlert";
 
 const initState = {
   name: "",
@@ -142,27 +143,27 @@ const JoinComponent = () => {
 
   const handleSubmit = async () => {
     if (!joinParam.name || !joinParam.email || !joinParam.password) {
-      alert("이름, 이메일, 비밀번호는 필수입니다.");
+      await showAlert("이름, 이메일, 비밀번호는 필수입니다.", "warning");
       return;
     }
 
     if (passwordError) {
-      alert("비밀번호 형식이 맞지 않습니다.");
+      await showAlert("비밀번호 형식이 맞지 않습니다.", "warning");
       return;
     }
 
     if (emailError) {
-      alert("잘못된 이메일");
+      await showAlert("잘못된 이메일", "warning");
       return;
     }
 
     if (joinParam.joinType === "NEW_COMPANY" && !joinParam.companyName) {
-      alert("새 회사명을 입력해주세요.");
+      await showAlert("새 회사명을 입력해주세요.", "warning");
       return;
     }
     //사업자 등록 번호 형식 체크------------------------------------------------------
     if (!joinParam.businessNumber || joinParam.businessNumber.length !== 12) {
-      alert("사업자 등록 번호 형식에 맞지 않습니다. (10자리를 입력해주세요)");
+      await showAlert("사업자 등록 번호 형식에 맞지 않습니다. (10자리를 입력해주세요)", "warning");
       return;
     }
     //--------------------------------------------------------------------------------
@@ -173,7 +174,7 @@ const JoinComponent = () => {
       brand && brand.brandName && brand.brandName.trim() !== "";
 
     if (joinParam.joinType === "NEW_COMPANY" && !hasValidBrand) {
-      alert("브랜드를 등록해주세요.");
+      await showAlert("브랜드를 등록해주세요.", "warning");
       return;
     }
     //브랜드 가공 --------------------------------------------------------
@@ -204,7 +205,7 @@ const JoinComponent = () => {
       joinParam.joinType === "JOIN_COMPANY" &&
       !joinParam.requestedCompanyId
     ) {
-      alert("가입할 회사를 선택해주세요.");
+      await showAlert("가입할 회사를 선택해주세요.", "warning");
       return;
     }
 
@@ -212,10 +213,10 @@ const JoinComponent = () => {
     //------------------------------------------------------
     try {
       await joinMember(finalData);
-      alert("회원가입 요청이 완료되었습니다!");
+      await showAlert("회원가입 요청이 완료되었습니다!", "success");
       moveToLogin();
     } catch (e) {
-      alert(getErrorMessage(e, "회원가입 실패"));
+      await showAlert(getErrorMessage(e, "회원가입 실패"), "error");
     }
     //------------------------------------------------------
   };

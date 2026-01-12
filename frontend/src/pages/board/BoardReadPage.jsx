@@ -19,6 +19,7 @@ import { formatDateTime } from "../../util/dateUtil";
 import { getCurrentMember } from "../../api/memberApi";
 import { deleteBoard } from "../../api/boardApi";
 import FileItem from "../../components/common/FileItem";
+import { confirmAlert, showAlert } from "../../hooks/common/useAlert";
 
 const BoardReadPage = () => {
   const dispatch = useDispatch();
@@ -47,7 +48,8 @@ const BoardReadPage = () => {
   }, []);
 
   const handleDelete = async () => {
-    if (!window.confirm("정말 삭제하시겠습니까?")) {
+    const confirmed = await confirmAlert("정말 삭제하시겠습니까?");
+    if (!confirmed) {
       return;
     }
     try {
@@ -55,7 +57,7 @@ const BoardReadPage = () => {
       navigate(`/app/${brandId}/board/discussion${location.search}`);
     } catch (error) {
       console.error("게시글 삭제 실패:", error);
-      alert("게시글 삭제에 실패했습니다.");
+      await showAlert("게시글 삭제에 실패했습니다.", "error");
     }
   };
 

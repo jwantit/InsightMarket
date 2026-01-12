@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { X } from "lucide-react";
 import BrandFormComponent from "../brand/BrandFormComponent";
+import { showAlert } from "../../hooks/common/useAlert";
 
 const trim = (v) => (v ?? "").trim();
 
@@ -34,9 +35,9 @@ const BrandRegistrationModal = ({ show, onClose, onSave, brands = [] }) => {
   // 유효성 검사: 브랜드명이 필수
   const canSubmit = useMemo(() => trim(form.name).length > 0, [form.name]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!canSubmit) {
-      alert("브랜드명을 입력해주세요.");
+      await showAlert("브랜드명을 입력해주세요.", "warning");
       return;
     }
 

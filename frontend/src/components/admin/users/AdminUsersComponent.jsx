@@ -6,6 +6,7 @@ import {
 } from "../../../api/adminApi";
 
 import UsersTableComponent from "./UsersTableComponent";
+import { confirmAlert, showAlert } from "../../../hooks/common/useAlert";
 
 const AdminUsersComponent = () => {
   const [members, setMembers] = useState([]);
@@ -21,7 +22,7 @@ const AdminUsersComponent = () => {
       );
       setMembers(Array.isArray(data) ? data : []);
     } catch (e) {
-      alert("회사 멤버 조회 실패");
+      await showAlert("회사 멤버 조회 실패", "error");
     } finally {
       setLoading(false);
     }
@@ -40,19 +41,20 @@ const AdminUsersComponent = () => {
       await updateMemberRole(memberId, role);
       loadMembers();
     } catch {
-      alert("권한 변경 실패");
+      await showAlert("권한 변경 실패", "error");
     }
   };
 
   const handleExpire = async (memberId, expired) => {
-    if (!window.confirm(expired ? "탈퇴 처리할까요?" : "복구할까요?")) return;
+    const confirmed = await confirmAlert(expired ? "탈퇴 처리하시겠습니까?" : "복구하시겠습니까?");
+    if (!confirmed) return;
 
     try {
         console.log("탈퇴로그:" , memberId, expired)
       await updateMemberExpired(memberId, expired);
       loadMembers();
     } catch {
-      alert("탈퇴 처리 실패");
+      await showAlert("탈퇴 처리 실패", "error");
     }
   };
 

@@ -14,6 +14,7 @@ import { modifyMember } from "../../api/memberApi";
 import { getCompanies } from "../../api/companyApi";
 import useCustomLogin from "../../hooks/login/useCustomLogin";
 import ResultModal from "../common/ResultModal";
+import { showAlert } from "../../hooks/common/useAlert";
 
 const Pill = ({ children, className = "" }) => (
   <span
@@ -136,35 +137,35 @@ const ModifyComponent = () => {
     }
   };
 
-  const validate = () => {
+  const validate = async () => {
     if (!name.trim()) {
-      alert("이름을 입력해주세요.");
+      await showAlert("이름을 입력해주세요.", "warning");
       return false;
     }
 
     // 소셜 로그인 사용자는 비밀번호 필수
     if (isSocial) {
       if (!password || !password2) {
-        alert("비밀번호를 입력해주세요.");
+        await showAlert("비밀번호를 입력해주세요.", "warning");
         return false;
       }
       if (password.length < 4) {
-        alert("비밀번호는 4자 이상으로 입력해주세요.");
+        await showAlert("비밀번호는 4자 이상으로 입력해주세요.", "warning");
         return false;
       }
       if (password !== password2) {
-        alert("비밀번호가 일치하지 않습니다.");
+        await showAlert("비밀번호가 일치하지 않습니다.", "warning");
         return false;
       }
     } else {
       // 일반 사용자는 비밀번호 선택사항이지만 입력한 경우 검증
       if (password || password2) {
         if (password.length < 4) {
-          alert("비밀번호는 4자 이상으로 입력해주세요.");
+          await showAlert("비밀번호는 4자 이상으로 입력해주세요.", "warning");
           return false;
         }
         if (password !== password2) {
-          alert("비밀번호가 일치하지 않습니다.");
+          await showAlert("비밀번호가 일치하지 않습니다.", "warning");
           return false;
         }
       }
@@ -172,7 +173,7 @@ const ModifyComponent = () => {
 
     // 소셜 로그인 사용자이고 아직 회사가 없으면 회사 선택 필수
     if (isSocial && !hasCompany && !isApproved && !requestedCompanyId) {
-      alert("가입할 회사를 선택해주세요.");
+      await showAlert("가입할 회사를 선택해주세요.", "warning");
       return false;
     }
 
@@ -180,7 +181,7 @@ const ModifyComponent = () => {
   };
 
   const handleSave = async () => {
-    if (!validate()) return;
+    if (!(await validate())) return;
 
     setSaving(true);
     try {
@@ -198,7 +199,7 @@ const ModifyComponent = () => {
       setResult("Modified");
     } catch (e) {
       console.error(e);
-      alert("정보 수정에 실패했습니다.");
+      await showAlert("정보 수정에 실패했습니다.", "error");
     } finally {
       setSaving(false);
     }

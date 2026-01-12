@@ -4,6 +4,7 @@ import CartItemComponent from "./CartItemComponent";
 import useCustomCart from "../../hooks/cart/useCustomCart";
 import usePayment from "../../hooks/payment/useCustomPayment";
 import { useBrand } from "../../hooks/brand/useBrand";
+import { showAlert } from "../../hooks/common/useAlert";
 
 const CartComponent = ({ projectId }) => {
   const { cartState, removeCartItem, refreshCart, addCartItem } =
@@ -102,7 +103,7 @@ const CartComponent = ({ projectId }) => {
           <button
             onClick={async () => {
               if (selectedSolutionIds.length === 0) {
-                alert("결제할 상품을 선택해주세요.");
+                await showAlert("결제할 상품을 선택해주세요.", "warning");
                 return;
               }
 

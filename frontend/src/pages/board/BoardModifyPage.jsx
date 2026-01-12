@@ -8,6 +8,7 @@ import useKeepFiles from "../../hooks/file/useKeepFiles";
 import useFileUpload from "../../hooks/file/useFileUpload";
 import useImagePasteToContent from "../../hooks/file/useImagePasteToContent";
 import FileUploadZone from "../../components/common/FileUploadZone";
+import { showAlert } from "../../hooks/common/useAlert";
 
 const BoardModifyPage = () => {
   const dispatch = useDispatch();
@@ -71,11 +72,11 @@ const BoardModifyPage = () => {
         navigate(`/app/${brandId}/board/discussion/read/${boardId}`);
       } else if (updateBoardThunk.rejected.match(resultAction)) {
         console.error("게시글 수정 실패:", resultAction.error);
-        alert("게시글 수정에 실패했습니다. 다시 시도해주세요.");
+        await showAlert("게시글 수정에 실패했습니다. 다시 시도해주세요.", "error");
       }
     } catch (error) {
       console.error("게시글 수정 중 오류 발생:", error);
-      alert("게시글 수정 중 오류가 발생했습니다.");
+      await showAlert("게시글 수정 중 오류가 발생했습니다.", "error");
     }
   };
 

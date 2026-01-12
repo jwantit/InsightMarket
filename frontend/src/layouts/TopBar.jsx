@@ -13,6 +13,7 @@ import useCustomLogin from "../hooks/login/useCustomLogin";
 import { useBrand } from "../hooks/brand/useBrand";
 import useMyBrands from "../hooks/brand/useMyBrands";
 import TopBarBrandSelect from "./TopBarBrandSelect";
+import { showAlert } from "../hooks/common/useAlert";
 
 const TopBar = ({ onToggleSidebar }) => {
   const [open, setOpen] = useState(false);
@@ -34,9 +35,9 @@ const TopBar = ({ onToggleSidebar }) => {
     return () => document.removeEventListener("mousedown", close);
   }, [open]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     doLogout();
-    alert("로그아웃 되었습니다.");
+    await showAlert("로그아웃 되었습니다.", "success");
     moveToPath("/");
   };
 

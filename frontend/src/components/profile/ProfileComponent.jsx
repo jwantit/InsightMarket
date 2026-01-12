@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Edit3, X, Save, User, Mail, Shield, Lock } from "lucide-react";
 import { modifyMember } from "../../api/memberApi";
 import { updateProfile } from "../../store/slices/loginSlice";
+import { showAlert } from "../../hooks/common/useAlert";
 
 const Pill = ({ children }) => (
   <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700 border border-indigo-100">
@@ -87,18 +88,18 @@ const ProfileComponent = () => {
     setPassword2("");
   };
 
-  const validate = () => {
+  const validate = async () => {
     if (!name.trim()) {
-      alert("이름을 입력해주세요.");
+      await showAlert("이름을 입력해주세요.", "warning");
       return false;
     }
     if (password || password2) {
       if (password.length < 4) {
-        alert("비밀번호는 4자 이상으로 입력해주세요.");
+        await showAlert("비밀번호는 4자 이상으로 입력해주세요.", "warning");
         return false;
       }
       if (password !== password2) {
-        alert("비밀번호가 일치하지 않습니다.");
+        await showAlert("비밀번호가 일치하지 않습니다.", "warning");
         return false;
       }
     }
@@ -106,7 +107,7 @@ const ProfileComponent = () => {
   };
 
   const handleSave = async () => {
-    if (!validate()) return;
+    if (!(await validate())) return;
 
     setSaving(true);
     try {
@@ -124,10 +125,10 @@ const ProfileComponent = () => {
       setEditing(false);
       setPassword("");
       setPassword2("");
-      alert("프로필이 수정되었습니다.");
+      await showAlert("프로필이 수정되었습니다.", "success");
     } catch (e) {
       console.error(e);
-      alert("프로필 수정에 실패했습니다.");
+      await showAlert("프로필 수정에 실패했습니다.", "error");
     } finally {
       setSaving(false);
     }

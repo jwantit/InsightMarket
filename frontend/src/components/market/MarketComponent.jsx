@@ -11,6 +11,7 @@ import FetchingModal from "../common/FetchingModal";
 import useCustomCart from "../../hooks/cart/useCustomCart"; // useCustomCart 임포트
 import usePayment from "../../hooks/payment/useCustomPayment";
 import { useBrand } from "../../hooks/brand/useBrand";
+import { confirmAlert, showAlert } from "../../hooks/common/useAlert";
 
 const initState = {
   dtoList: [],
@@ -207,7 +208,7 @@ const MarketComponent = ({ projectId, filter }) => {
                     (item) => item.solutionid === solution.solutionid
                   );
                   if (isExist) {
-                    alert("이미 장바구니에 담긴 상품입니다.");
+                    await showAlert("이미 장바구니에 담긴 상품입니다.", "warning");
                     return;
                   }
 
@@ -216,10 +217,10 @@ const MarketComponent = ({ projectId, filter }) => {
                       projectid: projectId,
                       solutionid: solution.solutionid,
                     });
-                    alert("장바구니에 추가되었습니다.");
+                    await showAlert("장바구니에 추가되었습니다.", "success");
                   } catch (error) {
                     console.error("장바구니 추가 실패", error);
-                    alert("장바구니 추가에 실패했습니다.");
+                    await showAlert("장바구니 추가에 실패했습니다.", "error");
                   }
                 }}
                 className="p-2 bg-slate-600 text-white rounded-xl hover:bg-slate-700 transition-all shadow-md shadow-slate-200 active:scale-95"
@@ -271,19 +272,20 @@ const MarketComponent = ({ projectId, filter }) => {
             }
           }}
           onDelete={async () => {
-            if (window.confirm("솔루션을 정말 삭제하시겠습니까?")) {
-              try {
-                await removeSolution(selectedSolution.solutionid);
-                alert(
-                  "삭제되었습니다. 전략추천에서 다시 생성하실 수 있습니다."
-                );
-                setSelectedSolution(null);
-                // 목록 새로고침을 위해 refresh 트리거
-                window.location.reload();
-              } catch (err) {
-                console.error("삭제 실패", err);
-                alert("삭제에 실패했습니다.");
-              }
+            const confirmed = await confirmAlert("솔루션을 정말 삭제하시겠습니까?");
+            if (!confirmed) return;
+            try {
+              await removeSolution(selectedSolution.solutionid);
+              await showAlert(
+                "삭제되었습니다. 전략추천에서 다시 생성하실 수 있습니다.",
+                "success"
+              );
+              setSelectedSolution(null);
+              // 목록 새로고침을 위해 refresh 트리거
+              window.location.reload();
+            } catch (err) {
+              console.error("삭제 실패", err);
+              await showAlert("삭제에 실패했습니다.", "error");
             }
           }}
         />

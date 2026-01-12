@@ -17,6 +17,7 @@ import {
 } from "../../api/brandApi";
 import { setBrandList } from "../../store/slices/brandSlice";
 import { getErrorMessage } from "../../util/errorUtil";
+import { confirmAlert } from "../../hooks/common/useAlert";
 
 // 하위 컴포넌트들
 import BrandListComponent from "./BrandListComponent";
@@ -229,7 +230,8 @@ const BrandComponent = forwardRef((props, ref) => {
 
   const handleDelete = useCallback(
     async (brandId) => {
-      if (!confirm("정말 삭제하시겠습니까?")) return;
+      const confirmed = await confirmAlert("브랜드를 정말 삭제하시겠습니까?");
+      if (!confirmed) return;
       setSaving(true);
       setErrorMsg(null);
       try {
