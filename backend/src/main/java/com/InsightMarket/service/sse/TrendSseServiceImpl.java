@@ -2,6 +2,7 @@ package com.InsightMarket.service.sse;
 
 import com.InsightMarket.ai.dto.trends.PythonTrendResponseDTO;
 import com.InsightMarket.ai.service.trends.TrendsRedisService;
+import com.InsightMarket.ai.service.trends.TrendsDbService;
 import com.InsightMarket.common.event.TrendDataUpdatedEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,9 @@ public class TrendSseServiceImpl implements TrendSseService {
     
     // Redis 서비스 주입 (초기 데이터 조회용)
     private final TrendsRedisService trendsRedisService;
+    
+    // DB 서비스 주입 (Redis에 없을 경우 fallback용)
+    private final TrendsDbService trendsDbService;
     
     // SSE 연결 타임아웃 (1시간)
     private static final long SSE_TIMEOUT = 3600000L;
@@ -149,6 +153,7 @@ public class TrendSseServiceImpl implements TrendSseService {
     
     /**
      * 브랜드별 트렌드 데이터 SSE 연결을 생성하고 등록하며 초기 데이터를 전송합니다.
+     * Redis에 데이터가 없으면 DB에서 조회합니다.
      * 
      * @param brandId 브랜드 ID
      * @return SseEmitter SSE 연결 객체
@@ -161,6 +166,21 @@ public class TrendSseServiceImpl implements TrendSseService {
         
         // 초기 데이터 전송 (Redis에서 최신 데이터 조회)
         PythonTrendResponseDTO initialData = trendsRedisService.getTrendData(brandId);
+        
+        // Redis에 데이터가 없으면 DB에서 조회
+        if (initialData == null) {
+            log.info("[SSE] 브랜드 {} Redis에 데이터 없음, DB에서 조회 시도", brandId);
+            initialData = trendsDbService.getTrendData(brandId);
+            if (initialData != null) {
+                log.info("[SSE] 브랜드 {} DB에서 초기 데이터 조회 성공", brandId);
+            } else {
+                log.warn("[SSE] 브랜드 {} 초기 데이터 없음 (Redis 및 DB 모두 데이터 없음)", brandId);
+            }
+        } else {
+            log.info("[SSE] 브랜드 {} Redis에서 초기 데이터 조회 성공", brandId);
+        }
+        
+        // 초기 데이터가 있으면 전송
         if (initialData != null) {
             try {
                 emitter.send(SseEmitter.event()
@@ -170,8 +190,6 @@ public class TrendSseServiceImpl implements TrendSseService {
             } catch (IOException e) {
                 log.error("[SSE] 브랜드 {} 초기 데이터 전송 실패", brandId, e);
             }
-        } else {
-            log.warn("[SSE] 브랜드 {} 초기 데이터 없음 (Redis에 데이터 없음)", brandId);
         }
         
         return emitter;

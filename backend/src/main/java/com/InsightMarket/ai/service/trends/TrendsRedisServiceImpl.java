@@ -22,7 +22,7 @@ public class TrendsRedisServiceImpl implements TrendsRedisService {
     public void saveTrendData(Long brandId, PythonTrendResponseDTO data) {
         try {
             String key = CACHE_KEY_PREFIX + brandId;
-            redisTemplate.opsForValue().set(key, data, 60, TimeUnit.MINUTES);
+            redisTemplate.opsForValue().set(key, data, 600, TimeUnit.MINUTES);
             log.info("Redis 저장 성공 - Key: {}, BrandId: {}", key, brandId);
             
             // 저장 후 확인 (디버깅용)

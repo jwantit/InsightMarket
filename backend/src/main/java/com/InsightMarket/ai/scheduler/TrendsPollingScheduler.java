@@ -19,12 +19,12 @@ public class TrendsPollingScheduler {
     private final BrandRepository brandRepository;
 
      // 서버 시작 시 즉시 실행 (빈 초기화 후)
-     @PostConstruct
-     public void init() {
-         log.info("=== 서버 시작 시 트렌드 데이터 초기 수집 시작 ===");
-         updateAllBrandTrends();
-         log.info("=== 트렌드 데이터 초기 수집 완료 ===");
-     }
+//     @PostConstruct
+//     public void init() {
+//         log.info("=== 서버 시작 시 트렌드 데이터 초기 수집 시작 ===");
+//         updateAllBrandTrends();
+//         log.info("=== 트렌드 데이터 초기 수집 완료 ===");
+//     }
 
     // 10분(600,000ms)마다 DB의 모든 브랜드를 순회하며
     // 최신 구글 연관 검색어 데이터를 수집하도록 요청합니다.
