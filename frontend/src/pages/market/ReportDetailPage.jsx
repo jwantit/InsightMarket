@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, FileText, Package, Calendar, Tag } from "lucide-react";
+import { ArrowLeft, FileText, Package, Calendar, Tag, Download, FileJson, ChevronDown } from "lucide-react";
+import html2pdf from "html2pdf.js";
 import { useBrand } from "../../hooks/brand/useBrand";
 import { getPurchasedSolutionDetail } from "../../api/solutionApi";
 
@@ -11,6 +12,8 @@ const ReportDetailPage = () => {
   const [solution, setSolution] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     const fetchSolution = async () => {
@@ -33,8 +36,59 @@ const ReportDetailPage = () => {
     }
   }, [solutionId]);
 
+  // 드롭다운 외부 클릭 시 닫기
+  useEffect(() => {
+    const close = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target))
+        setIsDropdownOpen(false);
+    };
+    if (isDropdownOpen) document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, [isDropdownOpen]);
+
   const handleBack = () => {
     navigate(`/app/${brandId}/market/history`);
+  };
+
+  // PDF 다운로드 핸들러
+  const handleDownloadPDF = () => {
+    const opt = {
+      margin: 10,
+      filename: `Report_${solution?.title || solutionId}_${new Date().getTime()}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+    };
+    html2pdf()
+      .set(opt)
+      .from(document.getElementById("pdf-report-content"))
+      .save();
+    setIsDropdownOpen(false);
+  };
+
+  // TXT 다운로드 핸들러
+  const handleDownloadTXT = () => {
+    const contentElement = document.getElementById("pdf-report-content");
+    if (!contentElement) return;
+    
+    // HTML 태그 제거하고 순수 텍스트만 추출
+    const textContent = contentElement.innerText || contentElement.textContent;
+    
+    // Blob 생성
+    const blob = new Blob([textContent], { type: "text/plain;charset=utf-8" });
+    const url = window.URL.createObjectURL(blob);
+    
+    // 다운로드 링크 생성 및 클릭
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `Report_${solution?.title || solutionId}_${new Date().getTime()}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    
+    // 정리
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    setIsDropdownOpen(false);
   };
 
   if (loading) {
@@ -186,9 +240,35 @@ const ReportDetailPage = () => {
       </div>
 
       {/* 리포트 내용 */}
-      <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden relative">
+        {/* EXPORT 버튼 - 우상단 고정 */}
+        <div className="absolute top-6 right-6 z-10" ref={dropdownRef}>
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-blue-600 hover:text-white rounded-xl text-xs font-black transition-all"
+          >
+            <Download size={14} /> EXPORT <ChevronDown size={12} />
+          </button>
+          {isDropdownOpen && (
+            <div className="absolute right-0 mt-2 w-40 bg-white border border-slate-200 rounded-2xl shadow-2xl z-10 overflow-hidden animate-in fade-in slide-in-from-top-2">
+              <button
+                onClick={handleDownloadPDF}
+                className="w-full px-4 py-3 text-left text-[11px] font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2 border-b border-slate-50"
+              >
+                <FileText size={14} className="text-rose-500" /> PDF로 저장
+              </button>
+              <button
+                onClick={handleDownloadTXT}
+                className="w-full px-4 py-3 text-left text-[11px] font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2"
+              >
+                <FileJson size={14} className="text-blue-500" /> TXT로 저장
+              </button>
+            </div>
+          )}
+        </div>
         <div className="p-8 lg:p-10">
           <div
+            id="pdf-report-content"
             className="prose prose-lg max-w-none"
             dangerouslySetInnerHTML={{
               __html: formatReportContent(solution.description),
