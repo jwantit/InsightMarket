@@ -1,5 +1,5 @@
 // src/components/ai/ImageAnalysisResult.jsx
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   Radar,
   RadarChart,
@@ -16,9 +16,14 @@ import {
   TrendingUp,
   Search,
   Sparkles,
+  Wand2,
+  Image as ImageIcon,
+  Loader2,
 } from "lucide-react";
 
 const ImageAnalysisResult = ({ result, imagePreview }) => {
+  const [showGeneratedImage, setShowGeneratedImage] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   // 1. Radar Chart 데이터 변환
   const radarData = useMemo(
     () => [
@@ -39,6 +44,18 @@ const ImageAnalysisResult = ({ result, imagePreview }) => {
       values.reduce((a, b) => a + Number(b), 0) / values.length
     );
   }, [result]);
+
+  // 이미지 생성 핸들러
+  const handleGenerateImage = () => {
+    setIsGeneratingImage(true);
+    setShowGeneratedImage(false);
+
+    // 5초 후 로딩 완료 및 이미지 표시
+    setTimeout(() => {
+      setIsGeneratingImage(false);
+      setShowGeneratedImage(true);
+    }, 5000);
+  };
 
   if (!result) return null;
 
@@ -194,13 +211,32 @@ const ImageAnalysisResult = ({ result, imagePreview }) => {
       {/* [섹션 6] AI 최적화 전략 제안 (12컬럼 - 전체 너비 및 어두운 색상 강조) */}
       <div className="lg:col-span-12 bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-950 rounded-[3rem] shadow-2xl p-10 text-white relative overflow-hidden group border border-white/10 mt-4">
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-blue-500 rounded-xl shadow-lg shadow-blue-500/50 group-hover:scale-110 transition-transform">
-              <Sparkles size={20} className="text-white" />
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-500 rounded-xl shadow-lg shadow-blue-500/50 group-hover:scale-110 transition-transform">
+                <Sparkles size={20} className="text-white" />
+              </div>
+              <h4 className="text-lg font-black uppercase tracking-[0.2em] text-blue-200">
+                AI Vision Optimization Strategy
+              </h4>
             </div>
-            <h4 className="text-lg font-black uppercase tracking-[0.2em] text-blue-200">
-              AI Vision Optimization Strategy
-            </h4>
+            <button
+              onClick={handleGenerateImage}
+              disabled={isGeneratingImage}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 active:scale-95 disabled:active:scale-100"
+            >
+              {isGeneratingImage ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  이미지 생성 중...
+                </>
+              ) : (
+                <>
+                  <Wand2 size={16} />
+                  피드백으로 적용하여 이미지 생성
+                </>
+              )}
+            </button>
           </div>
 
           <p className="text-lg md:text-xl font-bold leading-relaxed max-w-5xl tracking-tight text-white/95">
@@ -231,6 +267,63 @@ const ImageAnalysisResult = ({ result, imagePreview }) => {
           className="absolute -bottom-16 -right-16 text-white/5 rotate-12 group-hover:scale-110 group-hover:text-white/10 transition-all duration-700"
         />
       </div>
+
+      {/* [섹션 7] 로딩 및 생성된 이미지 표시 (12컬럼) */}
+      {(isGeneratingImage || showGeneratedImage) && (
+        <div className="lg:col-span-12 bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-8 animate-in slide-in-from-bottom-4 duration-500">
+          <div className="flex items-center gap-2 text-[11px] font-black text-slate-400 uppercase tracking-widest mb-6">
+            <ImageIcon size={14} className="text-blue-600" /> 피드백 적용 생성
+            이미지
+          </div>
+
+          {isGeneratingImage ? (
+            // 로딩 상태
+            <div className="rounded-3xl overflow-hidden border-4 border-slate-100 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50 min-h-[400px] flex flex-col items-center justify-center p-12">
+              <div className="flex flex-col items-center gap-6">
+                <div className="relative">
+                  <Loader2 size={64} className="animate-spin text-blue-600" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Wand2 size={32} className="text-blue-400 animate-pulse" />
+                  </div>
+                </div>
+                <div className="text-center space-y-2">
+                  <p className="text-lg font-black text-slate-900">
+                    AI가 이미지를 생성하고 있습니다...
+                  </p>
+                  <p className="text-sm text-slate-500">
+                    피드백을 반영하여 최적화된 이미지를 만들고 있어요
+                  </p>
+                </div>
+                <div className="w-full max-w-md h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full"
+                    style={{
+                      animation: "loadingProgress 5s ease-in-out forwards",
+                      width: "0%",
+                    }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            // 생성된 이미지 표시
+            <div className="flex justify-center">
+              <div className="rounded-3xl overflow-hidden border-4 border-slate-100 shadow-lg max-w-2xl">
+                <img
+                  src="/starbucks-frappuccino-banner.jpg"
+                  alt="피드백으로 적용하여 생성된 이미지"
+                  className="w-full h-auto max-h-[500px] object-contain animate-in fade-in duration-500"
+                  onError={(e) => {
+                    // 이미지 로드 실패 시 placeholder 표시
+                    e.target.src =
+                      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='600'%3E%3Crect fill='%23f1f5f9' width='1200' height='600'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='24' fill='%2394a3b8' text-anchor='middle' dominant-baseline='middle'%3E생성된 이미지%3C/text%3E%3C/svg%3E";
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
