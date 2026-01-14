@@ -16,7 +16,7 @@ import {
 import useBoardRouteParams from "../../hooks/board/useBoardRouteParams";
 import CommentSection from "../../components/comment/CommentSection";
 import { formatDateTime } from "../../util/dateUtil";
-import { getCurrentMember } from "../../api/memberApi";
+import { getCurrentMember, API_SERVER_HOST } from "../../api/memberApi";
 import { deleteBoard } from "../../api/boardApi";
 import FileItem from "../../components/common/FileItem";
 import { confirmAlert, showAlert } from "../../hooks/common/useAlert";
@@ -63,6 +63,35 @@ const BoardReadPage = () => {
 
   const goModify = () => {
     navigate(`/app/${brandId}/board/discussion/modify/${boardId}`);
+  };
+
+  // 이미지 파일을 content에 삽입하는 함수
+  const insertImagesIntoContent = (content, files) => {
+    // 1. 일반 텍스트의 줄바꿈을 <br>로 먼저 변환
+    let processedContent = (content || "").replace(/\n/g, "<br>");
+
+    if (!files || files.length === 0) {
+      return processedContent;
+    }
+    
+    // 이미지 파일만 필터링
+    const imageFiles = files.filter(
+      (file) => file.contentType && file.contentType.startsWith("image/")
+    );
+
+    // 이미지 파일이 있으면 content 끝에 이미지 태그 추가
+    if (imageFiles.length > 0) {
+      const imageTags = imageFiles
+        .map(
+          (file) =>
+            `<div style="margin: 16px 0;"><img src="${API_SERVER_HOST}/api/files/${file.id}" alt="${file.originalName || ""}" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onerror="this.style.display='none';" /></div>`
+        )
+        .join(""); // 줄바꿈 없이 합침
+      
+      processedContent = `${processedContent}<br>${imageTags}`;
+    }
+
+    return processedContent;
   };
 
   if (!detail)
@@ -128,13 +157,15 @@ const BoardReadPage = () => {
           <div
             className="prose max-w-none text-slate-800 leading-relaxed text-base"
             dangerouslySetInnerHTML={{
-              __html: (detail.content || "").replace(/\n/g, "<br>"),
+              __html: insertImagesIntoContent(detail.content, detail.files),
             }}
           />
         </div>
 
-        {/* 첨부 파일 */}
-        {detail.files?.length > 0 && (
+        {/* 첨부 파일 - 이미지가 아닌 파일만 표시 */}
+        {detail.files?.filter(
+          (file) => !file.contentType || !file.contentType.startsWith("image/")
+        ).length > 0 && (
           <div className="px-8 pb-8 border-t border-slate-100 pt-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-slate-50 rounded-lg text-slate-500">
@@ -143,9 +174,13 @@ const BoardReadPage = () => {
               <h3 className="text-base font-bold text-slate-900">첨부 파일</h3>
             </div>
             <div className="flex flex-wrap gap-3">
-              {detail.files.map((file) => (
-                <FileItem key={file.id} file={file} size="md" />
-              ))}
+              {detail.files
+                .filter(
+                  (file) => !file.contentType || !file.contentType.startsWith("image/")
+                )
+                .map((file) => (
+                  <FileItem key={file.id} file={file} size="md" />
+                ))}
             </div>
           </div>
         )}
