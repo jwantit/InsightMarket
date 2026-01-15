@@ -192,6 +192,8 @@ public void onAuthenticationSuccess(HttpServletRequest request, HttpServletRespo
 }
 ```
 
+---
+
 ### 대시보드
 
 - 실시간 통계 및 분석 결과 표시
@@ -200,8 +202,8 @@ public void onAuthenticationSuccess(HttpServletRequest request, HttpServletRespo
 
 - 파이썬 스케줄러를 통한 자동 데이터 수집 및 분석
 
-<div style="max-height: 550px; overflow-y: scroll; overflow-x: hidden;">
-<img src="./images/대시보드_페이지.png" alt="대시보드 시연 (스크롤 가능)" style="width: auto; height: auto; display: block;" />
+<div style="max-height: 550px; overflow-y: auto; overflow-x: auto; width: 100%;">
+<img src="./images/대시보드_페이지.png" alt="대시보드 시연 (스크롤 가능)" style="width: 100%; height: auto; display: block;" />
 </div>
 
 ```python
@@ -218,6 +220,8 @@ def run_analysis_pipeline(file_path: str, brand_id: Optional[int] = None) -> Dic
                 detect_spikes(daily_stats, aggregate_keyword_sentiment_daily_stats(analyzed_docs))))}
 ```
 
+---
+
 ### 브랜드 및 프로젝트 관리
 
 - 브랜드별 프로젝트 생성 및 관리
@@ -225,6 +229,8 @@ def run_analysis_pipeline(file_path: str, brand_id: Optional[int] = None) -> Dic
 - 프로젝트별 키워드 및 데이터 수집 제어
 
 ![브랜드 관리 시연](./images/브랜드_프로젝트_관리_시연.gif)
+
+---
 
 ### SNS 분석
 
@@ -236,8 +242,8 @@ def run_analysis_pipeline(file_path: str, brand_id: Optional[int] = None) -> Dic
 
 - 경쟁사 비교 분석
 
-<div style="max-height: 550px; overflow-y: scroll; overflow-x: hidden;">
-<img src="./images/sns분석_페이지.png" alt="대시보드 시연 (스크롤 가능)" style="width: auto; height: auto; display: block;" />
+<div style="max-height: 550px; overflow-y: auto; overflow-x: auto; width: 100%;">
+<img src="./images/sns분석_페이지.png" alt="SNS 분석 시연 (스크롤 가능)" style="width: 100%; height: auto; display: block;" />
 </div>
 
 ```python
@@ -255,6 +261,8 @@ def predict_sentiment(text, tokenizer, model):
             predicted_label = "negative"
         return predicted_label, float(score)
 ```
+
+---
 
 ### 전략 추천
 
@@ -287,6 +295,8 @@ def run_strategy_analysis(project_id: int, brand_id: int, brand_name: str, quest
                 ollama_url=settings.ollama_url, ollama_model=settings.ollama_model)}
 ```
 
+---
+
 ### 상권 분석
 
 - 카카오 맵 API를 활용한 위치 기반 상권 분석
@@ -315,6 +325,8 @@ async def generate_consulting_report(request: Request):
     return JSONResponse(content={"consulting": markdown.markdown(generated_consulting_text)}, status_code=200)
 ```
 
+---
+
 ### 광고 이미지 분석
 
 - Python FastAPI를 통한 이미지 분석 서비스
@@ -339,6 +351,8 @@ def analyze_image_content(base64_image: str, provider: str = "ollama", trace_id:
             "recommendations": result.get("recommendations", "")}
 ```
 
+---
+
 ### 결제 시스템 (포트원) 및 장바구니
 
 - 포트원 API를 통한 결제 구현
@@ -359,6 +373,8 @@ public OrderResponseDTO prepareOrder(MemberDTO member, OrderRequestDTO requestDT
             .merchantUid(merchantUid).amount(orders.getTotalPrice()).build();
 }
 ```
+
+---
 
 ### 게시판
 
@@ -387,6 +403,8 @@ public CommentResponseDTO create(Long brandId, Long boardId, CommentModifyDTO da
 }
 ```
 
+---
+
 ### 관리자 페이지
 
 - 가입 승인 관리
@@ -396,6 +414,8 @@ public CommentResponseDTO create(Long brandId, Long boardId, CommentModifyDTO da
 - 브랜드 권한 관리
 
 ![관리자 페이지 시연](./images/관리자페이지_시연.gif)
+
+---
 
 ### 반응형 UI
 
