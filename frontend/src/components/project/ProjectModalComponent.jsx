@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, Save, FolderKanban, Tag } from "lucide-react";
 import ProjectFormComponent from "./ProjectFormComponent";
 import ProjectKeywordBoxComponent from "./ProjectKeywordBoxComponent";
@@ -34,9 +35,9 @@ const ProjectModalComponent = ({ project, onClose, onSave }) => {
     onSave(payload);
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[150] flex items-center justify-center bg-black/40 backdrop-blur-md p-4"
       onMouseDown={handleBackdropClick}
     >
       <div className="w-full max-w-3xl rounded-3xl bg-white shadow-2xl overflow-hidden">
@@ -127,7 +128,8 @@ const ProjectModalComponent = ({ project, onClose, onSave }) => {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

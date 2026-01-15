@@ -1,5 +1,6 @@
 // src/components/ai/AnalysisLoadingModal.jsx
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   Loader2,
   CheckCircle2,
@@ -30,8 +31,8 @@ const AnalysisLoadingModal = ({ isOpen, radius }) => {
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md px-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/60 backdrop-blur-md px-4">
       <div className="bg-white rounded-[3rem] shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in duration-300">
         <div className="p-10 flex flex-col items-center text-center">
           <div className="relative mb-8">
@@ -98,7 +99,8 @@ const AnalysisLoadingModal = ({ isOpen, radius }) => {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

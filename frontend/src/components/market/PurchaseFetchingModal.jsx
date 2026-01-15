@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { createPortal } from "react-dom";
 import { useBrand } from "../../hooks/brand/useBrand";
 
 const PurchaseFetchingModal = ({ order, onClose }) => {
@@ -12,9 +13,9 @@ const PurchaseFetchingModal = ({ order, onClose }) => {
     onClose();
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[1055] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[1055] flex items-center justify-center bg-black/60 backdrop-blur-md p-4"
       onClick={onClose}
     >
       <div
@@ -189,7 +190,8 @@ const PurchaseFetchingModal = ({ order, onClose }) => {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

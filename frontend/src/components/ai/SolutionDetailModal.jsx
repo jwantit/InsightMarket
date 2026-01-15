@@ -1,5 +1,6 @@
 // src/components/ai/SolutionDetailModal.jsx
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import html2pdf from "html2pdf.js";
 import { X, Download, FileText, FileJson, ChevronDown } from "lucide-react";
 
@@ -58,8 +59,8 @@ const SolutionDetailModal = ({ isOpen, onClose, solution }) => {
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 animate-in zoom-in duration-200">
+  return createPortal(
+    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 animate-in zoom-in duration-200">
       <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-slate-200">
         {/* 모달 상단 헤더 */}
         <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
@@ -124,7 +125,8 @@ const SolutionDetailModal = ({ isOpen, onClose, solution }) => {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

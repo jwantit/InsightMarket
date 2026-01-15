@@ -62,7 +62,7 @@ const Alert = ({ message, onConfirm, onCancel, type = "confirm", variant = "warn
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-md p-4"
       onMouseDown={handleBackdropClick}
     >
       <div

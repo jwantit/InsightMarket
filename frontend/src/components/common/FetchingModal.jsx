@@ -1,4 +1,5 @@
 import { X, ShoppingCart, Trash2, Package, Calendar, Tag, DollarSign, Image as ImageIcon } from "lucide-react";
+import { createPortal } from "react-dom";
 
 const FetchingModal = ({ solution, onClose, onPurchase, onDelete }) => {
   if (!solution) return null;
@@ -7,9 +8,9 @@ const FetchingModal = ({ solution, onClose, onPurchase, onDelete }) => {
     if (e.target === e.currentTarget) onClose();
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[150] flex items-center justify-center bg-black/40 backdrop-blur-md p-4"
       onMouseDown={handleBackdropClick}
     >
       <div
@@ -158,7 +159,8 @@ const FetchingModal = ({ solution, onClose, onPurchase, onDelete }) => {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { getAdminMembers } from "../../../api/adminApi";
 import { showAlert } from "../../../hooks/common/useAlert";
 
@@ -39,8 +40,8 @@ const MemberSearchModal = ({
 
   if (!open) return null;
 
-  return (
-    <div className="fixed inset-0 z-50">
+  return createPortal(
+    <div className="fixed inset-0 z-[150] backdrop-blur-md">
       {/* overlay */}
       <div
         className="absolute inset-0 bg-black/40"
@@ -152,7 +153,8 @@ const MemberSearchModal = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

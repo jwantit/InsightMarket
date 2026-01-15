@@ -1,4 +1,5 @@
 import { CheckCircle, X } from "lucide-react";
+import { createPortal } from "react-dom";
 
 const ResultModal = ({ title, content, callbackFn }) => {
   const handleBackdropClick = (e) => {
@@ -7,9 +8,9 @@ const ResultModal = ({ title, content, callbackFn }) => {
     }
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[150] flex items-center justify-center bg-black/40 backdrop-blur-md p-4"
       onMouseDown={handleBackdropClick}
     >
       <div
@@ -63,7 +64,8 @@ const ResultModal = ({ title, content, callbackFn }) => {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

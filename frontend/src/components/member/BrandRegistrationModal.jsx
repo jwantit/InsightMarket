@@ -1,5 +1,6 @@
 // src/components/member/BrandRegistrationModal.jsx
 import React, { useState, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import BrandFormComponent from "../brand/BrandFormComponent";
 import { showAlert } from "../../hooks/common/useAlert";
@@ -69,8 +70,8 @@ const BrandRegistrationModal = ({ show, onClose, onSave, brands = [] }) => {
 
   if (!show) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-start z-50 p-4 overflow-y-auto">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex justify-center items-start z-[150] p-4 overflow-y-auto">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl my-8 relative">
         {/* 모달 헤더 */}
         <div className="sticky top-0 z-10 bg-white border-b border-slate-200 px-8 py-6 rounded-t-3xl">
@@ -105,7 +106,8 @@ const BrandRegistrationModal = ({ show, onClose, onSave, brands = [] }) => {
           />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

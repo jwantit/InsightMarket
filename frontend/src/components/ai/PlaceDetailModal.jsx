@@ -1,5 +1,6 @@
 // src/components/ai/PlaceDetailModal.jsx
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   LineChart,
   Line,
@@ -43,8 +44,8 @@ const PlaceDetailModal = ({ isOpen, placeId, placeName, onClose }) => {
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 animate-in fade-in duration-300">
+  return createPortal(
+    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 animate-in fade-in duration-300">
       <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col border border-white/20">
         {/* 헤더 */}
         <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
@@ -188,7 +189,8 @@ const PlaceDetailModal = ({ isOpen, placeId, placeName, onClose }) => {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
