@@ -1,8 +1,14 @@
+import { RouterProvider } from "react-router-dom";
+import { router } from "./router/rootRouter";
+import AlertContainer from "./components/common/AlertContainer";
+
 function App() {
-return (
-<>
-<h1 className="text-3xl font-bold underline">Vite + React Hello!!</h1>
-</>
-);
+  return (
+    <>
+      <RouterProvider router={router} />
+      <AlertContainer />
+    </>
+  );
 }
+
 export default App;

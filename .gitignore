@@ -3,20 +3,35 @@
 ################################
 .DS_Store
 Thumbs.db
+desktop.ini
 
 ################################
-# IntelliJ IDEA
+# IDE / Editor
 ################################
 .idea/
+.vscode/
 *.iml
-out/
+*.ipr
+*.iws
+**/out/
 
 ################################
-# Backend - Spring Boot (Gradle)
+# Java / Kotlin compiled artifacts
 ################################
-backend/build/
-backend/target/
-backend/.gradle/
+*.class
+
+################################
+# Backend - Spring Boot (Gradle / Maven / IDE outputs)
+################################
+# Gradle
+.gradle/
+**/build/
+
+# Maven (혹시 섞여있을 때 대비)
+**/target/
+
+# IDE / tool generated
+**/bin/
 backend/.settings/
 backend/.classpath
 backend/.project
@@ -24,18 +39,51 @@ backend/.project
 ################################
 # Frontend - Node / Vite / React
 ################################
-frontend/node_modules/
-frontend/dist/
+**/node_modules/
+**/dist/
+**/.vite/
+.cache/
+.pnpm-store/
+.eslintcache
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# env (로컬 전용이면 ignore 유지)
 frontend/.env
 frontend/.env.local
 
 ################################
-# Logs
+# Python
 ################################
-*.log
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+# env files
+python/.env
+python/.env.local
+*.env
+
+# Python ML caches (optional)
+**/.cache/huggingface/
+**/.cache/torch/
 
 ################################
-# OS / VM crash logs
+# Local data / storage (do not commit)
 ################################
-hs_err_pid*
-replay_pid*
+uploads/
+storage/
+data/
+qdrant_storage/

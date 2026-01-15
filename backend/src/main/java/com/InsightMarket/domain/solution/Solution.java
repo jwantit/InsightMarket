@@ -5,13 +5,16 @@ import com.InsightMarket.domain.project.Project;
 import com.InsightMarket.domain.strategy.Strategy;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Where;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 @Entity
+@Where(clause = "deleted = false")
 @Table(name = "solution")
+@ToString(exclude = {"strategy", "project"})
 public class Solution extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,5 +37,16 @@ public class Solution extends BaseEntity {
 
     @Lob
     @Column(name = "description", columnDefinition = "TEXT")
-    private String desc;
+    private String description;
+
+    @Column(columnDefinition = "TINYINT(1)")
+    private boolean deleted = false;
+
+    @Builder.Default
+    @Column(name = "is_purchased", columnDefinition = "TINYINT(1)")
+    private boolean isPurchased = false;
+
+    public void markAsPurchased() {
+        this.isPurchased = true;
+    }
 }

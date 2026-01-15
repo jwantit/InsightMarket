@@ -24,7 +24,4 @@ public class CartItem extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "solution_id", nullable = false)
     private Solution solution;
-
-    @Column(nullable = false)
-    private int quantity;
 }

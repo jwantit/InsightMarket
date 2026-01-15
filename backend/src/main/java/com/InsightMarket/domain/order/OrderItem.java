@@ -18,13 +18,24 @@ public class OrderItem extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
-    private Order order;
+    @JoinColumn(name = "order_id")
+    private Orders order;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "solution_id", nullable = false)
+    @JoinColumn(name = "solution_id")
     private Solution solution;
 
-    @Column(nullable = false)
-    private int quantity;
+    // 변경 2: 결제 당시의 정보를 기록 (스냅샷)
+    private String solutionName; // 결제 시점의 상품명
+
+    private int orderPrice;    // 결제 시점의 개별 가격
+    
+    @Builder.Default
+    private int quantity = 1;   // 주문 수량 (기본값: 1)
+
+    // Orders의 addOrderItem에서 호출하여 양방향을 연결해줍니다.
+    public void setOrder(Orders order) {
+        this.order = order;
+    }
 }
+

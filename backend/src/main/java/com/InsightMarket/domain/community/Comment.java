@@ -1,7 +1,7 @@
 package com.InsightMarket.domain.community;
 
-import com.InsightMarket.domain.common.BaseEntity;
-import com.InsightMarket.domain.user.User;
+import com.InsightMarket.domain.common.SoftDeleteEntity;
+import com.InsightMarket.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,9 +11,10 @@ import lombok.*;
 @Builder
 @Entity
 @Table(name = "comment")
-public class Comment extends BaseEntity {
+public class Comment extends SoftDeleteEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "comment_id")
     private Long id;
 
@@ -22,8 +23,8 @@ public class Comment extends BaseEntity {
     private Board board;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User writer;
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member writer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comment_id")
@@ -32,4 +33,9 @@ public class Comment extends BaseEntity {
     @Lob
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
+
+    // ===== 변경 메서드 =====
+    public void changeContent(String content) {
+        this.content = content;
+    }
 }

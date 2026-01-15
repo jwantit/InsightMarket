@@ -1,8 +1,8 @@
 package com.InsightMarket.domain.community;
 
 import com.InsightMarket.domain.brand.Brand;
-import com.InsightMarket.domain.common.BaseEntity;
-import com.InsightMarket.domain.user.User;
+import com.InsightMarket.domain.common.SoftDeleteEntity;
+import com.InsightMarket.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,15 +12,15 @@ import lombok.*;
 @Builder
 @Entity
 @Table(name = "board")
-public class Board extends BaseEntity {
+public class Board extends SoftDeleteEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "board_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User writer;
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member writer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id", nullable = false)
@@ -32,4 +32,12 @@ public class Board extends BaseEntity {
     @Lob
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
+
+    public void changeTitle(String title) {
+        this.title = title;
+    }
+
+    public void changeContent(String content) {
+        this.content = content;
+    }
 }

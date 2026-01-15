@@ -1,7 +1,8 @@
 package com.InsightMarket.domain.cart;
 
 import com.InsightMarket.domain.common.BaseEntity;
-import com.InsightMarket.domain.user.User;
+import com.InsightMarket.domain.member.Member;
+import com.InsightMarket.domain.project.Project;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,8 +14,8 @@ import lombok.*;
 @Table(
         name = "cart",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_cart_user", columnNames = "user_id")
-        }
+                @UniqueConstraint(name = "uk_cart_member", columnNames = "project_id")
+        }                               //유니크 제약 같은 project_id 값은 cart 테이블에 1번만 존재 가능
 )
 public class Cart extends BaseEntity {
 
@@ -22,7 +23,7 @@ public class Cart extends BaseEntity {
     @Column(name = "cart_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
 }

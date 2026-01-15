@@ -8,6 +8,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@ToString
 @Entity
 @Table(name = "company")
 public class Company extends BaseEntity {
@@ -18,4 +19,8 @@ public class Company extends BaseEntity {
 
     @Column(nullable = false, length = 255)
     private String name;
+
+    //사업자등록
+    @Column(name = "registration_number", unique = true, length = 20)
+    private String businessNumber;
 }

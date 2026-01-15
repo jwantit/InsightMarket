@@ -20,15 +20,23 @@ public class Project extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "brand_id", nullable = false)
+    @JoinColumn(name = "brand_id")//nullable = false
     private Brand brand;
 
-    @Column(nullable = false, length = 255)
+    @Column(length = 255)//nullable = false
     private String name;
 
-    @Column(name = "start_date", nullable = false)
+    @Column(name = "start_date")//nullable = false
     private LocalDate startDate;
 
-    @Column(name = "end_date", nullable = false)
+    @Column(name = "end_date")//nullable = false
     private LocalDate endDate;
+
+    public void changeInfo(String name, LocalDate startDate, LocalDate endDate) {
+        this.name = name;
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
 }
+
+

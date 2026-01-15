@@ -1,7 +1,7 @@
 package com.InsightMarket.domain.brand;
 
 import com.InsightMarket.domain.common.BaseEntity;
-import com.InsightMarket.domain.user.User;
+import com.InsightMarket.domain.member.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +13,7 @@ import lombok.*;
 @Table(
         name = "brand_member",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_brand_member_user_brand", columnNames = {"user_id", "brand_id"})
+                @UniqueConstraint(name = "uk_member_brand", columnNames = {"member_id", "brand_id"})
         }
 )
 public class BrandMember extends BaseEntity {
@@ -23,8 +23,8 @@ public class BrandMember extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id", nullable = false)
@@ -33,4 +33,8 @@ public class BrandMember extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "brand_role", nullable = false, length = 30)
     private BrandRole brandRole;
+
+    public void changeRole(BrandRole brandRole) {
+        this.brandRole = brandRole;
+    }
 }

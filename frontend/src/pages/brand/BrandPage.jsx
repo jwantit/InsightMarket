@@ -1,0 +1,69 @@
+// src/pages/brand/BrandPage.jsx
+import React, { useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import { Building2, Plus, Users } from "lucide-react";
+import BrandComponent from "../../components/brand/BrandComponent";
+import PageHeader from "../../components/common/PageHeader";
+
+const BrandPage = () => {
+  const brandRef = useRef();
+  const [totalCount, setTotalCount] = useState(0);
+  const loginState = useSelector((state) => state.loginSlice);
+  const systemRole = loginState?.role;
+  const isCompanyAdmin = systemRole === "COMPANY_ADMIN";
+
+  // 헤더 우측 "브랜드 등록" 버튼 클릭 시 자식의 openCreate 실행
+  const handleOpenCreate = () => {
+    if (brandRef.current) {
+      brandRef.current.openCreate();
+    }
+  };
+
+  const headerExtra = isCompanyAdmin ? (
+    <div className="flex items-center gap-4">
+      <button
+        onClick={handleOpenCreate}
+        className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-100 transition-all active:scale-95"
+      >
+        <Plus size={18} />
+        브랜드 등록
+      </button>
+    </div>
+  ) : null;
+
+  return (
+    <div className="max-w-[1400px] mx-auto p-6 space-y-10 pb-20 animate-in fade-in duration-700">
+      <PageHeader
+        icon={Building2}
+        title="브랜드 관리"
+        breadcrumb="Management / Brands"
+        subtitle="현재 관리 중인 모든 브랜드 리스트입니다. 브랜드별 대시보드 권한 및 데이터를 제어할 수 있습니다."
+        extra={headerExtra}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+        <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-sm flex items-center gap-4">
+          <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+            <Users size={20} />
+          </div>
+          <div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase">
+              전체 브랜드 수
+            </p>
+            <p className="text-lg font-black text-slate-900">{totalCount}개</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="animate-in fade-in slide-in-from-bottom-2 duration-700 delay-150">
+        {/* ref를 전달하고, 개수 변경 시 상태 업데이트 */}
+        <BrandComponent
+          ref={brandRef}
+          onCountChange={(count) => setTotalCount(count)}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default BrandPage;
