@@ -21,8 +21,6 @@ import com.InsightMarket.domain.brand.Brand;
 import com.InsightMarket.domain.member.Member;
 import com.InsightMarket.domain.project.Project;
 import com.InsightMarket.domain.keyword.ProjectKeyword;
-import com.InsightMarket.repository.analytics.AnalyticsAiAnswerRepository;
-import com.InsightMarket.repository.analytics.AnalyticsPromptRepository;
 import com.InsightMarket.repository.brand.BrandRepository;
 import com.InsightMarket.repository.keyword.ProjectKeywordRepository;
 import com.InsightMarket.repository.project.ProjectRepository;
@@ -47,8 +45,6 @@ public class AiInsightServiceImpl implements AiInsightService {
 
     private final PythonClient pythonClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final AnalyticsPromptRepository promptRepository;
-    private final AnalyticsAiAnswerRepository answerRepository;
     private final BrandRepository brandRepository;
     private final ProjectRepository projectRepository;
     private final ProjectKeywordRepository projectKeywordRepository;
