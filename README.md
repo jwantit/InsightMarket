@@ -8,6 +8,11 @@ SNS 데이터 기반 데이터 분석 및 AI 맞춤형 전략 추천 플랫폼
 
 25.12.17(수) ~ 26.01.16(금)
 
+## 🎥 시연 영상 및 프로젝트 작업 노션
+
+- **🎬 시연 영상**: [YouTube 링크](https://www.youtube.com/watch?v=IJNtPKMpAGs&feature=youtu.be)
+- **📋 프로젝트 노션**: [Notion 링크](https://www.notion.so/InsightMarket-SNS-AI-SaaS-2cc0d948140881d5bbe6d126f52e793e)
+
 ## 📑 목차
 
 - [팀원](#팀원)
@@ -155,7 +160,7 @@ SNS 데이터 기반 데이터 분석 및 AI 맞춤형 전략 추천 플랫폼
 
 ### ERD
 
-![ERD](./images/erd.png)
+![ERD](./images/인사이트마켓_ERD.png)
 
 ### 유스케이스 다이어그램
 
