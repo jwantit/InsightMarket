@@ -161,6 +161,30 @@ SNS 데이터 기반 데이터 분석 및 AI 맞춤형 전략 추천 플랫폼
 
 ![유스케이스](./images/인사이트마켓_유스케이스.png)
 
+## 📂 배포 파이프라인 아키텍처
+
+### AWS Cloud Ecosystem
+- **IAM** - 엄격한 권한 관리 및 보안 정책 적용
+- **EC2** - 확장 가능한 서버 환경 구축
+
+### Elastic Beanstalk
+- 애플리케이션 환경 관리 및 배포 프로세스 표준화
+- 자동 스케일링 및 환경 구성 관리
+
+### Database Management
+- **RDS(MySQL)** - 데이터 독립성 확보 및 고가용성 제공
+- **Security Group** - 네트워크 레벨 접근 제어를 통한 보안 강화
+
+### Nginx Reverse Proxy
+- 리버스 프록시 설정을 통한 로드 밸런싱
+- 서비스 중단 없는 무중단 배포 환경 구현
+
+### CI/CD Automation
+- **Jenkins** - 코드 통합 및 빌드 자동화
+- **Elastic Beanstalk 연동** - 코드 통합부터 실행까지 전 과정 자동화
+
+![배포](./images/배포.png)
+
 ## 기능 소개
 
 ### 로그인 및 회원가입 (소셜 로그인)
